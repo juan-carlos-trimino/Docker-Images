@@ -1,0 +1,73 @@
+# Usage:
+#   Start the application.
+#   > docker-compose -f docker-compose.rabbitmq-nano.yml up -d [--detach]
+#
+#   Stop the application.
+#   > docker-compose -f docker-compose.rabbitmq-nano.yml down
+#
+#   Stop all running containers without removing them or other resources. Stopping the containers end the running process with a
+#   graceful shutdown. Stopped containers retain all of their configuration and data, but they don't use any computer resources.
+#   > docker-compose -f docker-compose.rabbitmq-nano.yml stop
+#
+#   Start stopped containers by running the entry point program in the containers. Starting and stopping containers is a very
+#   efficient way to switch context if you work on multiple projects.
+#   > docker-compose -f docker-compose.rabbitmq-nano.yml start
+#
+#   To check memory and CPU usage of all containers.
+#   > docker-compose top
+#
+#   To see log entries for all containers.
+#   > docker-compose logs
+#
+#   Restrict the output to a specified number of the most recent log entries for each container.
+#   > docker-compose logs --tail 5
+version: "3.7"
+
+services:
+  # Publishes to RabbitMQ
+  rabbitmq-publisher:
+    depends_on:
+      - rabbitmq-nano
+      - rabbitmq-subscriber
+    image: veni-vidi-vici/rabbitmq-publisher-1.0.0:2.2-runtime-nanoserver-1903
+    isolation: process
+    networks:
+      - app-net
+    restart: on-failure:5
+
+  # Subscribes to RabbitMQ
+  rabbitmq-subscriber:
+    depends_on:
+      - rabbitmq-nano
+    image: veni-vidi-vici/rabbitmq-subscriber-1.0.0:2.2-runtime-nanoserver-1903
+    isolation: process
+    # deploy:
+      # Default.
+    #  mode: replicated
+      # Number of containers that should be running at any given time.
+    #  replicas: 3
+    networks:
+      - app-net
+    restart: on-failure:5
+
+  rabbitmq-nano:
+    image: veni-vidi-vici/rabbitmq-3.6.15:nanoserver-1903
+    isolation: process
+    networks:
+      - app-net
+    ports:
+      - target: 4369
+        published: 4369
+        protocol: tcp
+      - target: 5672
+        published: 5672
+        protocol: tcp
+      - target: 15672
+        published: 15672
+        protocol: tcp
+    restart: always
+
+networks:
+  app-net:
+    external:
+      name: nat  # The default network that Docker creates when it is installed.

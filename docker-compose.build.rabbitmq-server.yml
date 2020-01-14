@@ -1,0 +1,47 @@
+# Usage:
+#   Any service with the 'build' attribute specified will be built and tagged with the name in the 'image' attribute.
+#   > docker-compose -f [--file] docker-compose.rabbitmq-server.yml -f docker-compose.build.rabbitmq-server.yml build
+#   > docker-compose -f docker-compose.rabbitmq-server.yml -f docker-compose.build.rabbitmq-server.yml build --no-cache
+version: "3.7"
+
+services:
+  # Publishes to RabbitMQ.
+  rabbitmq-publisher:
+    build:
+      context: ./RabbitMQ.Publisher/
+      dockerfile: ./Dockerfile
+      args:
+        BASE_OS_LAYER: mcr.microsoft.com/dotnet/core/runtime
+        BASE_OS_LAYER_VERSION: 2.2
+        BUILD_BASE_OS_LAYER: mcr.microsoft.com/dotnet/core/sdk
+        BUILD_BASE_OS_LAYER_VERSION: 2.2
+
+  # Subscribes to RabbitMQ.
+  rabbitmq-subscriber:
+    build:
+      context: ./RabbitMQ.Subscriber/
+      dockerfile: ./Dockerfile
+      args:
+        BASE_OS_LAYER: mcr.microsoft.com/dotnet/core/runtime
+        BASE_OS_LAYER_VERSION: 2.2
+        BUILD_BASE_OS_LAYER: mcr.microsoft.com/dotnet/core/sdk
+        BUILD_BASE_OS_LAYER_VERSION: 2.2
+
+  rabbitmq-server:
+    build:
+      context: ./RabbitMQ.Server/
+      dockerfile: ./Dockerfile
+      args:
+        BASE_OS_LAYER: mcr.microsoft.com/windows/servercore
+        BASE_OS_LAYER_VERSION: 1903
+        # Warning!!!
+        # If the backslash (\) is used, the erlang installer will place the installation on the directory given in the /D switch.
+        # However, if the forward slash (/) is used, the erlang installer will ignore the directory given in the /D switch; the
+        # installation will be placed under the ‘Program Files’ directory.
+        ERLANG_HOME: "c:\\erlang\\"
+        ERLANG_SERVICE_MANAGER_PATH: "c:\\erlang\\erts-10.5\\bin\\"
+        ERLANG_VERSION: "22.1"
+        ERLANG_ROOT_URL: "http://erlang.org/download/otp_win64_{0}.exe"
+        RABBITMQ_BASE: "c:\\rabbitmq\\"
+        RABBITMQ_VERSION: "3.8.1"
+        RABBITMQ_ROOT_URL: "https://github.com/rabbitmq/rabbitmq-server/releases/download/v{0}/rabbitmq-server-windows-{1}.zip"
