@@ -100,8 +100,8 @@ RUN Get-ChildItem Env:; `
 SHELL ["cmd", "/S", "/C"]
 
 # Add metadata to the image.
-LABEL copyright="Copyright (C) 2019 Juan Carlos Trimino. All rights reserved." `
-      version="1.000" `
+LABEL copyright="Copyright (C) 2020 Juan Carlos Trimino. All rights reserved." `
+      version="1.0.0" `
       maintainer="juancarlos@trimino.com"
 
 ARG ERLANG_HOME
