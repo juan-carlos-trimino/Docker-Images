@@ -1,0 +1,78 @@
+# Usage:
+#  Start the application.
+#  > docker-compose up -d [--detach]
+#
+#  Stop the application.
+#  > docker-compose down
+version: "3.7"
+
+services:
+  # Publishes to NATS
+  nats-publisher:
+    depends_on:
+      - natsmq
+      - nats-subscriber
+    #environment:
+    #  MessageQueue: "Url=nats://message-queue:4222"
+    image: veni-vidi-vici/nats-publisher-1.0.0:2.2-runtime-nanoserver-1903
+    isolation: process
+    networks:
+      - frontend
+      - backend
+    restart: on-failure:5
+
+  # Subscribes to NATS
+  nats-subscriber:
+    depends_on:
+      - natsmq
+    # These are actually the default values in the code, so they are not needed in the Compose file. But it can be useful to
+    # explicitly set them since the Compose file as the complete deployment guide for the distributed solution.
+    #environment:
+    #  MessageQueue: "Url=nats://natsmq:4222"
+    image: veni-vidi-vici/nats-subscriber-1.0.0:2.2-runtime-nanoserver-1903
+    isolation: process
+    # deploy:
+      # Default.
+    #  mode: replicated
+      # Number of containers that should be running at any given time.
+    #  replicas: 3
+    networks:
+      - backend
+    restart: on-failure:5
+
+  # Message-queue
+  natsmq:
+    # Note: If your service specifies a build option, variables defined in 'environment' are not automatically visible during the
+    # build. Use the args sub-option of build to define build-time environment variables.
+    # Docker-compose provides the ability to pass environment variables into the container without storing the values directly in
+    # the image.
+    #environment:
+    image: veni-vidi-vici/nats-2.0.2:nanoserver-1903
+    isolation: process
+    networks:
+      - backend
+    restart: on-failure:10
+
+
+# Docker containers communicate among themselves in networks created, implicitly or through configuration,
+# by Docker Compose. A service can communicate with another service on the same network by simply referencing
+# it by container name and port (for example network-example-service:80), provided that we've made the port
+# accessible through the expose keyword:
+
+# To reach a container from the host, the ports must be exposed declaratively through the ports keyword,
+# which also allows us to choose if exposing the port differently in the host:
+
+# Create two networks: one for front-end containers that we'll make
+# publicly accessible to the internet, and one for private back-end.
+
+networks:
+  frontend:
+    # If containers are joining a pre-existing network, use the external option.
+    external:
+      # The default network that Docker creates when it is installed.
+      name: nat
+  # Create a new network using the nat driver.
+  backend:
+    driver: nat
+    name: natbackend
+    external: false
