@@ -71,9 +71,9 @@ FROM ${BASE_OS_LAYER}:${BASE_OS_LAYER_VERSION}
 SHELL ["cmd", "/S", "/C"]
 
 # Add metadata to the image.
-LABEL copyright="Copyright (C) 2020 Juan Carlos Trimino. All rights reserved." `
-      version="1.0.0" `
-      maintainer="juancarlos@trimino.com"
+LABEL copyright="Copyright (C) 2020 Juan Carlos Trimino. All rights reserved."
+LABEL version="1.0.0"
+LABEL maintainer="juancarlos@trimino.com"
 
 ARG ERLANG_HOME
 ARG ERLANG_SERVICE_MANAGER_PATH
