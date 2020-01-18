@@ -1,0 +1,59 @@
+# Disable swapping.
+# After starting Elasticsearch, you can see whether this setting was applied successfully by checking the value of mlockall in
+# the output from this request:
+#   GET _nodes?filter_path=**.mlockall
+# If you see that mlockall is false, then it means that the mlockall request has failed. You will also see a line with more
+# information in the logs with the words Unable to lock JVM Memory.
+bootstrap:
+  memory_lock: true
+
+cluster:
+  name: es_dev
+  # As per documentation, node.name should be the same as initial_master_nodes.
+  initial_master_nodes: ["${HOSTNAME}"]
+
+# This value is required because we set "network.host"; be sure to modify it appropriately for a production cluster deployment.
+discovery:
+  seed_hosts: ["_site_"]
+
+# Defaults to 9200-9300.
+http:
+  port: 9200
+
+indices:
+  memory:
+    # Define the percentage of available heap memory that may be used for indexing operations; the remaining heap memory will
+    # mainly be used for search operations. When it fills up, the documents in the buffer are written to a segment on disk. It is
+    # divided between all shards on the node.
+    index_buffer_size: "20%"
+  recovery:
+    # Limit total inbound and outbound recovery traffic for each node. Defaults to 40mb.
+    # If this limit is too high, ongoing recoveries may consume an excess of bandwidth and other resources, which can destabilize
+    # the cluster.
+    max_bytes_per_sec: "100m"
+
+#index: not allow...
+  # This setting can be set in the elasticsearch.yml configuration file, or it can be set in each index's settings. If both are
+  # set, index settings override the configuration. The default is 1s so newly indexed documents will appear in searches after
+  # 1 second at most.
+#  refresh_interval: "1m"
+
+network:
+  # Any site-local addresses on the system; e.g., 192.168.0.1.
+  host: _site_
+  # By default, Elasticsearch binds to loopback addresses only -- e.g.; 127.0.0.1, [::1], and _local_.
+  # 0.0.0.0 is an acceptable IP address and will bind to all network interfaces.
+  bind_host: 0.0.0.0
+
+node:
+  name: ${HOSTNAME}
+  master: true
+  max_local_storage_nodes: 1
+  data: true
+  ingest: true
+
+# Same directories must exist on every node and share by all nodes.
+path:
+  data: c:\db\elasticsearch
+  logs: c:\db\elasticsearch\logs
+  repo: c:\db\elasticsearch\es-backup
