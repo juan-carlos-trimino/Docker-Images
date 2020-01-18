@@ -51,7 +51,7 @@ services:
     restart: on-failure:5
 
   rabbitmq-nano:
-    image: veni-vidi-vici/rabbitmq-3.6.15:nanoserver-1903
+    image: veni-vidi-vici/rabbitmq-3.8.1-erlang-22.1:nanoserver-1903
     isolation: process
     networks:
       - app-net
