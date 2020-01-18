@@ -39,9 +39,9 @@ RUN del \app\*.pdb /Q
 FROM ${BASE_OS_LAYER}:${BASE_OS_LAYER_VERSION}
 
 # Add metadata to the image.
-LABEL copyright="Copyright (C) 2020 Juan Carlos Trimiño. All rights reserved." \
-      version="1.0.0" \
-      maintainer="juancarlos@trimino.com"
+LABEL copyright="Copyright (C) 2020 Juan Carlos Trimiño. All rights reserved."
+LABEL version="1.0.0"
+LABEL maintainer="juancarlos@trimino.com"
 
 WORKDIR c:/app/
 
