@@ -81,6 +81,16 @@ The **start** command starts all stopped containers via the entry point of the c
 **When a build fails, it can be very useful to launch the layer before the failure**
 >`>` docker container run --rm -it [image-id]
 
+### Tagging
+**Tagging an image under an additional tag; creates an additional tag for the image**
+>`>` docker tag [old-image-tag] [new-image-tag]
+
+### Pushing the image to Docker Hub
+**Login to Docker Hub; need userId and password**
+>`>` docker login
+
+>`>` docker push [image-tag]
+
 ### Displaying
 **Display the full set of layers that make up an image**
 >`>` docker history [image-name-or-id]
@@ -179,7 +189,7 @@ The **start** command starts all stopped containers via the entry point of the c
 
 ### Stopping/Removing/Killing
 **Stop a running container**  
-When a **docker stop** command is issued, Docker sends a SIGTERM signal to the main process in the container and waits up to ten (10) seconds for the main process to stop. If the mian process doesn't comply with the request within the timeout period, Docker sends a SIGKILL. Whereas the main process can ignore a SIGTERM, the SIGKILL goes straight to the kernel thereby terminating the main process; the main process is forcibly killed without having an opportunity to exit gracefully. To change the default 10 seconds to wait, use the --time (-t) option.
+When a **docker stop** command is issued, Docker sends a SIGTERM signal to the main process in the container and waits up to ten (10) seconds for the main process to stop. If the main process doesn't comply with the request within the timeout period, Docker sends a SIGKILL. Whereas the main process can ignore a SIGTERM, the SIGKILL goes straight to the kernel thereby terminating the main process; the main process is forcibly killed without having an opportunity to exit gracefully. To ensure a gracefully exit, the main process needs to handle the SIGTERM signal. To change the default 10 seconds to wait, use the --time (-t) option.
 >`>` docker container stop [container-name-or-id]
 
 >`>` docker container stop --time=20 [container-name-or-id]
