@@ -1,0 +1,23 @@
+apiVersion: v1
+kind: ReplicationController
+metadata:
+  name: rc-rabbitmq
+spec:
+  # The desired number of pod instances.
+  replicas: 3
+  # Pod selector.
+  selector:
+    app: rabbitmq
+  # Pod template.
+  template:
+    metadata:
+      labels:
+        app: rabbitmq
+        env: prod
+    spec:
+      containers:
+        - image: jctrimino/rabbitmq-3.8.1:1903
+          name: rabbitmq
+          ports:
+            - containerPort: 5672
+              protocol: TCP

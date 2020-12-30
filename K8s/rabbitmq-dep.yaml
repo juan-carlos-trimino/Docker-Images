@@ -1,0 +1,80 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: rabbitmq
+# YAML files can contain multiple resource definitions separated by a line with three dashes.
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: rabbitmq
+  namespace: rabbitmq
+spec:
+  # Only the current and previous revisions (ReplicaSets) are preserved.
+  revisionHistoryLimit: 2
+  # The desired number of pod instances.
+  replicas: 3
+  stragedy:
+    rollingUpdate:
+      # How many pod instances are allowed to exist above the desired replica count.
+      maxSurge: 1
+      # How many pod instances can be unavailable relative to the desired replica count.
+      maxUnavailable: 1
+    # When app does support running multiple versions in parallel.
+    type: RollingUpdate
+    # When app doesn't support running multiple versions in parallel (app becomes completely unavailable for a short period of time).
+    # type: Recreate
+  # Pod selector.
+  selector:
+    matchExpressions:
+      - key: depl
+        operator: In
+        values:
+          - rabbitmq
+  # Pod template.
+  template:
+    metadata:
+      # Must macth "Service" and "Deployment" labels.
+      labels:
+        depl: rabbitmq
+        svc: rabbitmq
+    spec:
+      containers:
+        - name: rabbitmq
+          image: jctrimino/rabbitmq-3.8.1:1903
+          ports:
+            - name: without-tls
+              containerPort: 5672
+              protocol: TCP
+            - name: with-tls
+              containerPort: 5671
+              protocol: TCP
+            - name: ui-admin
+              containerPort: 15672
+              protocol: TCP
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: rabbitmq
+spec:
+  ports:
+    - name: without-tls
+      # Host
+      port: 5672
+      # Pod
+      targetPort: without-tls
+      protocol: TCP
+    - name: with-tls
+      port: 5671
+      targetPort: with-tls
+      protocol: TCP
+    - name: ui-admin
+      port: 15672
+      targetPort: ui-admin
+      protocol: TCP
+  selector:
+    # Pod selector.
+    svc: rabbitmq
+    sessionAffinity: None
+  type: ClusterIP

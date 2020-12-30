@@ -1,0 +1,87 @@
+apiVersion: apps/v1beta2
+kind: ReplicaSet
+metadata:
+  name: rs-rabbitmq
+spec:
+  # Pod selector.
+  selector:
+    matchExpressions:
+      - key: rs
+        operator: In
+        values:
+          - rs-rabbitmq
+  # The desired number of pod instances.
+  replicas: 3
+  # Pod template.
+  template:
+    metadata:
+      name: pod-rabbitmq
+      labels:
+        rs: rs-rabbitmq
+        svc: svc-rabbitmq
+    spec:
+      containers:
+        - name: cnt-rabbitmq
+          image: jctrimino/rabbitmq-3.8.1:1903
+          ports:
+            - name: without-tls
+              containerPort: 5672
+              protocol: TCP
+            - name: with-tls
+              containerPort: 5671
+              protocol: TCP
+            - name: ui-admin
+              containerPort: 15672
+              protocol: TCP
+# YAML files can contain multiple resource definitions separated by a line with three dashes.
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: svc-rabbitmq
+spec:
+  ports:
+    - name: without-tls
+      # Host
+      port: 5672
+      # Pod
+      targetPort: without-tls
+    - name: with-tls
+      port: 5671
+      targetPort: with-tls
+    - name: ui-admin
+      port: 15672
+      targetPort: ui-admin
+  selector:
+    # Pod selector.
+    svc: svc-rabbitmq
+    sessionAffinity: None
+  type: ClusterIP
+
+#apiVersion: apps/v1
+#kind: Deployment
+#metadata:
+#  name: dep-rabbitmq
+  #labels:
+#spec:
+#  replicas: 2
+#  template:
+#    metadata:
+#      name: pod-rabbitmq
+#    spec:
+#      containers:
+#      - name: rabbitmq
+#        image: jctrimino/rabbitmq-3.8.1-erlang-22.1:windowsserver-1903
+#        ports:
+#        - name: without-tls
+#          containerPort: 5672
+#          protocol: TCP
+#        - name: with-tls
+#          containerPort: 5671
+#          protocol: TCP
+#        - name: ui-admin
+#          containerPort: 15672
+#          protocol: TCP
+#  selector:
+#    matchLabels:
+#      svc: rabbitmq

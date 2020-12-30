@@ -1,0 +1,31 @@
+apiVersion: apps/v1beta2
+kind: ReplicaSet
+metadata:
+  name: rs-rabbitmq
+spec:
+  # The desired number of pod instances.
+  replicas: 3
+  # Pod selector.
+  selector:
+    matchExpressions:
+      - key: app
+        operator: In
+        values:
+          - rabbitmq
+  # Pod template.
+  template:
+    metadata:
+      labels:
+        matchExpressions:
+          - key: app
+            operator: In
+            values:
+              - rabbitmq
+#        env: prod
+    spec:
+      containers:
+        - image: jctrimino/rabbitmq-3.8.1:1903
+          name: rabbitmq
+          ports:
+            - containerPort: 5672
+              protocol: TCP

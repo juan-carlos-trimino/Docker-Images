@@ -1,0 +1,21 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: pod-rabbitmq
+  namespace: ns-message-broker
+  labels:
+    env: prod
+spec:
+  containers:
+    - image: jctrimino/rabbitmq-3.8.1-erlang-22.1:windowsserver-1903
+      name: con-rabbitmq
+      ports:
+      - name: withoutTls
+        containerPort: 5672
+        protocol: TCP
+      - name: withTls
+        containerPort: 5671
+        protocol: TCP
+      - name: uiAdmin
+        containerPort: 15672
+        protocol: TCP
