@@ -1,0 +1,37 @@
+# Usage:
+#   Any service with the 'build' attribute specified will be built and tagged with the name in the 'image' attribute. (-f [--file])
+#   > docker-compose -f docker-compose.yml -f docker-compose.es-kibana.yml -f docker-compose.build.yml -f docker-compose.build.es-kibana.yml build
+#   > docker-compose -f docker-compose.yml -f docker-compose.es-kibana.yml -f docker-compose.build.yml -f docker-compose.build.es-kibana.yml build --no-cache
+version: "3.7"
+
+services:
+  ##################
+  # Infrastructure #
+  ##################
+  elasticsearch:
+    build:
+      context: ./ElasticSearch/
+      dockerfile: ./Dockerfile
+      # Build arguments to use in the image.
+      args:
+        BASE_OS_LAYER: openjdk
+        BASE_OS_LAYER_VERSION: 12-windowsservercore
+        BUILD_BASE_OS_LAYER: mcr.microsoft.com/windows/servercore
+        BUILD_BASE_OS_LAYER_VERSION: 1903
+        ES_VERSION: "7.3.1"
+        ES_HOME: "C:/elasticsearch/"
+        ES_ROOT_URL: "https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch"
+
+  kibana:
+    build:
+      context: ./Kibana/
+      dockerfile: ./Dockerfile
+      args:
+        BASE_OS_LAYER: mcr.microsoft.com/windows/servercore
+        BASE_OS_LAYER_VERSION: 1903
+        BUILD_BASE_OS_LAYER: mcr.microsoft.com/windows/servercore
+        BUILD_BASE_OS_LAYER_VERSION: 1903
+        KIBANA_VERSION: "7.3.1"
+        KIBANA_HOME: "C:/kibana/"
+        KIBANA_ROOT_URL: "https://artifacts.elastic.co/downloads/kibana/kibana"
+        ELASTICSEARCH_HOSTS: ""

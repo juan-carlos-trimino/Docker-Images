@@ -1,0 +1,118 @@
+# Usage:
+#   Start the application.
+#   > docker-compose -f docker-compose.yml -f docker-compose.es-kibana.yml up -d [--detach]
+#
+#   Stop the application.
+#   > docker-compose -f docker-compose.yml -f docker-compose.es-kibana.yml down
+version: "3.7"
+
+services:
+  ##################
+  # Infrastructure #
+  ##################
+  elasticsearch:
+    # Defining environment variables for a service in the Compose file sets these environment variables for every container
+    # running the service.
+    #
+    # Settings added to the Dockerfile with ENV become part of the image, and containers run from the image will have these
+    # values set. When running a container, the --env or -e option can be used to add or replace environment variables in the
+    # image.
+    #
+    # When using a separate environment file for sensitive values, the sensitive values are in plain text. But by isolating it in
+    # a separate file, access to the file can be restricted. Nonetheless, environment variables are not secure even if access to
+    # the file is restricted; anyone with access to the Docker APIs can see the data. To protect the data, Docker secrets with
+    # Docker Swarm should be used.
+    environment:
+      # By default, Elasticsearch allocates 2 GB of system memory for the database. For a development environment, 512 MB to 1 GB
+      # is probably enough.
+      ES_JAVA_OPTS: "-Xms512m -Xmx512m"
+      # See elasticsearch.yml.
+      HOSTNAME: "JuanCarlos-PC"
+    image: veni-vidi-vici/elasticsearch-7.3.1:windowsserver
+    isolation: hyperv
+    networks:
+      - backend
+    restart: on-failure:10
+    volumes:
+      - type: bind
+        # The source is the host location, which needs to exist.
+        source: c:\db\elasticsearch\
+        # The target is the container location, which does't need to exist, but the existing contents will be hidden if it does
+        # exist.
+        target: c:\db\elasticsearch\
+#    ports:
+#      - target: 9200
+#        published: 9200
+#        protocol: tcp
+    #volumes:
+      #
+      # You use the --volume option to explicitly map a directory in a container from a known location on the host. The target
+      # location in the container can be a directory created with the VOLUME command, or any directory in the container's
+      # filesystem. If the target location already exists in the Docker image, it is hidden by the volume mount so you won't
+      # see any of the image files.
+      #
+    #  - c:\docker-volumes\elasticsearch\data:c:\data
+
+  # By convention, the Kibana image connects to Elasticsearch using the service name elasticsearch, which is the service name
+  # used in the Docker Compose file to support the convention.
+  kibana:
+    depends_on:
+      - elasticsearch
+    image: veni-vidi-vici/kibana-7.3.1:windowsserver-1903
+    isolation: process
+    labels:
+      - "traefik.frontend.rule=Host:kibana.dev.local"
+      - "traefik.frontend.priority=1"
+    networks:
+      - frontend
+      - backend
+    restart: on-failure:10
+
+
+
+
+
+# Docker containers communicate among themselves in networks created, implicitly or through configuration,
+# by Docker Compose. A service can communicate with another service on the same network by simply referencing
+# it by container name and port (for example network-example-service:80), provided that we've made the port
+# accessible through the expose keyword:
+
+# To reach a container from the host, the ports must be exposed declaratively through the ports keyword,
+# which also allows us to choose if exposing the port differently in the host:
+
+#networks:
+  #front-end:
+  #  external:
+      # The default network that Docker creates when it is installed.
+  #    name: nat
+#  back-end:
+#    external:
+#      name: nat-backend
+
+#
+# Volumes can be specified as external so Docker will use existing volumes. Docker does not create any default volumes so if you
+# use an external volume, you will need to create it on the host before running the application. But if you specify the volumes
+# without any options, Docker will create them for you. For example,
+#
+#   volumes:
+#     es-data:
+#
+# These volumes will store the data on the host rather than in the container's writable layer. They're not host-mounted volumes
+# so although the data is stored on the local disk, you are not specifying the location. Each volume will write its data in the
+# Docker data directory at C:\ProgramData\Docker.
+#
+# To use existing volumes, you need to specify the external attribute and optionally a name for the resource. With external
+# resources declared, you can't just run the application using docker-compose up. Compose won't create volumes defined as
+# external; they need to exist before the application starts. And if these volumes are required by the services, Docker won't
+# create any containers either. To create basic volumes with default configurations,
+#   docker volume create --name elasticsearch-data
+#
+#volumes:
+##  elasticsearch-data:
+#    driver_opts:
+#      type: none
+##      device: c:\docker-volumes\elasticsearch\data
+#     o: bind
+#  sqlexpress-data:
+#    external:
+#      name: sqlexpress-database
