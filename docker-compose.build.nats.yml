@@ -7,6 +7,7 @@ version: "3.7"
 services:
   # Publishes to NATS.
   nats-publisher:
+    # The context path is relative to the location of the Compose file, and the Dockerfile path is relative to the context.
     build:
       context: ./Nats.Publisher/
       dockerfile: ./Dockerfile
@@ -29,7 +30,6 @@ services:
 
   # Message-queue
   natsmq:
-    # The context path is relative to the location of the Compose file, and the Dockerfile path is relative to the context.
     build:
       context: ./NATS/
       dockerfile: ./Dockerfile
