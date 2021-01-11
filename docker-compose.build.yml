@@ -1,0 +1,88 @@
+# Usage:
+#   Any service with the 'build' attribute specified will be built and tagged with the name in the 'image' attribute. (-f [--file])
+#   > docker-compose -f docker-compose.yml -f docker-compose.build.yml build
+#   > docker-compose -f docker-compose.yml -f docker-compose.build.yml build --no-cache
+#
+version: "3.7"
+
+services:
+  ################
+  # Applications #
+  ################
+  msfinances:
+    build:
+      context: ./MSFinances/
+      dockerfile: ./Dockerfile
+      args:
+        BASE_OS_LAYER: mcr.microsoft.com/windows/nanoserver
+        BASE_OS_LAYER_VERSION: 1903
+        BUILD_BASE_OS_LAYER: mcr.microsoft.com/windows/servercore
+        BUILD_BASE_OS_LAYER_VERSION: 1903
+        VC_REDIST_URL: "https://aka.ms/vs/16/release/vc_redist.x64.exe"
+
+  esmovies:
+    build:
+      context: ./ESMovies/
+      dockerfile: ./Dockerfile
+      args:
+        BASE_OS_LAYER: mcr.microsoft.com/windows/nanoserver
+        BASE_OS_LAYER_VERSION: 1903
+        BUILD_BASE_OS_LAYER: mcr.microsoft.com/windows/servercore
+        BUILD_BASE_OS_LAYER_VERSION: 1903
+        PY_VERSION: "3.8.0"
+        PY_HOME: "C:/python/"
+        PY_INSTALL_TO_PATH: "../Python38"
+        PY_COPY_FROM_PATH: "./Program Files/Python38"
+        PY_ROOT_URL: "https://www.python.org/ftp/python/{0}/python-{1}-amd64.exe"
+
+  # Publishes to NATS.
+  nats-publisher:
+    build:
+      context: ./Nats.Publisher/
+      dockerfile: ./Dockerfile
+      args:
+        BASE_OS_LAYER: mcr.microsoft.com/dotnet/core/runtime
+        BASE_OS_LAYER_VERSION: 2.2
+        BUILD_BASE_OS_LAYER: mcr.microsoft.com/dotnet/core/sdk
+        BUILD_BASE_OS_LAYER_VERSION: 2.2
+
+  # Subscribes to NATS.
+  nats-subscriber:
+    build:
+      context: ./Nats.Subscriber/
+      dockerfile: ./Dockerfile
+      args:
+        BASE_OS_LAYER: mcr.microsoft.com/dotnet/core/runtime
+        BASE_OS_LAYER_VERSION: 2.2
+        BUILD_BASE_OS_LAYER: mcr.microsoft.com/dotnet/core/sdk
+        BUILD_BASE_OS_LAYER_VERSION: 2.2
+
+  ##################
+  # Infrastructure #
+  ##################
+  # Message-queue
+  natsmq:
+    # The context path is relative to the location of the Compose file, and the Dockerfile path is relative to the context.
+    build:
+      context: ./NATS/
+      dockerfile: ./Dockerfile
+      args:
+        BASE_OS_LAYER: mcr.microsoft.com/windows/nanoserver
+        BASE_OS_LAYER_VERSION: 1903
+        # The NAT Server will look for this environment variable. When set, it prevents the use of the service API to detect
+        # if it is running in interactive mode or not, which is failing in the context of a Docker container.
+        # (https://github.com/nats-io/gnatsd/issues/543)
+        NATS_DOCKERIZED: 1
+
+  # Reverse-proxy
+  traefik:
+    build:
+      context: ./Traefik/
+      dockerfile: ./Dockerfile
+      args:
+        BASE_OS_LAYER: mcr.microsoft.com/windows/nanoserver
+        BASE_OS_LAYER_VERSION: 1903
+        BUILD_BASE_OS_LAYER: mcr.microsoft.com/windows/servercore
+        BUILD_BASE_OS_LAYER_VERSION: 1903
+        TRAEFIK_VERSION: 2.1.1
+        TRAEFIK_ROOT_URL: "https://github.com/containous/traefik/releases/download/v{0}/traefik_v{1}_windows_amd64.zip"

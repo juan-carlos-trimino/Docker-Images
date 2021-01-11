@@ -1,0 +1,255 @@
+# Usage:
+#   Start the application.
+#   > docker-compose up -d [--detach]
+#
+#   Stop the application.
+#   > docker-compose down
+version: "3.7"
+
+services:
+  ################
+  # Applications #
+  ################
+  msfinances:
+    depends_on:
+      - traefik
+#     elasticsearch:
+#       condition: service_healthy
+    environment:
+      # Default value for HTTP_SERVER: "http://0.0.0.0:49480/api/v1/"
+      # Default value for DB_URL: "http://elasticsearch:9200"
+      # Default value for DB_NAME (no logging): ""
+      # DB_NAME: "msfinances"
+      DB_NAME: ""
+      HTTP_SERVER: "http://localhost:49480/api/v1/"
+    image: veni-vidi-vici/msfinances-1.0.0:nanoserver-1903
+    isolation: process
+    # Labels are case insensitive.
+    labels:
+      # Traefik will include this container in its internal configuration; see exposedByDefault in traefik.yml.
+      - "traefik.enable=true"
+      # A router is in charge of connecting incoming requests to the services that can handle them. In the process, routers may
+      # use pieces of middleware to update the request, or act before forwarding the request to the service.
+      - "traefik.http.routers.rt-finances.entrypoints=http"
+      # Specify the hostname for the site on the rt-finances router.
+      - "traefik.http.routers.rt-finances.rule=Host(`finances.dev.local`) && PathPrefix(`/api/v1/`)"
+
+#      - "traefik.docker.network=nat"
+
+    networks:
+      - frontend
+      - backend
+    restart: on-failure:5
+
+  # Elasticsearch client
+  esmovies:
+    #command:
+    #  - "--providers.docker=true"
+    depends_on:
+      - traefik
+#      - elasticsearch
+    image: veni-vidi-vici/esmovies-1.0.0:nanoserver-1903
+    isolation: process
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.rt-esmovies.entrypoints=http"
+      - "traefik.http.routers.rt-esmovies.rule=Host(`movies.dev.local`) && PathPrefix(`/api/v1/`)"
+    networks:
+      - frontend
+      - backend
+    restart: on-failure:5
+
+  # Publishes to NATS
+  nats-publisher:
+    depends_on:
+      - natsmq
+      - nats-subscriber
+    #environment:
+    #  MessageQueue: "Url=nats://message-queue:4222"
+    image: veni-vidi-vici/nats-publisher-1.0.0:2.2-runtime-nanoserver-1903
+    isolation: process
+    networks:
+      - frontend
+      - backend
+    restart: on-failure:5
+
+  # Subscribes to NATS
+  nats-subscriber:
+    depends_on:
+      - natsmq
+    # These are actually the default values in the code, so they are not needed in the Compose file. But it can be useful to
+    # explicitly set them since the Compose file as the complete deployment guide for the distributed solution.
+    #environment:
+    #  MessageQueue: "Url=nats://natsmq:4222"
+    image: veni-vidi-vici/nats-subscriber-1.0.0:2.2-runtime-nanoserver-1903
+    isolation: process
+    # deploy:
+      # Default.
+    #  mode: replicated
+      # Number of containers that should be running at any given time.
+    #  replicas: 3
+    networks:
+      - backend
+    restart: on-failure:5
+
+  ##################
+  # Infrastructure #
+  ##################
+  # Message-queue
+  natsmq:
+    # Note: If your service specifies a build option, variables defined in 'environment' are not automatically visible during the
+    # build. Use the args sub-option of build to define build-time environment variables.
+    # Docker-compose provides the ability to pass environment variables into the container without storing the values directly in
+    # the image.
+    #environment:
+    image: veni-vidi-vici/nats-2.0.2:nanoserver-1903
+    isolation: process
+    networks:
+      - backend
+    restart: on-failure:10
+
+  # In Docker, the reverse proxy runs in a container with published ports, and it proxies traffic from other containers, which do
+  # not have any published ports. The proxy is the only endpoint that is publicly accessible. The proxy makes HTTP requests to
+  # the actual service on the client's behalf, using the containers' host names.
+  # See https://docs.traefik.io/v1.7/basics/
+  traefik:
+    command:
+      # Enable the docker provider.
+      - "--providers.docker=true"
+
+#      - "--providers.docker.network=nat"
+
+
+    healthcheck:
+      test: ["CMD", "traefik", "healthcheck"]
+      interval: 1m
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+
+
+
+
+    image: veni-vidi-vici/traefik-2.1.1:nanoserver-1903
+    # Traefik can't use Windows named pipe in hyperv isolation.
+    # See https://github.com/containous/traefik/issues/4409
+    isolation: process
+    labels:
+
+      - "traefik.docker.network=nat"
+
+      - "traefik.enable=true"
+      - "traefik.http.routers.rt-api.entrypoints=traefik"
+      # Attach router to the service api@internal.
+      - "traefik.http.routers.rt-api.service=api@internal"
+      # By default, Traefik uses the first exposed port of a container.
+      # Useful when the container exposes multiples ports.
+      # Mandatory for Docker Swarm; Docker Swarm does not provide any port detection information to Traefik.
+      #- "traefik.http.services.rt-api.loadbalancer.server.port=8080"
+      - "traefik.http.routers.rt-api.rule=PathPrefix(`/api`) || PathPrefix(`/dashboard`) || PathPrefix(`/debug`)"
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "200k"
+        max-file: "3"
+    networks:
+      - frontend
+#      - backend
+    ports:
+        # HTTP (container)
+      - target: 80
+        # HTTP (host)
+        published: 80
+        # Protocol (tcp or udp)
+        protocol: tcp
+        # For publishing a host port on each node, or ingress for a swarm mode port to be load balanced.
+        # mode: host
+        # HTTPS
+      - target: 443
+        # By not specifying a host (published) port, an ephemeral host port is chosen.
+        # published: 443
+        protocol: tcp
+        # mode: host
+        # Dashboard (http://app1.dev.local:8080/dashboard/)
+      - target: 8080
+        published: 8080
+        protocol: tcp
+    restart: on-failure:10
+    volumes:
+      # Mounting a pipe lets a container query the Docker APIs without needing to know the IP address of the host where the
+      # container is running. By Traefik subscribing to the event stream from the Docker API with the named pipe connection, it
+      # will get notifications from Docker when containers are created or removed, and Traefik uses the data in those events to
+      # build its own routing map.
+      - type: npipe
+        # The source of the mount, a path on the host for a bind mount.
+        source: \\.\pipe\docker_engine
+        # The path in the container where the volume is mounted.
+        target: \\.\pipe\docker_engine
+
+
+
+
+
+
+# Docker containers communicate among themselves in networks created, implicitly or through configuration,
+# by Docker Compose. A service can communicate with another service on the same network by simply referencing
+# it by container name and port (for example network-example-service:80), provided that we've made the port
+# accessible through the expose keyword:
+
+# To reach a container from the host, the ports must be exposed declaratively through the ports keyword,
+# which also allows us to choose if exposing the port differently in the host:
+
+# Create two networks: one for front-end containers that we'll make
+# publicly accessible to the internet, and one for private back-end.
+
+networks:
+  frontend:
+    # If containers are joining a pre-existing network, use the external option.
+    external:
+      # The default network that Docker creates when it is installed.
+      name: nat
+  # Create a new network using the nat driver.
+  backend:
+    driver: nat
+    name: natbackend
+    external: false
+
+
+
+#
+# Volumes can be specified as external so Docker will use existing volumes. Docker does not create any default volumes so if you
+# use an external volume, you will need to create it on the host before running the application. But if you specify the volumes
+# without any options, Docker will create them for you. For example,
+#
+#   volumes:
+#     es-data:
+#
+# These volumes will store the data on the host rather than in the container's writable layer. They're not host-mounted volumes
+# so although the data is stored on the local disk, you are not specifying the location. Each volume will write its data in the
+# Docker data directory at C:\ProgramData\Docker.
+#
+# To use existing volumes, you need to specify the external attribute and optionally a name for the resource. With external
+# resources declared, you can't just run the application using docker-compose up. Compose won't create volumes defined as
+# external; they need to exist before the application starts. And if these volumes are required by the services, Docker won't
+# create any containers either. To create basic volumes with default configurations,
+#   docker volume create --name elasticsearch-data
+#
+#volumes:
+##  elasticsearch-data:
+#    driver_opts:
+#      type: none
+##      device: c:\docker-volumes\elasticsearch\data
+#     o: bind
+#  sqlexpress-data:
+#    external:
+#      name: sqlexpress-database
+
+
+#Here, we can see a set of services with two applications that we're actually exposing to the outside world.
+#Notice how there isn't a single container that has any published ports to the host -- everything is routed through Docker networks.
+#Also, only the containers that we want traffic to get routed to are attached to the web network we created at the start of this document.
+
+#Since the traefik container we've created and started earlier is also attached to this network, HTTP requests can now get routed to these containers.
+
+#Should you choose to enable the exposedByDefault flag in the traefik.toml configuration, be aware that all containers that are placed in the same network as Traefik will automatically be reachable from the outside world, for everyone and everyone to see. Usually, this is a bad idea.
+

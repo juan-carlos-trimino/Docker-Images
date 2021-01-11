@@ -1,0 +1,25 @@
+# Usage:
+#   Any service with the 'build' attribute specified will be built and tagged with the name in the 'image' attribute. (-f [--file])
+#   > docker-compose -f docker-compose.yml -f docker-compose.sqldb.yml -f docker-compose.build.yml -f docker-compose.build.sqldb.yml build
+#   > docker-compose -f docker-compose.yml -f docker-compose.sqldb.yml -f docker-compose.build.yml -f docker-compose.build.sqldb.yml build --no-cache
+version: "3.7"
+
+services:
+  ##################
+  # Infrastructure #
+  ##################
+  sqlexpress:
+    build:
+      context: ./SQL-Express/
+      dockerfile: ./Dockerfile
+      # Build arguments to use in the image.
+      args:
+        BASE_OS_LAYER: microsoft/mssql-server-windows-express
+        BASE_OS_LAYER_VERSION: 2017
+        # To create a new empty disposable database
+        # Note: Ensure the 'volumes' resource is commented out in the file docker-compose.yml.
+        # DB_INFO: "[{'dbScriptName': 'RunInvestmentsSchema.sql'}]"
+        # To create a new empty persistent database
+        # DB_INFO: "[{'dbScriptName': 'RunInvestmentsSchema.sql'}]"
+        # To attach to a persistent database
+        DB_INFO: "[{'dbsToAttach': [{'dbName': 'Investments', 'dbFiles': ['Investments_data.mdf', 'Investments_log.ldf']}]}]"
