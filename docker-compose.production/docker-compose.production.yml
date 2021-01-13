@@ -1,0 +1,86 @@
+# Usage:
+#   Start the application.
+#   > docker-compose -f docker-compose.yml -f docker-compose.production.yml up -d [--detach]
+#
+#   Stop the application.
+#   > docker-compose -f docker-compose.yml -f docker-compose.production.yml down
+version: "3.7"
+
+services:
+  ################
+  # Applications #
+  ################
+  msfinances:
+    labels:
+      - "traefik.frontend.rule=Host:finances.com"
+      - "traefik.frontend.priority=1"
+
+  ##################
+  # Infrastructure #
+  ##################
+  traefik:
+    command: --docker --docker.endpoint=npipe:////./pipe/docker_engine
+    ports:
+        # HTTP (container)
+      - target: 80
+        # HTTP (host)
+        published: 80
+        # Protocol (tcp or udp)
+        protocol: tcp
+        # For publishing a host port on each node, or ingress for a swarm mode port to be load balanced.
+        # mode: host
+        # HTTPS
+      - target: 443
+        published: 443
+        protocol: tcp
+        # mode: host
+
+
+# Docker containers communicate among themselves in networks created, implicitly or through configuration,
+# by Docker Compose. A service can communicate with another service on the same network by simply referencing
+# it by container name and port (for example network-example-service:80), provided that we've made the port
+# accessible through the expose keyword:
+
+# To reach a container from the host, the ports must be exposed declaratively through the ports keyword,
+# which also allows us to choose if exposing the port differently in the host:
+
+#networks:
+#  front-end:
+    # If containers are joining a pre-existing network, use the external option.
+#    external:
+      # The default network that Docker creates when it is installed.
+#      name: nat
+  # Create a new network using the nat driver.
+#  back-end:
+#    driver: nat
+#    name: nat-backend
+
+
+
+#
+# Volumes can be specified as external so Docker will use existing volumes. Docker does not create any default volumes so if you
+# use an external volume, you will need to create it on the host before running the application. But if you specify the volumes
+# without any options, Docker will create them for you. For example,
+#
+#   volumes:
+#     es-data:
+#
+# These volumes will store the data on the host rather than in the container's writable layer. They're not host-mounted volumes
+# so although the data is stored on the local disk, you are not specifying the location. Each volume will write its data in the
+# Docker data directory at C:\ProgramData\Docker.
+#
+# To use existing volumes, you need to specify the external attribute and optionally a name for the resource. With external
+# resources declared, you can't just run the application using docker-compose up. Compose won't create volumes defined as
+# external; they need to exist before the application starts. And if these volumes are required by the services, Docker won't
+# create any containers either. To create basic volumes with default configurations,
+#   docker volume create --name elasticsearch-data
+#
+#volumes:
+##  elasticsearch-data:
+#    driver_opts:
+#      type: none
+##      device: c:\docker-volumes\elasticsearch\data
+#     o: bind
+#  sqlexpress-data:
+#    external:
+#      name: sqlexpress-database

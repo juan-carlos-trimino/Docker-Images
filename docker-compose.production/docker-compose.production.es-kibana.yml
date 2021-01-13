@@ -1,0 +1,96 @@
+# Usage:
+#   Start the application.
+#   > docker-compose -f docker-compose.yml -f docker-compose.es-kibana.yml up -d [--detach]
+#
+#   Stop the application.
+#   > docker-compose -f docker-compose.yml -f docker-compose.es-kibana.yml down
+version: "3.7"
+
+services:
+  ##################
+  # Infrastructure #
+  ##################
+  elasticsearch:
+    environment:
+      ES_JAVA_OPTS: "-Xms2g -Xmx2g"
+    labels:
+      - "traefik.frontend.rule=Host:elasticsearch.com"
+
+#    ports:
+#      - target: 9200
+#        published: 9200
+#        protocol: tcp
+
+    # restart: unless-stopped
+    volumes:
+      - type: bind
+        # The source is the host location, which needs to exist.
+        source: c:\db\elasticsearch\
+        # The target is the container location, which does't need to exist, but the existing contents will be hidden if it does
+        # exist.
+        target: c:\db\elasticsearch\
+    #volumes:
+      #
+      # You use the --volume option to explicitly map a directory in a container from a known location on the host. The target
+      # location in the container can be a directory created with the VOLUME command, or any directory in the container's
+      # filesystem. If the target location already exists in the Docker image, it is hidden by the volume mount so you won't
+      # see any of the image files.
+      #
+    #  - c:\docker-volumes\elasticsearch\data:c:\data
+
+
+
+  # By convention, the Kibana image connects to Elasticsearch using the service name elasticsearch, which is the service name
+  # used in the Docker Compose file to support the convention.
+  kibana:
+    labels:
+      - "traefik.frontend.rule=Host:kibana.com"
+
+
+
+
+
+# Docker containers communicate among themselves in networks created, implicitly or through configuration,
+# by Docker Compose. A service can communicate with another service on the same network by simply referencing
+# it by container name and port (for example network-example-service:80), provided that we've made the port
+# accessible through the expose keyword:
+
+# To reach a container from the host, the ports must be exposed declaratively through the ports keyword,
+# which also allows us to choose if exposing the port differently in the host:
+
+#networks:
+  #front-end:
+  #  external:
+      # The default network that Docker creates when it is installed.
+  #    name: nat
+#  back-end:
+#    external:
+#      name: nat-backend
+
+#
+# Volumes can be specified as external so Docker will use existing volumes. Docker does not create any default volumes so if you
+# use an external volume, you will need to create it on the host before running the application. But if you specify the volumes
+# without any options, Docker will create them for you. For example,
+#
+#   volumes:
+#     es-data:
+#
+# These volumes will store the data on the host rather than in the container's writable layer. They're not host-mounted volumes
+# so although the data is stored on the local disk, you are not specifying the location. Each volume will write its data in the
+# Docker data directory at C:\ProgramData\Docker.
+#
+# To use existing volumes, you need to specify the external attribute and optionally a name for the resource. With external
+# resources declared, you can't just run the application using docker-compose up. Compose won't create volumes defined as
+# external; they need to exist before the application starts. And if these volumes are required by the services, Docker won't
+# create any containers either. To create basic volumes with default configurations,
+#   docker volume create --name elasticsearch-data
+#
+#volumes:
+##  elasticsearch-data:
+#    driver_opts:
+#      type: none
+##      device: c:\docker-volumes\elasticsearch\data
+#     o: bind
+#  sqlexpress-data:
+#    external:
+#      name: sqlexpress-database
