@@ -19,8 +19,7 @@ WORKDIR c:/Publisher-CS/
 
 COPY ./Publisher-CS/ ./
 
-# Use NuGet to restore dependencies as well as project-specific tools that are specified in the project file. By default, the
-# restoration of dependencies and tools are executed in parallel.
+# Use NuGet to restore dependencies as well as project-specific tools that are specified in the project file. By default, the restoration of dependencies and tools are executed in parallel.
 RUN dotnet restore "./NatsPublisher.csproj"
 
 # Build a project and all of its dependencies.
