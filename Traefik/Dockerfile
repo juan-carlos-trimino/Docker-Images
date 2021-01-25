@@ -2,16 +2,14 @@
 #
 # https://traefik.io/
 #
-# If system.exe (PID 4) is listening on port 80, the service "World Wide Web Publishing Service" is listening on port 80. Stop
-# and disable the W3SVC service. To see ports usage:
+# If system.exe (PID 4) is listening on port 80, the service "World Wide Web Publishing Service" is listening on port 80. Stop and disable the W3SVC service. To see ports usage:
 #   C:\> netstat -aon
 #   C:\> sc stop w3svc
 #   C:\> sc config w3svc start=disabled
 # or
 #   C:\> net stop http /y
 #   C:\> sc config http start=disabled
-#   Microsoft Windows HTTP Services (WinHTTP) provides developers with an HTTP client application programming interface (API) to
-#   send requests through the HTTP protocol to other HTTP servers.
+#   Microsoft Windows HTTP Services (WinHTTP) provides developers with an HTTP client application programming interface (API) to send requests through the HTTP protocol to other HTTP servers.
 #   (sc config http start=auto --> To start the service)
 #
 # Usage
@@ -64,12 +62,10 @@ COPY --from=builder /windows/system32/netapi32.dll ./netapi32.dll
 
 WORKDIR c:/traefik
 
-#COPY --from=traefik:v1.7.11-nanoserver-sac2016 ./traefik.exe ./traefik.exe
 COPY --from=builder C:/traefik/traefik.exe ./traefik.exe
 COPY ./traefik.yml ./traefik.yml
 
-# Nano Server uses a least-privilege user by default. This switches to a built-in account in the container image, which has
-# administrative rights.
+# Nano Server uses a least-privilege user by default. This switches to a built-in account in the container image, which has administrative rights.
 USER ContainerAdministrator
 
 # HTTP port
@@ -78,14 +74,16 @@ EXPOSE "80/tcp"
 EXPOSE "443/tcp"
 # Web UI (enabled by --api)
 EXPOSE "8080/tcp"
+# Ping
+EXPOSE "8081/tcp"
 
 ENTRYPOINT ["traefik", "--configFile=traefik.yml"]
 
 ARG TRAEFIK_VERSION
 # Metadata (copied from official Traefik image)
-LABEL org.opencontainers.image.vendor="Containous" `
-      org.opencontainers.image.url="https://traefik.io" `
-      org.opencontainers.image.title="Traefik" `
-      org.opencontainers.image.description="A modern reverse-proxy" `
-      org.opencontainers.image.version="v${TRAEFIK_VERSION}" `
-      org.opencontainers.image.documentation="https://docs.traefik.io"
+LABEL org.opencontainers.image.vendor="Containous"
+LABEL org.opencontainers.image.url="https://traefik.io"
+LABEL org.opencontainers.image.title="Traefik"
+LABEL org.opencontainers.image.description="A modern reverse-proxy"
+LABEL org.opencontainers.image.version="v${TRAEFIK_VERSION}"
+LABEL org.opencontainers.image.documentation="https://docs.traefik.io"

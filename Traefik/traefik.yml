@@ -1,70 +1,129 @@
-# traefik.yml
-# Static configuration
+##############################################
+# traefik.yml - Static Traefik Configuration #
+##############################################
 # Traefik (pronounced "traffic") is a open source reverse proxy/load balancer; it is written in GO.
 
-# EntryPoints are the network entry points into Traefik. They define the port which will receive the requests (whether HTTP or
-# TCP).
+##############
+### Global ###
+##############
+global:
+  # Send anonymous usage data.
+  sendAnonymousUsage: false
+
+###################
+### Entrypoints ###
+###################
+# https://doc.traefik.io/traefik/routing/entrypoints/
+# EntryPoints are the network entry points into Traefik. They define the port which will receive the packets, and whether to listen for TCP (default) or UDP.
 entryPoints:
   http:
-    address: ":80"
+    address: ":10080"  # Same as ":80/tcp"
+    # Redirection is applied on an entry point or a router; applied at the router.
+    #http:
+    #  redirections:
+    #    entryPoint:
+    #      to: https
+    #      scheme: https
+    transport:
+      respondingTimeouts:
+        # The maximum duration an idle (keep-alive) connection will remain idle before closing itself.
+        idleTimeout: 180s
+      lifeCycle:
+        # Duration to keep accepting requests prior to initiating the graceful termination period (as defined by the graceTimeOut option). This option is meant to give downstream load-balancers sufficient time to take Traefik out of rotation. The zero duration disables the request accepting grace period; i.e., Traefik will immediately proceed to the grace period.
+        requestAcceptGraceTimeout: 5s
+        # Duration to give active requests a chance to finish before Traefik stops.
+        graceTimeOut: 10s
   https:
-    address: ":443"
-#  dashboard:
-#    address: ":8080"
+    address: ":10443"
+    transport:
+      respondingTimeouts:
+        idleTimeout: 180s
+      lifeCycle:
+        requestAcceptGraceTimeout: 5s
+        graceTimeOut: 10s
+  dashboard:
+    address: ":18080"
+    transport:
+      respondingTimeouts:
+        idleTimeout: 180s
+      lifeCycle:
+        requestAcceptGraceTimeout: 5s
+        graceTimeOut: 10s
+  ping:
+    address: ":18081"
+    transport:
+      respondingTimeouts:
+        idleTimeout: 180s
+      lifeCycle:
+        requestAcceptGraceTimeout: 5s
+        graceTimeOut: 10s
 
-# Docker configuration backend
+#################
+### Providers ###
+#################
+# https://doc.traefik.io/traefik/routing/providers/docker/
 providers:
-  # It is the duration that Traefik waits for, after a configuration reload, before taking into account any new configuration
-  # refresh event. If any event arrives during that duration, only the most recent one is taken into account, and all the
-  # previous others are dropped. It defaults to 2 seconds.
+  # It is the duration that Traefik waits for, after a configuration reload, before taking into account any new configuration refresh event. If any event arrives during that duration, only the most recent one is taken into account, and all the previous others are dropped. It defaults to 2 seconds.
   providersThrottleDuration: 10s
+  # Enable the docker provider.
   docker:
-    # Traefik exposes containers by default. If set to false, containers that don't have a traefik.enable=true label will be
-    # ignored from the resulting routing configuration.
+    # Traefik exposes containers by default. If set to false, containers that don't have a traefik.enable=true label will be ignored from the resulting routing configuration.
     exposedByDefault: false
-    # It defines a default Docker network to use for connections to all containers. This option can be overridden on a container
-    # basis with the traefik.docker.network label.
+    # It defines a default Docker network to use for connections to all containers. This option can be overridden on a container basis with the traefik.docker.network label.
     # Run 'docker network ls' to see the actual name.
     # Run 'docker network inspect network-name-or-id' for more detail information.
-    network: "nat"
+    network: "frontend"
     # It activates the Swarm Mode (instead of standalone Docker).
     swarmMode: false
     # Traefik requires access to the docker socket to get its dynamic configuration.
-    endpoint: npipe:////./pipe/docker_engine
-  #defaultRoute = "dev.local"
-  #useBindPortIP = true
-    # Enable watch docker changes.
+    ##endpoint: npipe:////./pipe/docker_engine
+    ##defaultRoute = "dev.local"
+    # Traefik routes requests to the IP/Port of the matching container. When setting useBindPortIP=true, you tell Traefik to use the IP/Port attached to the container's binding instead of its inner network IP/Port.
+    useBindPortIP: false
+    # Watch Docker events.
     watch: true
 
-
-# Enable the API handler.
+###########
+### API ###
+###########
+# https://doc.traefik.io/traefik/operations/api/
+# Warning: Enabling API will expose Traefik's configuration.
+# It is not recommended in production, unless secured by authentication and authorization.
 api:
-  # The dashboard is available at the same location as the API but on the path /dashboard/ by default.
-  # The trailing slash (/) in /dashboard/ is mandatory.
-  # Then specify a router associated to the service api@internal to allow:
-  #   * Defining one or more security features through middlewares like authentication (basicAuth , digestAuth, forwardAuth) or
-  #     whitelisting.
+  ###entryPoint: dashboard
+  # The dashboard is available at the same location as the API but on the path /dashboard/ by default. (The trailing slash (/) in /dashboard/ is MANDATORY.)
+  # With dashboard: true, the router rule must catch requests for both /api and /dashboard.
+  # Then define a routing configuration on Traefik itself, with a router attached to the service api@internal in the dynamic configuration, to allow defining:
+  #   * Defining one or more security features through middlewares like authentication (basicAuth , digestAuth, forwardAuth) or whitelisting.
   #   * Defining your own HTTP routing rule for accessing the dashboard, through Traefik itself.
   dashboard: true
-  # THIS MODE IS NOT RECOMMENDED BECAUSE IT DOES NOT ALLOW THE USE OF SECURITY FEATURES.
-  # Enable the API in insecure mode, which means that the API will be available directly on the entryPoint named traefik.
-  # (If the entryPoint named traefik is not configured, it will be automatically created on port 8080.)
-  # You can now access the dashboard on the port 8080 of the Traefik instance, at the following
-  # URL: http://<Traefik IP>:8080/dashboard/ (trailing slash is mandatory).
+  # The dashboard can now be accessed on port 8080 of the Traefik instance, at the following URL: http://<Traefik IP>:8080/dashboard/ (trailing slash is mandatory).
   insecure: true
   # Enable additional endpoints for debugging and profiling, served under /debug/.
-  debug: true
+  debug: false
+  ##debug: true
+
+############
+### Ping ###
+############
+# https://doc.traefik.io/traefik/operations/ping/
+ping:
+  ####entryPoint: ping
+  # If manualRouting is true, it disables the default internal router in order to allow one to create a custom router for the ping@internal service.
+  manualRouting: true
+
+###########
+### Log ###
+###########
+log:
+  # By default, the level is set to ERROR. Alternative logging levels are DEBUG, PANIC, FATAL, ERROR, WARN, and INFO.
+  level: DEBUG
 
 
-ping: {}
+
 
 # Let's Encrypt
 
-
-# Log ERROR-level messages (or more severe) to the console, but silence
-# DEBUG-level messages.
-##debug = false
-##logLevel = "ERROR"
 
 
 # These options are for Traefik's integration with Docker.
