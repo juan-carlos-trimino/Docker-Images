@@ -128,7 +128,8 @@ The **start** command starts all stopped containers via the entry point of the c
 
 # Containers
 ## Notes
-1. Windows 10–1809 ("October 2018 Update") + Docker engine 18.09.1 + the Windows 1809 base images from Dockerhub are the first combination that allows to run **real** Windows containers on Windows 10, without hyperv virtualization.  
+1.	From the Docker Desktop menu, select which daemon (Linux or Windows) the Docker CLI uses. Select **Switch to Windows containers...** to use Windows containers, or select **Switch to Linux containers...** to use Linux containers (the default).
+2. Windows 10–1809 ("October 2018 Update") + Docker engine 18.09.1 + the Windows 1809 base images from Dockerhub are the first combination that allows to run **real** Windows containers on Windows 10, without hyperv virtualization.  
    **https://docs.microsoft.com/en-us/virtualization/windowscontainers/deploy-containers/version-compatibility**
 
    Select a Windows base image from Dockerhub that **matches** the kernel of your host's Windows version. For Windows 10–1809, that's the :1809 version/tag of nanoserver, servercore and windows (or any higher-level image, that builds up on one of these).
@@ -141,9 +142,9 @@ The **start** command starts all stopped containers via the entry point of the c
 
    By infinitely running ping (-t) against the localhost in a Windows nano server container in process-isolation mode (--isolation=process), 'ping.exe' is directly running on the host (instead of a virtual macine); this is why it can be seeing in the host system's task manager while the container is running:
     >`>` docker container run --rm --name pinger --isolation=process mcr.microsoft.com/windows/nanoserver:1903 cmd.exe /c ping 127.0.0.1 -t
-2. When Docker runs a container, it starts the process specified in the Dockerfile or the command line; Docker watches that process, and when that process ends, the containers exits. But if the application starts multiple processes in a container, Docker will only monitor the last process that started. Ideally, there will be one process per container; otherwise, the application will have to take on the responsability of managing all other processes. **This is a recommendation and not a requirement.**
-3. When identifying a container/image by its id, **there is no need to specify the entire id**; specify enough characters to uniquely identify it.
-4. To exit a container while keeping it running in the background, **<Ctrl>PQ or <Ctrl><Shift>pq**.
+3. When Docker runs a container, it starts the process specified in the Dockerfile or the command line; Docker watches that process, and when that process ends, the containers exits. But if the application starts multiple processes in a container, Docker will only monitor the last process that started. Ideally, there will be one process per container; otherwise, the application will have to take on the responsability of managing all other processes. **This is a recommendation and not a requirement.**
+4. When identifying a container/image by its id, **there is no need to specify the entire id**; specify enough characters to uniquely identify it.
+5. To exit a container while keeping it running in the background, **<Ctrl>PQ or <Ctrl><Shift>pq**.
 
 ### Running containers
 **Task container**
@@ -319,6 +320,7 @@ When a **docker stop** command is issued, Docker sends a SIGTERM signal to the m
 2. The use of **0.0.0.0** as IP address binds to **all network interfaces**, which is needed to allow the container to be accessed from the host or other containers.
 3. When publishing ports to the host, Docker publishes to all interfaces (0.0.0.0) by default. By specifying the interface to bind explicitly, the attack surface is reduced since only traffic from the explicitly bound interface is allowed; e.g.,
     >`>` docker container run -p 172.123.34.23:80:80 ...
+4. The **hosts** file is an Operating System file that maps hostnames to IP addresses; it is a plain text file. It is located at **C:\Windows\System32\drivers\etc\hosts**.
 
 ### Creation
 **Create a network**
