@@ -47,8 +47,6 @@ LABEL copyright="Copyright (C) 2020 Juan Carlos Trimino. All rights reserved."
 LABEL version="1.0.0"
 LABEL maintainer="juancarlos@trimino.com"
 
-SHELL ["powershell", "-Command", "$ErrorActionPreference = 'Stop'; $ProgressPreference = 'SilentlyContinue';"]
-
 ARG ES_HOME
 ENV ES_HOME=${ES_HOME}
 
