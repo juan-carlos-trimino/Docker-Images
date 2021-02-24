@@ -114,6 +114,12 @@ The **start** command starts all stopped containers via the entry point of the c
 >`>` docker images -f "dangling=true" -q
 
 ### Removing
+**Remove given image**
+>`PS>` docker image rm [container-name-or-id]
+
+**Remove given image (force removal)**
+>`PS>` docker image rm -f [container-name-or-id]
+
 **Remove images with TAG=<none>**
 >`PS>` docker rmi $(docker images -f "dangling=true" -q)
 
@@ -386,7 +392,7 @@ You specify volumes with a target directory, which is the location inside the co
 
 When you mount a volume, it may be named or anonymous. Anonymous volumes are not given an explicit name when they are first mounted into a container; Docker gives them a random name that is guaranteed to be unique within a given host. Besides the name, named and anonymous volumes behave the same.
 
-In **Windows**, volume directories need to be empty. In your Dockerfile, you can't create files in a directory and then expose it as a volume. Volumes also need to be defined on a disk that exists in the image. In the Windows base images, there is only a **C** drive available so volumes need to be created on the **C** drive.
+In **Windows**, volume directories need to be empty. In the Dockerfile, files cannot be created in a directory and then expose it as a volume. Furthermore, volumes need to be defined on a disk that exists in the image. In the Windows base images, there is only a **C** drive available, and volumes need to be created on the **C** drive.
 
 Bind mounts have limited functionality compared to volumes. When a bind mount is used, a file or directory on the host is mounted into a container. The file or directory is referenced by its full or relative path on the host. By contrast, when a volume is used, a new directory is created within Docker's storage directory on the host, and Docker manages that directory's contents. You can't use Docker CLI commands to directly manage bind mounts.
 
