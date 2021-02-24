@@ -25,6 +25,27 @@ services:
         TRAEFIK_VERSION: 2.4.0
         TRAEFIK_ROOT_URL: "https://github.com/traefik/traefik/releases/download/v{0}/traefik_v{1}_windows_amd64.zip"
 
+  ###########
+  # OpenSSL #
+  ###########
+  openssl:
+    build:
+      context: ./OpenSSL/
+      dockerfile: ./Dockerfile
+      args:
+        BASE_OS_LAYER: mcr.microsoft.com/windows/nanoserver
+        BASE_OS_LAYER_VERSION: 1909
+        # Use the Windows Server Core image with .NET Framework 4.8.
+        BUILD_BASE_OS_LAYER: mcr.microsoft.com/dotnet/framework/sdk:4.8-windowsservercore
+        BUILD_BASE_OS_LAYER_VERSION: 1909
+        PERL_URL: "https://strawberryperl.com/download/5.32.1.1/strawberry-perl-5.32.1.1-64bit.zip"
+        OPENSSL_VERSION: openssl-1.1.1i
+        OPENSSL_URL: "https://www.openssl.org/source/{0}.tar.gz"
+        # The Netwide Assembler, NASM, is an 80x86 and x86-64 assembler designed for portability and modularity.
+        NASM_VERSION: nasm-2.15.05
+        NASM_URL: "https://www.nasm.us/pub/nasm/releasebuilds/2.15.05/win64/{0}-win64.zip"
+        VC_BUILDTOOLS_URL: "https://aka.ms/vs/15/release/vs_buildtools.exe"
+
   ########################
   # NATS (Message-queue) #
   ########################
@@ -45,42 +66,39 @@ services:
   #####################
   # Publishes to NATS #
   #####################
-#  nats-publisher:
-#    build:
-#      context: ./Nats.Publisher/
-#      dockerfile: ./Dockerfile
-#      args:
-#        BASE_OS_LAYER: mcr.microsoft.com/dotnet/core/runtime
-#        BASE_OS_LAYER_VERSION: 2.2
-#        BUILD_BASE_OS_LAYER: mcr.microsoft.com/dotnet/core/sdk
-#        BUILD_BASE_OS_LAYER_VERSION: 2.2
+  nats-publisher:
+    build:
+      context: ./Nats.Publisher/
+      dockerfile: ./Dockerfile
+      args:
+        BASE_OS_LAYER: mcr.microsoft.com/dotnet/core/runtime
+        BASE_OS_LAYER_VERSION: 2.2
+        BUILD_BASE_OS_LAYER: mcr.microsoft.com/dotnet/core/sdk
+        BUILD_BASE_OS_LAYER_VERSION: 2.2
 
   ######################
   # Subscribes to NATS #
   ######################
-#  nats-subscriber:
-#    build:
-#      context: ./Nats.Subscriber/
-#      dockerfile: ./Dockerfile
-#      args:
-#        BASE_OS_LAYER: mcr.microsoft.com/dotnet/core/runtime
-#        BASE_OS_LAYER_VERSION: 2.2
-#        BUILD_BASE_OS_LAYER: mcr.microsoft.com/dotnet/core/sdk
-#        BUILD_BASE_OS_LAYER_VERSION: 2.2
+  nats-subscriber:
+    build:
+      context: ./Nats.Subscriber/
+      dockerfile: ./Dockerfile
+      args:
+        BASE_OS_LAYER: mcr.microsoft.com/dotnet/core/runtime
+        BASE_OS_LAYER_VERSION: 2.2
+        BUILD_BASE_OS_LAYER: mcr.microsoft.com/dotnet/core/sdk
+        BUILD_BASE_OS_LAYER_VERSION: 2.2
 
-
-
-
-#  msfinances:
-#    build:
-#      context: ./MSFinances/
-#      dockerfile: ./Dockerfile
-#      args:
-#        BASE_OS_LAYER: mcr.microsoft.com/windows/nanoserver
-#        BASE_OS_LAYER_VERSION: 1903
-#        BUILD_BASE_OS_LAYER: mcr.microsoft.com/windows/servercore
-#        BUILD_BASE_OS_LAYER_VERSION: 1903
-#        VC_REDIST_URL: "https://aka.ms/vs/16/release/vc_redist.x64.exe"
+  msfinances:
+    build:
+      context: ./MSFinances/
+      dockerfile: ./Dockerfile
+      args:
+        BASE_OS_LAYER: mcr.microsoft.com/windows/nanoserver
+        BASE_OS_LAYER_VERSION: 1909
+        BUILD_BASE_OS_LAYER: mcr.microsoft.com/windows/servercore
+        BUILD_BASE_OS_LAYER_VERSION: 1909
+        VC_REDIST_URL: "https://aka.ms/vs/16/release/vc_redist.x64.exe"
 
 #  esmovies:
 #    build:

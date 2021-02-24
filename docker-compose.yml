@@ -94,6 +94,22 @@ services:
       start_period: 30s
     restart: unless-stopped
 
+  ###########
+  # OpenSSL #
+  ###########
+  openssl:
+    image: veni-vidi-vici/openssl-1.1.1i:nanoserver-1909
+    isolation: process
+    volumes:
+      - type: bind
+        # The source is the host location, which needs to exist.
+        source: C:\jct\certs\
+        # The target is the container location, which does't need to exist, but the existing contents will be hidden if it does exist.
+        target: C:\openssl-certs\
+    networks:
+      - frontend
+    restart: unless-stopped
+
   ########################
   # NATS (Message-queue) #
   ########################
@@ -111,69 +127,70 @@ services:
   #####################
   # Publishes to NATS #
   #####################
-#  nats-publisher:
-#    depends_on:
-#      - nats-mq
-#      - nats-subscriber
+  nats-publisher:
+    depends_on:
+      - nats-mq
+      - nats-subscriber
     #environment:
     #  MessageQueue: "Url=nats://message-queue:4222"
-#    image: veni-vidi-vici/nats-publisher-1.0.0:2.2-runtime-nanoserver-1909
-#    isolation: process
-#    networks:
-#      - backend
-#    restart: on-failure:5
+    image: veni-vidi-vici/nats-publisher-1.0.0:2.2-runtime-nanoserver-1909
+    isolation: process
+    networks:
+      - backend
+    restart: on-failure:5
 
   ######################
   # Subscribes to NATS #
   ######################
-#  nats-subscriber:
-#    depends_on:
-#      - nats-mq
+  nats-subscriber:
+    depends_on:
+      - nats-mq
     # These are actually the default values in the code, so they are not needed in the Compose file. But it can be useful to explicitly set them since the Compose file as the complete deployment guide for the distributed solution.
     #environment:
     #  MessageQueue: "Url=nats://natsmq:4222"
-#    image: veni-vidi-vici/nats-subscriber-1.0.0:2.2-runtime-nanoserver-1909
-#    isolation: process
+    image: veni-vidi-vici/nats-subscriber-1.0.0:2.2-runtime-nanoserver-1909
+    isolation: process
     #deploy:
       # Default.
     #  mode: replicated
       # Number of containers that should be running at any given time.
     #  replicas: 3
-#    networks:
-#      - backend
-#    restart: on-failure:5
+    networks:
+      - backend
+    restart: on-failure:5
 
-
-
+  ##############
   # msfinances #
   ##############
-#  msfinances:
-#    depends_on:
-#      - traefik
+  msfinances:
+    depends_on:
+      - traefik
 #     elasticsearch:
 #       condition: service_healthy
-#    environment:
+    environment:
       # Default value for HTTP_SERVER: "http://0.0.0.0:49480/api/v1/"
       # Default value for DB_URL: "http://elasticsearch:9200"
       # Default value for DB_NAME (no logging): ""
       # DB_NAME: "msfinances"
-#      DB_NAME: ""
-#      HTTP_SERVER: "http://localhost:49480/api/v1/"
-#    image: veni-vidi-vici/msfinances-1.0.0:nanoserver-1903
-#    isolation: process
+      DB_NAME: ""
+      HTTP_SERVER: "http://localhost:49480/api/v1/"
+    image: veni-vidi-vici/msfinances-1.0.0:nanoserver-1909
+    isolation: process
     # Labels are case insensitive.
-#    labels:
+    labels:
       # Traefik will include this container in its internal configuration; see exposedByDefault in traefik.yml.
-#      - "traefik.enable=true"
+      - "traefik.enable=true"
       # A router is in charge of connecting incoming requests to the services that can handle them. In the process, routers may use pieces of middleware to update the request, or act before forwarding the request to the service.
- #     - "traefik.http.routers.rt-finances.entrypoints=http"
+      - "traefik.http.routers.rt-finances.entrypoints=http"
       # Specify the hostname for the site on the rt-finances router.
-#      - "traefik.http.routers.rt-finances.rule=Host(`finances.dev.lo#cal`) && PathPrefix(`/api/v1/`)"
-#      - "traefik.docker.network=nat"
-#    networks:
-#      - frontend
-#      - backend
-#    restart: on-failure:5
+      - "traefik.http.routers.rt-finances.rule=Host(`finances.dev.local`) && PathPrefix(`/api/v1/`)"
+###      - "traefik.docker.network=nat"
+    networks:
+      - frontend
+      - backend
+    restart: on-failure:5
+
+
 
   ########################
   # Elasticsearch client #
@@ -249,8 +266,10 @@ networks:
 # create any containers either. To create basic volumes with default configurations,
 #   docker volume create --name elasticsearch-data
 #
-#volumes:
-##  elasticsearch-data:
+volumes:
+  openssl-certs:
+    external: true
+#  elasticsearch-data:
 #    driver_opts:
 #      type: none
 ##      device: c:\docker-volumes\elasticsearch\data
