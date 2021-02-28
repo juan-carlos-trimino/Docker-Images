@@ -150,7 +150,7 @@ The **start** command starts all stopped containers via the entry point of the c
     >`>` docker container run --rm --name pinger --isolation=process mcr.microsoft.com/windows/nanoserver:1903 cmd.exe /c ping 127.0.0.1 -t
 3. When Docker runs a container, it starts the process specified in the Dockerfile or the command line; Docker watches that process, and when that process ends, the containers exits. But if the application starts multiple processes in a container, Docker will only monitor the last process that started. Ideally, there will be one process per container; otherwise, the application will have to take on the responsability of managing all other processes. **This is a recommendation and not a requirement.**
 4. When identifying a container/image by its id, **there is no need to specify the entire id**; specify enough characters to uniquely identify it.
-5. To exit a container while keeping it running in the background, **<Ctrl>PQ or <Ctrl><Shift>pq**.
+5. To exit a container while keeping it running in the background, **<kbd>Ctrl</kbd>PQ or <kbd>Ctrl</kbd>+<kbd>Shift</kbd>pq**.
 
 ### Running containers
 **Task container**
@@ -405,7 +405,7 @@ To mount the host *c:\host_dir* folder to the container path *c:\container_dir*
 
 >`PS C:\cdir>` Add-Content -Path .\LogFile.txt -Value 'Juan Carlos Trimiño';
 
->`PS C:\cdir>` <Ctrl><Shift>pq
+>`PS C:\cdir>` <kbd>Ctrl</kbd>+<kbd>Shift</kbd>pq
 
 To see the file in the host
 >`C:\>` dir c:\host_dir
@@ -417,7 +417,7 @@ To mount the host c:\host_dir folder to another container (mount2) path c:\conta
 
 >`PS C:\>` Get-Content -Path .\container_dir\LogFile.txt;
 
->`PS C:\>` <Ctrl><Shift>pq
+>`PS C:\>` <kbd>Ctrl</kbd>+<kbd>Shift</kbd>pq
 
 **HEALTHCHECK**
 The options that can appear before **CMD** are:  

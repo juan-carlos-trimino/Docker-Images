@@ -1,22 +1,10 @@
 # escape=`
 #
 # docker image ls
-# docker container run -it --rm --name openssl [name-of-container-image][:version-or-variation] cmd
 # docker container ls -a
 # docker image rm -f [container-name-or-id]
 # PS> docker container ls -aq | foreach { docker rm -f $_ }
 # PS> docker rmi $(docker images -f "dangling=true" -q)
-# OpenSSL
-# Using the image
-# Create self-signed certificate on Windows using openssl inside docker.
-# To generate a certificate cccccc
-# docker container run -it --rm --name openssl -v c:/jct/certs:c:/openssl-certs [name-of-container-image][:version-or-variation]
-# The container will display
-# Follow the on-screen instructions to generate your certificate. After you reach OpenSSL> again, type exit and tada: your certificate should now be located under "C:\some\path" ready to be used!
-# OpenSSL> req -newkey rsa:2048 -keyout privkey.pem -x509 -days 365 -out fullchain.pem
-# Type
-# Use the following command to identify which version of OpenSSL you are running:
-# openssl version -a
 #
 ARG BASE_OS_LAYER
 ARG BASE_OS_LAYER_VERSION
@@ -178,7 +166,7 @@ RUN SETX /M PATH "C:\openssl\bin;%PATH%" & `
     SETX /M SSL_CERT_DIR "C:\openssl-certs"
 
 # Switch back to the least-privilege account.
-USER ContainerUser
+# USER ContainerUser
 
 # The directory where certificates and private keys are stored (OPENSSLDIR).
 VOLUME C:/openssl-certs
