@@ -19,9 +19,9 @@ services:
       dockerfile: ./Dockerfile
       args:
         BASE_OS_LAYER: mcr.microsoft.com/windows/nanoserver
-        BASE_OS_LAYER_VERSION: 1909
+        BASE_OS_LAYER_VERSION: 20H2
         BUILD_BASE_OS_LAYER: mcr.microsoft.com/windows/servercore
-        BUILD_BASE_OS_LAYER_VERSION: 1909
+        BUILD_BASE_OS_LAYER_VERSION: 20H2
         TRAEFIK_VERSION: 2.4.0
         TRAEFIK_ROOT_URL: "https://github.com/traefik/traefik/releases/download/v{0}/traefik_v{1}_windows_amd64.zip"
 
@@ -34,10 +34,10 @@ services:
       dockerfile: ./Dockerfile
       args:
         BASE_OS_LAYER: mcr.microsoft.com/windows/nanoserver
-        BASE_OS_LAYER_VERSION: 1909
+        BASE_OS_LAYER_VERSION: 20H2
         # Use the Windows Server Core image with .NET Framework 4.8.
         BUILD_BASE_OS_LAYER: mcr.microsoft.com/dotnet/framework/sdk:4.8-windowsservercore
-        BUILD_BASE_OS_LAYER_VERSION: 1909
+        BUILD_BASE_OS_LAYER_VERSION: 20H2
         PERL_URL: "https://strawberryperl.com/download/5.32.1.1/strawberry-perl-5.32.1.1-64bit.zip"
         OPENSSL_VERSION: openssl-1.1.1i
         OPENSSL_URL: "https://www.openssl.org/source/{0}.tar.gz"
@@ -55,7 +55,7 @@ services:
       dockerfile: ./Dockerfile
       args:
         BASE_OS_LAYER: mcr.microsoft.com/windows/nanoserver
-        BASE_OS_LAYER_VERSION: 1909
+        BASE_OS_LAYER_VERSION: 20H2
         # The NAT Server will look for this environment variable. When set, it prevents the use of the service API to detect if it is running in interactive mode or not, which is failing in the context of a Docker container.
         # (https://github.com/nats-io/gnatsd/issues/543)
         NATS_DOCKERIZED: 1
@@ -89,16 +89,16 @@ services:
         BUILD_BASE_OS_LAYER: mcr.microsoft.com/dotnet/core/sdk
         BUILD_BASE_OS_LAYER_VERSION: 2.2
 
-  msfinances:
-    build:
-      context: ./MSFinances/
-      dockerfile: ./Dockerfile
-      args:
-        BASE_OS_LAYER: mcr.microsoft.com/windows/nanoserver
-        BASE_OS_LAYER_VERSION: 1909
-        BUILD_BASE_OS_LAYER: mcr.microsoft.com/windows/servercore
-        BUILD_BASE_OS_LAYER_VERSION: 1909
-        VC_REDIST_URL: "https://aka.ms/vs/16/release/vc_redist.x64.exe"
+  #msfinances:
+  #  build:
+  #    context: ./MSFinances/
+  #    dockerfile: ./Dockerfile
+  #    args:
+  #      BASE_OS_LAYER: mcr.microsoft.com/windows/nanoserver
+  #      BASE_OS_LAYER_VERSION: 20H2
+  #      BUILD_BASE_OS_LAYER: mcr.microsoft.com/windows/servercore
+  #      BUILD_BASE_OS_LAYER_VERSION: 20H2
+  #      VC_REDIST_URL: "https://aka.ms/vs/16/release/vc_redist.x64.exe"
 
 #  esmovies:
 #    build:

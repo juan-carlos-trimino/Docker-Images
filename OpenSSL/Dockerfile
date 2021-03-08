@@ -1,11 +1,5 @@
 # escape=`
 #
-# docker image ls
-# docker container ls -a
-# docker image rm -f [container-name-or-id]
-# PS> docker container ls -aq | foreach { docker rm -f $_ }
-# PS> docker rmi $(docker images -f "dangling=true" -q)
-#
 ARG BASE_OS_LAYER
 ARG BASE_OS_LAYER_VERSION
 ARG BUILD_BASE_OS_LAYER
@@ -156,6 +150,7 @@ WORKDIR C:/
 COPY --from=builder C:/openssl ./openssl
 
 # In order to set system PATH, ContainerAdministrator must be used.
+# Some operations in OpenSSL require Admin privileges.
 USER ContainerAdministrator
 
 # Appending to PATH from the DOS command line.
@@ -165,18 +160,9 @@ RUN SETX /M PATH "C:\openssl\bin;%PATH%" & `
     SETX /M OPENSSL_CONF "C:\openssl\openssl.cnf" & `
     SETX /M SSL_CERT_DIR "C:\openssl-certs"
 
-# Switch back to the least-privilege account.
-# USER ContainerUser
-
 # The directory where certificates and private keys are stored (OPENSSLDIR).
 VOLUME C:/openssl-certs
 
-# REST APIs
-#EXPOSE "9200/tcp"
-# Cluster
-#EXPOSE "9300/tcp"
-
 # The Nano Server image uses a least-privilege user by default. Volumes are not accessible by that user; hence, this Dockerfile switches to the administrative account so that when a container is run from this image, volume directories can be accessed.
-#USER ContainerAdministrator
 ENTRYPOINT ["openssl"]
 #CMD "openssl"
