@@ -31,12 +31,14 @@ RUN Write-Host "Downloading: $ENV:PERL_URL"; `
     # Set the environment variables manually to the Machine level, then terminate this session and start a new session. The new session will have the environment variables set. `
     $ENV:PATH = 'C:\Perl\bin;{0}' -f $ENV:PATH; `
     [System.Environment]::SetEnvironmentVariable('Path', $ENV:PATH, [System.EnvironmentVariableTarget]::Machine); `
+    # `
     $url = "$ENV:OPENSSL_URL" -f $ENV:OPENSSL_VERSION; `
     Write-Host "Downloading: $url"; `
     $fileName = 'openssl.tar.gz'; `
     curl -o $fileName $url; `
     tar -zxvf $fileName; `
     Remove-Item -Path $fileName -Force; `
+    # `
     $url = "$ENV:NASM_URL" -f $ENV:NASM_VERSION; `
     Write-Host "Downloading: $url"; `
     $fileName = 'nasm.zip'; `
@@ -45,6 +47,7 @@ RUN Write-Host "Downloading: $ENV:PERL_URL"; `
     Remove-Item -Path $fileName -Force; `
     $ENV:PATH = 'C:\{0};{1}' -f $ENV:NASM_VERSION, $ENV:PATH; `
     [System.Environment]::SetEnvironmentVariable('Path', $ENV:PATH, [System.EnvironmentVariableTarget]::Machine); `
+    # `
     Write-Host "Downloading: $ENV:VC_BUILDTOOLS_URL"; `
     $fileName = 'vs_buildtools.exe'; `
     Invoke-WebRequest -Uri "$ENV:VC_BUILDTOOLS_URL" -OutFile $fileName -UseBasicParsing; `
@@ -165,4 +168,3 @@ VOLUME C:/openssl-certs
 
 # The Nano Server image uses a least-privilege user by default. Volumes are not accessible by that user; hence, this Dockerfile switches to the administrative account so that when a container is run from this image, volume directories can be accessed.
 ENTRYPOINT ["openssl"]
-#CMD "openssl"
