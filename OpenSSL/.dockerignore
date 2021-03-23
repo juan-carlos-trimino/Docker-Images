@@ -4,6 +4,3 @@
 # to images using ADD or COPY.
 # Ignore everything
 **
-
-# Include this directory...
-!Perl/
