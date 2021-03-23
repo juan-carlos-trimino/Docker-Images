@@ -50,7 +50,7 @@ services:
     #  options:
     #    max-size: "200k"
     #    max-file: "3"
-    image: veni-vidi-vici/traefik-2.4.0:nanoserver-1909
+    image: veni-vidi-vici/traefik-2.4.0:nanoserver-20H2
     # Traefik can't use Windows named pipe in hyperv isolation.
     # See https://github.com/containous/traefik/issues/4409
     isolation: process
@@ -98,7 +98,7 @@ services:
   # OpenSSL #
   ###########
   openssl:
-    image: veni-vidi-vici/openssl-1.1.1i:nanoserver-1909
+    image: veni-vidi-vici/openssl-1.1.1i:nanoserver-20H2
     isolation: process
     volumes:
       - type: bind
@@ -110,12 +110,28 @@ services:
       - frontend
     restart: unless-stopped
 
+  ##########
+  # OAuth2 #
+  ##########
+  oauth2:
+    image: veni-vidi-vici/hydra-1.9.2-sqlite:nanoserver-20H2
+    isolation: process
+#    volumes:
+#      - type: bind
+        # The source is the host location, which needs to exist.
+#        source: C:\jct\certs\
+        # The target is the container location, which does't need to exist, but the existing contents will be hidden if it does exist.
+#        target: C:\openssl-certs\
+    networks:
+      - frontend
+    restart: unless-stopped
+
   ########################
   # NATS (Message-queue) #
   ########################
   nats-mq:
     # Note: If your service specifies a build option, variables defined in 'environment' are not automatically visible during the build. Use the args sub-option of build to define build-time environment variables. Docker-compose provides the ability to pass environment variables into the container without storing the values directly in the image.
-    image: veni-vidi-vici/nats-2.0.2:nanoserver-1909
+    image: veni-vidi-vici/nats-2.0.2:nanoserver-20H2
     isolation: process
     networks:
       - backend
@@ -133,7 +149,7 @@ services:
       - nats-subscriber
     #environment:
     #  MessageQueue: "Url=nats://message-queue:4222"
-    image: veni-vidi-vici/nats-publisher-1.0.0:2.2-runtime-nanoserver-1909
+    image: veni-vidi-vici/nats-publisher-1.0.0:2.2-runtime-nanoserver-20H2
     isolation: process
     networks:
       - backend
@@ -148,7 +164,7 @@ services:
     # These are actually the default values in the code, so they are not needed in the Compose file. But it can be useful to explicitly set them since the Compose file as the complete deployment guide for the distributed solution.
     #environment:
     #  MessageQueue: "Url=nats://natsmq:4222"
-    image: veni-vidi-vici/nats-subscriber-1.0.0:2.2-runtime-nanoserver-1909
+    image: veni-vidi-vici/nats-subscriber-1.0.0:2.2-runtime-nanoserver-20H2
     isolation: process
     #deploy:
       # Default.
@@ -174,7 +190,7 @@ services:
       # DB_NAME: "msfinances"
       DB_NAME: ""
       HTTP_SERVER: "http://localhost:49480/api/v1/"
-    image: veni-vidi-vici/msfinances-1.0.0:nanoserver-1909
+    image: veni-vidi-vici/msfinances-1.0.0:nanoserver-20H2
     isolation: process
     # Labels are case insensitive.
     labels:

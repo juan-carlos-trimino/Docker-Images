@@ -46,6 +46,20 @@ services:
         NASM_URL: "https://www.nasm.us/pub/nasm/releasebuilds/2.15.05/win64/{0}-win64.zip"
         VC_BUILDTOOLS_URL: "https://aka.ms/vs/15/release/vs_buildtools.exe"
 
+  ##########
+  # OAuth2 #
+  ##########
+  oauth2:
+    build:
+      context: ./OAuth2/
+      dockerfile: ./Dockerfile
+      args:
+        BASE_OS_LAYER: mcr.microsoft.com/windows/nanoserver
+        BASE_OS_LAYER_VERSION: 20H2
+        BUILD_BASE_OS_LAYER: mcr.microsoft.com/windows/servercore
+        BUILD_BASE_OS_LAYER_VERSION: 20H2
+        HYDRA_URL: "https://github.com/ory/hydra/releases/download/v1.9.2/hydra_1.9.2-sqlite_windows_64bit.zip"
+
   ########################
   # NATS (Message-queue) #
   ########################
@@ -71,10 +85,10 @@ services:
       context: ./Nats.Publisher/
       dockerfile: ./Dockerfile
       args:
-        BASE_OS_LAYER: mcr.microsoft.com/dotnet/core/runtime
-        BASE_OS_LAYER_VERSION: 2.2
-        BUILD_BASE_OS_LAYER: mcr.microsoft.com/dotnet/core/sdk
-        BUILD_BASE_OS_LAYER_VERSION: 2.2
+        BASE_OS_LAYER: mcr.microsoft.com/dotnet/runtime
+        BASE_OS_LAYER_VERSION: 5.0
+        BUILD_BASE_OS_LAYER: mcr.microsoft.com/dotnet/sdk
+        BUILD_BASE_OS_LAYER_VERSION: 5.0
 
   ######################
   # Subscribes to NATS #
@@ -84,10 +98,10 @@ services:
       context: ./Nats.Subscriber/
       dockerfile: ./Dockerfile
       args:
-        BASE_OS_LAYER: mcr.microsoft.com/dotnet/core/runtime
-        BASE_OS_LAYER_VERSION: 2.2
-        BUILD_BASE_OS_LAYER: mcr.microsoft.com/dotnet/core/sdk
-        BUILD_BASE_OS_LAYER_VERSION: 2.2
+        BASE_OS_LAYER: mcr.microsoft.com/dotnet/runtime
+        BASE_OS_LAYER_VERSION: 5.0
+        BUILD_BASE_OS_LAYER: mcr.microsoft.com/dotnet/sdk
+        BUILD_BASE_OS_LAYER_VERSION: 5.0
 
   #msfinances:
   #  build:
