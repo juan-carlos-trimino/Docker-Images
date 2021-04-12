@@ -1,7 +1,9 @@
 Usage
 =====
-Create self-signed certificate on Windows using openssl inside docker.
->`>` docker container run -it --rm -v c:/jct/certs:c:/openssl-certs [name-of-container-image][:version-or-variation]
+Create self-signed certificate on Windows using OpenSSL inside docker.
+>`>` docker run -d --rm -v C:\jct\Repos\Volumes\OpenSSL:c:/openssl-certs veni-vidi-vici/openssl-1.1.1i:nanoserver-20H2
+>`>` docker run -it --rm -v C:\jct\Repos\Volumes\OpenSSL:c:/openssl-certs [name-of-container-image][:version-or-variation]
+>`>` docker run -it --rm -v C:\jct\Repos\Volumes\OpenSSL:c:/openssl-certs veni-vidi-vici/openssl-1.1.1i:nanoserver-20H2
 
 <br>
 
