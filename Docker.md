@@ -106,6 +106,7 @@ The **start** command starts all stopped containers via the entry point of the c
 >`>` docker image ls -a
 
 >`>` docker image ls --filter reference=[name-of-container-image][:version-or-variation]
+>`>` docker image ls --filter reference=[name-of-container-image]
 
 **List untagged images (dangling - TAG=<none>)**
 >`>` docker images -f "dangling=true"
@@ -458,7 +459,7 @@ The instruction has three forms:
 2. The default parameters to **ENTRYPOINT**: **CMD ["param1","param2"]**
    * If **CMD** is used to provide default arguments for the **ENTRYPOINT** instruction, both the **CMD** and **ENTRYPOINT** instructions should be specified with the **JSON** array format.
 3. The shell form: **CMD command param1 param2**
-   * If the shell form of the **CMD** is used, then the <command> will execute in the current shell set by the **SHELL** instruction, or the default shell (see the **SHELL** instruction).
+   * If the shell form of the **CMD** is used, then **command** will execute in the current shell set by the **SHELL** instruction, or the default shell (see the **SHELL** instruction).
 
 There can only be one **CMD** instruction in a Dockerfile. If more than one **CMD** instruction is used, then only the last **CMD** will take effect.
 
