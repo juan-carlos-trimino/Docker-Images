@@ -53,7 +53,6 @@ RUN SETX /M PATH "C:\hydra;%PATH%"
 
 USER ContainerUser
 
-# The directory where certificates and private keys are stored (OPENSSLDIR).
 #VOLUME C:/openssl-certs
 
 ENTRYPOINT ["hydra"]
