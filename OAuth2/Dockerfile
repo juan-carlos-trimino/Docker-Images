@@ -53,6 +53,6 @@ RUN SETX /M PATH "C:\hydra;%PATH%"
 
 USER ContainerUser
 
-#VOLUME C:/openssl-certs
+VOLUME C:/hydra-data
 
 ENTRYPOINT ["hydra"]
