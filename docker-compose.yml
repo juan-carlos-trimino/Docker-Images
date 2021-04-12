@@ -16,6 +16,10 @@ services:
   # In Docker, the reverse proxy runs in a container with published ports, and it proxies traffic from other containers, which do not have any published ports. The proxy is the only endpoint that is publicly accessible. The proxy makes HTTP requests to the actual service on the client's behalf, using the containers' host names.
   # See https://docs.traefik.io/v1.7/basics/
   traefik:
+    image: veni-vidi-vici/traefik-2.4.0:nanoserver-20H2
+    # Traefik can't use Windows named pipe in hyperv isolation.
+    # See https://github.com/containous/traefik/issues/4409
+    isolation: process
     command:
       - --providers.docker.endpoint=npipe:////./pipe/docker_engine
     labels:
@@ -50,10 +54,13 @@ services:
     #  options:
     #    max-size: "200k"
     #    max-file: "3"
-    image: veni-vidi-vici/traefik-2.4.0:nanoserver-20H2
-    # Traefik can't use Windows named pipe in hyperv isolation.
-    # See https://github.com/containous/traefik/issues/4409
-    isolation: process
+    volumes:
+        # Mounting a pipe lets a container query the Docker APIs without needing to know the IP address of the host where the container is running. By Traefik subscribing to the event stream from the Docker API with the named pipe connection, it will get notifications from Docker when containers are created or removed, and Traefik uses the data in those events to build its own routing map.
+      - type: npipe
+        # The source of the mount, a path on the host for a bind mount.
+        source: \\.\pipe\docker_engine
+        # The path in the container where the volume is mounted.
+        target: \\.\pipe\docker_engine
     ports:
         # HTTP (container)
       - target: 80
@@ -79,13 +86,6 @@ services:
         protocol: tcp
     networks:
       - frontend
-    volumes:
-        # Mounting a pipe lets a container query the Docker APIs without needing to know the IP address of the host where the container is running. By Traefik subscribing to the event stream from the Docker API with the named pipe connection, it will get notifications from Docker when containers are created or removed, and Traefik uses the data in those events to build its own routing map.
-      - type: npipe
-        # The source of the mount, a path on the host for a bind mount.
-        source: \\.\pipe\docker_engine
-        # The path in the container where the volume is mounted.
-        target: \\.\pipe\docker_engine
     healthcheck:
       test: ["CMD", "traefik", "healthcheck"]
       interval: 1m
@@ -97,39 +97,53 @@ services:
   ###########
   # OpenSSL #
   ###########
-  openssl:
-    image: veni-vidi-vici/openssl-1.1.1i:nanoserver-20H2
-    isolation: process
-    volumes:
-      - type: bind
+  #openssl:
+  #  image: veni-vidi-vici/openssl-1.1.1i:nanoserver-20H2
+  #  isolation: process
+  #  volumes:
+  #    - type: bind
         # The source is the host location, which needs to exist.
-        source: C:\jct\certs\
+  #      source: C:\jct\Repos\Volumes\OpenSSL
         # The target is the container location, which does't need to exist, but the existing contents will be hidden if it does exist.
-        target: C:\openssl-certs\
-    networks:
-      - frontend
-    restart: unless-stopped
+  #      target: C:\openssl-certs\
+    #networks:
+    #  - frontend
+  #  restart: unless-stopped
 
-  ##########
-  # OAuth2 #
-  ##########
-  oauth2:
-    image: veni-vidi-vici/hydra-1.9.2-sqlite:nanoserver-20H2
-    isolation: process
-#    volumes:
-#      - type: bind
+
+
+
+  #postgresql:
+  #  image: veni-vidi-vici/postgres-9.6.21:nanoserver-20H2
+  #  environment:
+  #    - POSTGRES_DB:hydra
+  #    - POSTGRES_USER:hydra
+  #    - POSTGRES_PASSWORD:s3cuR3
+  #  isolation: process
+  #  ports:
+        # Container
+  #    - target: 5432
+        # Host
+  #      published: 5432
+        # Protocol (tcp or udp)
+  #      protocol: tcp
+  #  volumes:
+  #    - type: bind
         # The source is the host location, which needs to exist.
-#        source: C:\jct\certs\
+  #      source: C:\Repos\Volumes\postgresql\
         # The target is the container location, which does't need to exist, but the existing contents will be hidden if it does exist.
-#        target: C:\openssl-certs\
-    networks:
-      - frontend
-    restart: unless-stopped
+  #      target: C:\postgresql-data\
+  #  networks:
+  #    - oauth
+  #  restart: unless-stopped
+
+
+
 
   ########################
   # NATS (Message-queue) #
   ########################
-  nats-mq:
+  nats:
     # Note: If your service specifies a build option, variables defined in 'environment' are not automatically visible during the build. Use the args sub-option of build to define build-time environment variables. Docker-compose provides the ability to pass environment variables into the container without storing the values directly in the image.
     image: veni-vidi-vici/nats-2.0.2:nanoserver-20H2
     isolation: process
@@ -145,7 +159,7 @@ services:
   #####################
   nats-publisher:
     depends_on:
-      - nats-mq
+      - nats
       - nats-subscriber
     #environment:
     #  MessageQueue: "Url=nats://message-queue:4222"
@@ -160,7 +174,7 @@ services:
   ######################
   nats-subscriber:
     depends_on:
-      - nats-mq
+      - nats
     # These are actually the default values in the code, so they are not needed in the Compose file. But it can be useful to explicitly set them since the Compose file as the complete deployment guide for the distributed solution.
     #environment:
     #  MessageQueue: "Url=nats://natsmq:4222"
@@ -178,33 +192,33 @@ services:
   ##############
   # msfinances #
   ##############
-  msfinances:
-    depends_on:
-      - traefik
+  #msfinances:
+  #  depends_on:
+  #    - traefik
 #     elasticsearch:
 #       condition: service_healthy
-    environment:
+  #  environment:
       # Default value for HTTP_SERVER: "http://0.0.0.0:49480/api/v1/"
       # Default value for DB_URL: "http://elasticsearch:9200"
       # Default value for DB_NAME (no logging): ""
       # DB_NAME: "msfinances"
-      DB_NAME: ""
-      HTTP_SERVER: "http://localhost:49480/api/v1/"
-    image: veni-vidi-vici/msfinances-1.0.0:nanoserver-20H2
-    isolation: process
+  #    DB_NAME: ""
+  #    HTTP_SERVER: "http://localhost:49480/api/v1/"
+  #  image: veni-vidi-vici/msfinances-1.0.0:nanoserver-20H2
+  #  isolation: process
     # Labels are case insensitive.
-    labels:
+  #  labels:
       # Traefik will include this container in its internal configuration; see exposedByDefault in traefik.yml.
-      - "traefik.enable=true"
+  #    - "traefik.enable=true"
       # A router is in charge of connecting incoming requests to the services that can handle them. In the process, routers may use pieces of middleware to update the request, or act before forwarding the request to the service.
-      - "traefik.http.routers.rt-finances.entrypoints=http"
+  #    - "traefik.http.routers.rt-finances.entrypoints=http"
       # Specify the hostname for the site on the rt-finances router.
-      - "traefik.http.routers.rt-finances.rule=Host(`finances.dev.local`) && PathPrefix(`/api/v1/`)"
+  #    - "traefik.http.routers.rt-finances.rule=Host(`finances.dev.local`) && PathPrefix(`/api/v1/`)"
 ###      - "traefik.docker.network=nat"
-    networks:
-      - frontend
-      - backend
-    restart: on-failure:5
+  #  networks:
+  #    - frontend
+  #    - backend
+  #  restart: on-failure:5
 
 
 
@@ -261,6 +275,11 @@ networks:
     driver: nat
     name: natbackend
     external: false
+  # Create a new network using the nat driver.
+  oauth:
+    driver: nat
+    name: natoauth
+    external: false
 
 
 
@@ -282,9 +301,11 @@ networks:
 # create any containers either. To create basic volumes with default configurations,
 #   docker volume create --name elasticsearch-data
 #
-volumes:
-  openssl-certs:
-    external: true
+#volumes:
+#  openssl-certs:
+#    external: true
+#  postgres-sql:
+#    external: true
 #  elasticsearch-data:
 #    driver_opts:
 #      type: none

@@ -1,0 +1,21 @@
+# Usage:
+#   Any service with the 'build' attribute specified will be built and tagged with the name in the 'image' attribute. (-f [--file])
+#   > docker-compose -f docker-compose.yml -f docker-compose.hydra.yml -f docker-compose.build.yml -f docker-compose.build.hydra.yml up build [--no-cache]
+version: "3.7"
+
+services:
+  ##################
+  # Infrastructure #
+  ##################
+  # Hydra (OAuth2) #
+  ##################
+  hydra:
+    build:
+      context: ./OAuth2/
+      dockerfile: ./Dockerfile
+      args:
+        BASE_OS_LAYER: mcr.microsoft.com/windows/nanoserver
+        BASE_OS_LAYER_VERSION: 20H2
+        BUILD_BASE_OS_LAYER: mcr.microsoft.com/windows/servercore
+        BUILD_BASE_OS_LAYER_VERSION: 20H2
+        HYDRA_URL: "https://github.com/ory/hydra/releases/download/v1.10.1/hydra_1.10.1-sqlite_windows_64bit.zip"
