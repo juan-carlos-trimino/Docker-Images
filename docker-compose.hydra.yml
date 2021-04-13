@@ -14,9 +14,10 @@ services:
   ##################
   # Run hydra-migrate ONLY from the command line!!!
   # See WARNING!!! below.
-  #hydra-migrate:
-  #  image: veni-vidi-vici/hydra-1.10.1-sqlite:nanoserver-20H2
-  #  isolation: process
+  hydra-migrate:
+    image: veni-vidi-vici/hydra-1.10.1-sqlite:nanoserver-20H2
+    isolation: process
+    entrypoint: hydra
     # WARNING!!!
     # Before running this command on an existing database, create a back up.
     #
@@ -26,22 +27,25 @@ services:
     #
     # Options inherited from parent commands
     # -c [--config strings] - Path to one or more .json, .yaml, .yml, .toml config files. Values are loaded in the order provided, meaning that the last config file overwrites values from the previous config file.
-  #  command: migrate sql -e --yes
-  #  environment:
-  #    DSN: "sqlite://C:/hydra-data/db.sqlite?_fk=true"
-  #  volumes:
-  #    - type: bind
+    command: "migrate sql -e --yes"
+    environment:
+      DSN: "sqlite://C:/hydra-data/db.sqlite?_fk=true"
+    volumes:
+      - type: bind
         # The source is the host location, which needs to exist.
-  #      source: C:\jct\Repos\Volumes\hydra\
+        source: C:\jct\Repos\Volumes\hydra\
         # The target is the container location, which does't need to exist, but the existing contents will be hidden if it does exist.
-  #      target: C:\hydra-data\
-  #  restart: on-failure
+        target: C:\hydra-data\
+    networks:
+      - oauth
+    restart: on-failure
 
   hydra:
-    #depends_on:
-    #  - hydra-migrate
+    depends_on:
+      - hydra-migrate
     image: veni-vidi-vici/hydra-1.10.1-sqlite:nanoserver-20H2
     isolation: process
+    entrypoint: hydra
     command: "serve all --dangerous-force-http"
     environment:
       - SECRETS_SYSTEM='this_needs_to_be_the_same_always_and_also_very_$$3cuR3-._'
@@ -73,6 +77,5 @@ services:
         # Protocol (tcp or udp)
         protocol: tcp
     networks:
-      #- frontend
       - oauth
     restart: unless-stopped

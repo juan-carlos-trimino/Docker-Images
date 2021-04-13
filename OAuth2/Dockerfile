@@ -20,6 +20,7 @@ RUN Write-Host "Downloading: $ENV:HYDRA_URL"; `
     curl -o $fileName "$ENV:HYDRA_URL"; `
     tar -xvf $fileName; `
     Remove-Item -Path $fileName -Force; `
+    Remove-Item -Path 'CHANGELOG.md' -Force; `
     Write-Host "Done!!!";
 
 # Final image.
@@ -37,22 +38,14 @@ WORKDIR C:/
 COPY --from=builder C:/hydra ./hydra
 
 # In order to set system PATH, ContainerAdministrator must be used.
-
-# Security run a container with non-Admin user account (nonroot user)
-# ContainerAdministrator is the default user account for Windows Server Core.
-# ContainerUser is the default user account for Nano Server.
-# Always use a least-privilege user account to run processes and set ACLs as narrowly as possible.
-#> docker run image cmd /C echo %USERDOMAIN%\%USERNAME%
-
-
 USER ContainerAdministrator
 
 # Appending to PATH from the DOS command line.
 # /M specifies to set the variable in the system environment.
 RUN SETX /M PATH "C:\hydra;%PATH%"
 
-USER ContainerUser
+#USER ContainerUser
 
 VOLUME C:/hydra-data
 
-ENTRYPOINT ["hydra"]
+#ENTRYPOINT ["hydra"]
