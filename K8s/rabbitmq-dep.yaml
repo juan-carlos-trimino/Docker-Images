@@ -1,14 +1,14 @@
 apiVersion: v1
 kind: Namespace
 metadata:
-  name: rabbitmq
+  name: rabbitmq-namespace
 # YAML files can contain multiple resource definitions separated by a line with three dashes.
 ---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: rabbitmq
-  namespace: rabbitmq
+  namespace: rabbitmq-namespace
 spec:
   # Only the current and previous revisions (ReplicaSets) are preserved.
   revisionHistoryLimit: 2
@@ -19,11 +19,13 @@ spec:
       # How many pod instances are allowed to exist above the desired replica count.
       maxSurge: 1
       # How many pod instances can be unavailable relative to the desired replica count.
+      # A value of 0 makes the deployment replace pods one by one.
       maxUnavailable: 1
     # When app does support running multiple versions in parallel.
     type: RollingUpdate
-    # When app doesn't support running multiple versions in parallel (app becomes completely unavailable for a short period of time).
-    # type: Recreate
+    # When app doesn't support running multiple versions in parallel (app becomes completely unavailable
+    # for a short period of time).
+    #type: Recreate
   # Pod selector.
   selector:
     matchExpressions:
