@@ -1,14 +1,51 @@
 Tools
 =====
-To setup a single-node K8S cluster on a local machine.<br>
-*Docker Desktop*<br>
-https://docs.docker.com/desktop/<br>
-*Minikube*<br>
+Minikube
+--------
+Setup a single-node K8S cluster on a local machine.<br>
+https://kubernetes.io/docs/setup/minikube/
+
 Note: Minikube will only run Linux based containers.<br>
-https://kubernetes.io/docs/setup/minikube/<br>
+
+To verify minikube is running.<br>
+>`\>` minikube status
+
+To display the current context.
+>`\>` kubectl config current-context
+
+To change the current context to minikube.
+>`\>` kubectl config use-context minikube
+
+To start the local cluster from a terminal with administrator access, but not logged in as root.
+>`\>` minikube start
+
+To stop the local minikube cluster.
+>`\>` minikube stop
+
+To open the dashboard in the system's default web browser.
+>`\>` minikube dashboard
+
+To display the dashboard URL.
+>`\>` minikube dashboard --url
+
+xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx<br>
 Instructions to install minikube in Windows.<br>
 https://iteritory.com/install-minikube-in-windows-10-laptop-step-by-step-tutorial/
+xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx<br>
 
+Docker Desktop
+--------------
+Setup a single-node K8S cluster on a local machine.<br>
+https://docs.docker.com/desktop/
+
+To display the current context.
+>`\>` kubectl config current-context
+
+To change the current context to docker-for-desktop.
+>`\>` kubectl config use-context docker-for-desktop
+
+Base64
+------
 To convert a binary file to a base64-encoded text file.<br>
 https://www.browserling.com/tools/file-to-base64
 
@@ -16,9 +53,13 @@ Base64 Encode and Decode<br>
 https://base64.guru/converter/decode/file
 http://www.base64decode.org
 
+PEM
+---
 To decode a PEM file.<br>
 https://report-uri.com/home/pem_decoder
 
+JWT
+---
 JWT decoder<br>
 http://jwt.io
 
@@ -48,10 +89,20 @@ K8S runs workloads (containers) on worker nodes; a worker node consists of three
 Deployment
 ==========
 To create a deployment.
->`\>` kubectl apply -f [deployment-name].deployment.yaml
+>`\>` kubectl apply -f [deployment-name]-deployment.yaml
 
-To list ....
->`\>` kubectl get deployment xxxxx
+To delete a deployment.
+>`\>` kubectl delete -f [deployment-name]-deployment.yaml
+
+To list deployments in the *default* namespace.
+>`\>` kubectl get deployment
+
+To list deployments in the given namespaces.
+>`\>` kubectl get deployment --namespace [namespace-name]
+>`\>` kubectl get deployment -n [namespace-name]
+
+To list deployments in all namespaces.
+>`\>` kubectl get deployment --all-namespaces
 
 To display the metadata related to the deployment.
 >`\>` kubectl describe deployment xxxxxxx
