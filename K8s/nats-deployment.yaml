@@ -46,7 +46,8 @@ spec:
     spec:
       containers:
         - name: nats
-          image: veni-vidi-vici/nats-2.0.2:nanoserver-20H2
+          #image: veni-vidi-vici/nats-2.0.2:nanoserver-20H2
+          image: nats:2.2.1
           ports:
             - name: client
               containerPort: 4222
@@ -57,6 +58,7 @@ spec:
             - name: cluster
               containerPort: 6222
               protocol: TCP
+      restartPolicy: Always
 ---
 #############
 # Publisher #
@@ -70,7 +72,7 @@ spec:
   # Only the current and previous revisions (ReplicaSets) are preserved.
   revisionHistoryLimit: 2
   # The desired number of pod instances.
-  replicas: 2
+  replicas: 1
   #stragedy:
   #  rollingUpdate:
       # How many pod instances are allowed to exist above the desired replica count.
@@ -100,7 +102,7 @@ spec:
     spec:
       containers:
         - name: nats-publisher
-          image: veni-vidi-vici/nats-publisher-1.0.0:2.2-runtime-nanoserver-20H2
+          image: veni-vidi-vici/nats-publisher-1.0.0:dotnet-5.0-alpine
 ---
 apiVersion: v1
 kind: Service
