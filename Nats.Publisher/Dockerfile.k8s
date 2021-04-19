@@ -13,7 +13,6 @@ RUN dotnet restore "./Publisher-CS/NatsPublisher.csproj" --runtime alpine-x64 &&
     -r alpine-x64 --self-contained true -p:PublishTrimmed=true -p:PublishSingleFile=true && \
     rm ./app/*.pdb -f
 
-
 # Final image
 # Using the .NET runtime dependencies Docker image.
 FROM mcr.microsoft.com/dotnet/runtime-deps:5.0-alpine
@@ -28,4 +27,3 @@ WORKDIR /app/
 COPY --from=Builder /NATS/app/ ./
 
 ENTRYPOINT ["NatsPublisher.exe"]
-#ENTRYPOINT ["dotnet", "./NatsPublisher.dll"]
