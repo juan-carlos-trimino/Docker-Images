@@ -1,0 +1,31 @@
+# nats-publisher
+FROM mcr.microsoft.com/dotnet/sdk:5.0-alpine AS Builder
+
+WORKDIR /NATS/
+
+COPY ./Message-CS/ ./Message-CS/
+
+COPY ./Publisher-CS/ ./Publisher-CS/
+
+# -f will forcibly delete files without asking.
+RUN dotnet restore "./Publisher-CS/NatsPublisher.csproj" --runtime alpine-x64 && \
+    dotnet publish "./Publisher-CS/NatsPublisher.csproj" -c Release -o ./app --no-restore \
+    -r alpine-x64 --self-contained true -p:PublishTrimmed=true -p:PublishSingleFile=true && \
+    rm ./app/*.pdb -f
+
+
+# Final image
+# Using the .NET runtime dependencies Docker image.
+FROM mcr.microsoft.com/dotnet/runtime-deps:5.0-alpine
+
+# Add metadata to the image.
+LABEL copyright="Copyright (C) 2020 Juan Carlos Trimino. All rights reserved."
+LABEL version="1.0.0"
+LABEL maintainer="juancarlos@trimino.com"
+
+WORKDIR /app/
+
+COPY --from=Builder /NATS/app/ ./
+
+ENTRYPOINT ["NatsPublisher.exe"]
+#ENTRYPOINT ["dotnet", "./NatsPublisher.dll"]
