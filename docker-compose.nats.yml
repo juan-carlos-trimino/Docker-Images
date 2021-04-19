@@ -14,7 +14,7 @@ services:
       - nats-subscriber
     #environment:
     #  MessageQueue: "Url=nats://message-queue:4222"
-    image: veni-vidi-vici/nats-publisher-1.0.0:2.2-runtime-nanoserver-1903
+    image: veni-vidi-vici/nats-publisher-1.0.0:dotnet-5.0-nanoserver-20H2
     isolation: process
     networks:
       - frontend
@@ -29,7 +29,7 @@ services:
     # explicitly set them since the Compose file as the complete deployment guide for the distributed solution.
     #environment:
     #  MessageQueue: "Url=nats://natsmq:4222"
-    image: veni-vidi-vici/nats-subscriber-1.0.0:2.2-runtime-nanoserver-1903
+    image: veni-vidi-vici/nats-subscriber-1.0.0:dotnet-5.0-nanoserver-20H2
     isolation: process
     # deploy:
       # Default.
