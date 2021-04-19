@@ -1,0 +1,29 @@
+# nats-subscriber
+FROM mcr.microsoft.com/dotnet/sdk:5.0-alpine AS Builder
+
+WORKDIR /NATS/
+
+COPY ./Message-CS/ ./Message-CS/
+
+COPY ./Subscriber-CS/ ./Subscriber-CS/
+
+# -f will forcibly delete files without asking.
+RUN dotnet restore "./Subscriber-CS/NatsSubscriber.csproj" --runtime alpine-x64 && \
+    dotnet publish "./Subscriber-CS/NatsSubscriber.csproj" -c Release -o ./app --no-restore \
+    -r alpine-x64 --self-contained true -p:PublishTrimmed=true -p:PublishSingleFile=true && \
+    rm ./app/*.pdb -f
+
+# Final image
+# Using the .NET runtime dependencies Docker image.
+FROM mcr.microsoft.com/dotnet/runtime-deps:5.0-alpine
+
+# Add metadata to the image.
+LABEL copyright="Copyright (C) 2020 Juan Carlos Trimino. All rights reserved."
+LABEL version="1.0.0"
+LABEL maintainer="juancarlos@trimino.com"
+
+WORKDIR /app/
+
+COPY --from=Builder /NATS/app/ ./
+
+ENTRYPOINT ["NatsSubscriber.exe"]
