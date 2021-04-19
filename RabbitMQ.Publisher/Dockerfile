@@ -1,9 +1,10 @@
 # rabbitmq-publisher
-ARG BASE_OS_LAYER
-ARG BASE_OS_LAYER_VERSION
-ARG BUILD_BASE_OS_LAYER
-ARG BUILD_BASE_OS_LAYER_VERSION
-FROM ${BUILD_BASE_OS_LAYER}:${BUILD_BASE_OS_LAYER_VERSION} AS Builder
+#ARG BASE_OS_LAYER
+#ARG BASE_OS_LAYER_VERSION
+#ARG BUILD_BASE_OS_LAYER
+#ARG BUILD_BASE_OS_LAYER_VERSION
+#FROM ${BUILD_BASE_OS_LAYER}:${BUILD_BASE_OS_LAYER_VERSION} AS Builder
+FROM mcr.microsoft.com/dotnet/core/sdk:5.0 AS Builder
 
 WORKDIR c:/Message-CS/
 
@@ -36,7 +37,8 @@ RUN dotnet publish "./Publisher.csproj" -c Release -o /app
 RUN del \app\*.pdb /Q
 
 # Final image
-FROM ${BASE_OS_LAYER}:${BASE_OS_LAYER_VERSION}
+#FROM ${BASE_OS_LAYER}:${BASE_OS_LAYER_VERSION}
+FROM mcr.microsoft.com/dotnet/core/runtime:5.0
 
 # Add metadata to the image.
 LABEL copyright="Copyright (C) 2020 Juan Carlos Trimino. All rights reserved."
