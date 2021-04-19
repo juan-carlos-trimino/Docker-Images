@@ -104,6 +104,50 @@ spec:
         - name: nats-publisher
           image: veni-vidi-vici/nats-publisher-1.0.0:dotnet-5.0-alpine
 ---
+##############
+# Subscriber #
+##############
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nats-subscriber-deployment
+  namespace: nats-namespace
+spec:
+  # Only the current and previous revisions (ReplicaSets) are preserved.
+  revisionHistoryLimit: 2
+  # The desired number of pod instances.
+  replicas: 1
+  #stragedy:
+  #  rollingUpdate:
+      # How many pod instances are allowed to exist above the desired replica count.
+  #    maxSurge: 1
+      # How many pod instances can be unavailable relative to the desired replica count.
+      # A value of 0 makes the deployment replace pods one by one.
+  #    maxUnavailable: 1
+    # When app does support running multiple versions in parallel.
+  #  type: RollingUpdate
+    # When app doesn't support running multiple versions in parallel (app becomes completely unavailable
+    # for a short period of time).
+    #type: Recreate
+  # Pod selector.
+  selector:
+    matchExpressions:
+      - key: deployment-label
+        operator: In
+        values:
+          - nats
+  # Pod template.
+  template:
+    metadata:
+      # Must macth "Service" and "Deployment" labels.
+      labels:
+        deployment-label: nats
+        service-label: nats
+    spec:
+      containers:
+        - name: nats-subscriber
+          image: veni-vidi-vici/nats-subscriber-1.0.0:dotnet-5.0-alpine
+---
 apiVersion: v1
 kind: Service
 metadata:
