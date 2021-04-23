@@ -7,26 +7,23 @@ FROM ${BUILD_BASE_OS_LAYER}:${BUILD_BASE_OS_LAYER_VERSION} AS Builder
 
 WORKDIR C:/NATS/
 
-COPY ./Message-CS/ ./Message-CS/
-
-COPY ./Publisher-CS/ ./Publisher-CS/
+COPY ./CSharp/ ./
 
 # The 'dotnet restore' command uses NuGet to restore dependencies as well as project-specific tools
 # that are specified in the project file.
-#
-# The 'dotnet publish' command packs the application and its dependencies into a folder for
-# deployment to a hosting system.
-# -c [--configuration] - {Debug|Release}
-# -o [--output] - <OUTPUT_DIRECTORY>
-# --no-restore - It doesn't execute an implicit restore during build.
-# -r [--runtime] - It specifies the target runtime.
-# --self-contained - It publishes the .NET runtime with the application so the runtime doesn't
-#                    need to be installed on the target machine.
-# -p:PublishTrimmed - It trims unused libraries to reduce the deployment size of an app when
-#                     publishing a self-contained executable.
-# -p:PublishSingleFile - It packages the app into a platform-specific single-file executable.
-RUN dotnet restore "./Publisher-CS/NatsPublisher.csproj" --runtime win10-x64 && \
-    dotnet publish "./Publisher-CS/NatsPublisher.csproj" -c Release -o ./app --no-restore \
+RUN dotnet restore "./Publisher/Publisher.csproj" --runtime win10-x64 && \
+    # The 'dotnet publish' command packs the application and its dependencies into a folder for \
+    # deployment to a hosting system. \
+    # -c [--configuration] - {Debug|Release} \
+    # -o [--output] - <OUTPUT_DIRECTORY> \
+    # --no-restore - It doesn't execute an implicit restore during build. \
+    # -r [--runtime] - It specifies the target runtime. \
+    # --self-contained - It publishes the .NET runtime with the application so the runtime \
+    #                    doesn't need to be installed on the target machine. \
+    # -p:PublishTrimmed - It trims unused libraries to reduce the deployment size of an app when \
+    #                     publishing a self-contained executable. \
+    # -p:PublishSingleFile - It packages the app into a platform-specific single-file executable. \
+    dotnet publish "./Publisher/Publisher.csproj" -c Release -o ./app --no-restore \
     -r win10-x64 --self-contained true -p:PublishTrimmed=true -p:PublishSingleFile=true && \
     del .\app\*.pdb /Q
 
@@ -44,4 +41,4 @@ WORKDIR C:/app/
 
 COPY --from=Builder C:/NATS/app/ ./
 
-ENTRYPOINT ["NatsPublisher.exe"]
+ENTRYPOINT ["Publisher.exe"]
