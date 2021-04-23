@@ -1,21 +1,31 @@
 # nats-subscriber
-FROM mcr.microsoft.com/dotnet/sdk:5.0-alpine AS Builder
+FROM mcr.microsoft.com/dotnet/sdk:5.0.202-alpine3.13-amd64 AS Builder
 
 WORKDIR /NATS/
 
-COPY ./Message-CS/ ./Message-CS/
+COPY ./CSharp/ ./
 
-COPY ./Subscriber-CS/ ./Subscriber-CS/
-
-# -f will forcibly delete files without asking.
-RUN dotnet restore "./Subscriber-CS/NatsSubscriber.csproj" --runtime alpine-x64 && \
-    dotnet publish "./Subscriber-CS/NatsSubscriber.csproj" -c Release -o ./app --no-restore \
+# The 'dotnet restore' command uses NuGet to restore dependencies as well as project-specific tools
+# that are specified in the project file.
+RUN dotnet restore "./Subscriber/Subscriber.csproj" --runtime alpine-x64 && \
+    # -c [--configuration] - {Debug|Release} \
+    # -o [--output] - <OUTPUT_DIRECTORY> \
+    # --no-restore - It doesn't execute an implicit restore during build. \
+    # -r [--runtime] - It specifies the target runtime. \
+    # --self-contained - It publishes the .NET runtime with the application so the runtime \
+    #                    doesn't need to be installed on the target machine. \
+    # -p:PublishTrimmed - It trims unused libraries to reduce the deployment size of an app when \
+    #                     publishing a self-contained executable. \
+    # -p:PublishSingleFile - It packages the app into a platform-specific single-file executable. \
+    dotnet publish "./Subscriber/Subscriber.csproj" -c Release -o ./app --no-restore \
     -r alpine-x64 --self-contained true -p:PublishTrimmed=true -p:PublishSingleFile=true && \
+    # -f will forcibly delete files without asking. \
     rm ./app/*.pdb -f
 
 # Final image
 # Using the .NET runtime dependencies Docker image.
-FROM mcr.microsoft.com/dotnet/runtime-deps:5.0-alpine
+FROM mcr.microsoft.com/dotnet/runtime-deps:5.0.5-alpine3.13-amd64
+#FROM mcr.microsoft.com/dotnet/runtime:5.0.5-alpine3.13-amd64
 
 # Add metadata to the image.
 LABEL copyright="Copyright (C) 2020 Juan Carlos Trimino. All rights reserved."
@@ -26,4 +36,6 @@ WORKDIR /app/
 
 COPY --from=Builder /NATS/app/ ./
 
-ENTRYPOINT ["NatsSubscriber.exe"]
+ENTRYPOINT ["./Subscriber"]
+# A common idiom for keeping a container alive indefinitely.
+#ENTRYPOINT ["tail", "-f", "/dev/null"]

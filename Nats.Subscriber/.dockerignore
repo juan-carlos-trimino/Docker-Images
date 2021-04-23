@@ -6,19 +6,21 @@
 **
 
 # Include this directory...
-!Message-CS/
+!CSharp/
 # ... but ignore these subdirectories...
-Message-CS/.vs
-Message-CS/obj
-Message-CS/bin
+CSharp/Message/.vs
+CSharp/Message/obj
+CSharp/Message/bin
+CSharp/Message/Message
 # ... and these files...
-**/*.dll
+CSharp/Message/.gitignore
 
-# Include this directory...
-!Subscriber-CS/
 # ... but ignore these subdirectories...
-Subscriber-CS/.vs
-Subscriber-CS/obj
-Subscriber-CS/bin
+CSharp/Subscriber/.vs
+CSharp/Subscriber/obj
+CSharp/Subscriber/bin
+CSharp/Subscriber/Subscriber
 # ... and these files...
-**/*.dll
+CSharp/Subscriber/.gitignore
+
+CSharp/Publisher
