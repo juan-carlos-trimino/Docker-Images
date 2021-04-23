@@ -7,6 +7,17 @@
 version: "3.7"
 
 services:
+  ########################
+  # NATS (Message-queue) #
+  ########################
+  nats:
+    # Note: If your service specifies a build option, variables defined in 'environment' are not automatically visible during the build. Use the args sub-option of build to define build-time environment variables. Docker-compose provides the ability to pass environment variables into the container without storing the values directly in the image.
+    image: veni-vidi-vici/nats-2.0.2:nanoserver-20H2
+    isolation: process
+    networks:
+      - backend
+    restart: unless-stopped
+
   # Publishes to NATS
   nats-publisher:
     depends_on:
@@ -14,7 +25,7 @@ services:
       - nats-subscriber
     #environment:
     #  MessageQueue: "Url=nats://message-queue:4222"
-    image: veni-vidi-vici/nats-publisher-1.0.0:dotnet-5.0-nanoserver-20H2
+    image: veni-vidi-vici/nats-publisher-1.0.0:5.0.202-nanoserver-20H2
     isolation: process
     networks:
       - frontend
