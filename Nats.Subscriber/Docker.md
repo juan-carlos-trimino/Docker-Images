@@ -4,9 +4,11 @@ Windows
 >`\>` docker run -d --rm veni-vidi-vici/nats-subscriber-1.0.0:dotnet-5.0-nanoserver-20H2<br>
 >`\>` docker run -it --rm veni-vidi-vici/nats-subscriber-1.0.0:dotnet-5.0-nanoserver-20H2 cmd
 
-Any service with the 'build' attribute specified will be built and tagged with the name in the 'image' attribute. (-f [--file])
+Any service with the 'build' attribute specified will be built and tagged with the name in the 'image' attribute. (-f [--file])<br>
+Note:<br>
+If during the building of the image the error "Unable to load the service index for source https://api.nuget.org/v3/index.json." occurs, add the option '--network=host' to 'docker build'.
 >`\>` docker build -t veni-vidi-vici/nats-subscriber-1.0.0:dotnet-5.0-nanoserver-20H2 ./Nats.Subscriber<br>
->`\>` docker-compose -f docker-compose.nats.yml -f docker-compose.build.nats.yml build [--no-cache]
+>`\>` docker-compose -f docker-compose.nats.yml -f docker-compose.build.nats.yml build [--no-cache]<br>
 >`\>` docker-compose -f docker-compose.yml -f docker-compose.nats.yml -f docker-compose.build.yml -f docker-compose.build.nats.yml build [--no-cache]
 
 Start the application. (-d [--detach])
