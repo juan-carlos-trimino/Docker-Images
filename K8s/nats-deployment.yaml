@@ -39,6 +39,7 @@ spec:
   # Pod template.
   template:
     metadata:
+      name: nats-server-pod
       # Must macth "Service" and "Deployment" labels.
       labels:
         deployment-label: nats

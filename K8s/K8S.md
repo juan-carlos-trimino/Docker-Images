@@ -5,16 +5,9 @@ Minikube
 Setup a single-node K8S cluster on a local machine.<br>
 https://kubernetes.io/docs/setup/minikube/
 
-Note: Minikube will only run Linux based containers.<br>
-
-To verify minikube is running.<br>
->`\>` minikube status
-
-To display the current context.
->`\>` kubectl config current-context
-
-To change the current context to minikube.
->`\>` kubectl config use-context minikube
+Note:<br>
+(1) Minikube will only run Linux based containers.<br>
+(2) Since Minikube doesn't support *LoadBalancer* services, services will never get an external IP.
 
 To start the local cluster from a terminal with administrator access, but not logged in as root.
 >`\>` minikube start
@@ -22,11 +15,23 @@ To start the local cluster from a terminal with administrator access, but not lo
 To stop the local minikube cluster.
 >`\>` minikube stop
 
+To verify minikube is running.<br>
+>`\>` minikube status
+
+To get the IP and port through which the service can be accessed.
+>`\>` minikube service [service-name]
+
 To open the dashboard in the system's default web browser.
 >`\>` minikube dashboard
 
 To display the dashboard URL.
 >`\>` minikube dashboard --url
+
+To display the current context.
+>`\>` kubectl config current-context
+
+To change the current context to minikube.
+>`\>` kubectl config use-context minikube
 
 When using a container or VM driver (all drivers except none), it is best to reuse the Docker daemon inside the minikube cluster. This way there is no need to build the image on the host machine and push it into a docker registry. Just build the image inside the same docker daemon as minikube, which speeds up local deployments.
 
@@ -125,10 +130,27 @@ To delete a deployment with a configuration file.
 
 Status of different K8S components
 ----------------------------------
+To list all possible object types.
+>`\>` kubectl get
+
 **Nodes**<br>
 >`\>` kubectl get nodes
 
 **Pod**<br>
+Notes:<br>
+(1) Pods represent the basic deployable unit in K8S.<br>
+(2) As soon as a pod is scheduled to a node, the Kubelet on that node will run its containers, and it will keep them running as long as the pod exists. If a container's main process crashes, the Kubelet will restart the container.<br>
+(3) Since containers are not standalone K8S objects, they can't be listed individually.<br>
+(4) It's common for a pod to contain only a single container, but when a pod contains multiple containers, all of them are run on a single worker node.<br>
+(5) Because most of the container's filesystem comes from the container image, the filesystem of each container, by default, is fully isolated from other containers. But it is possible to have containers share file directories using *Volume*.<br>
+(6) Container logs are automatically rotated daily and every time the log file reaches 10MB in size. Note that container logs can only be retrieved from running pods. Once a pod is deleted, its logs are also deleted.<br>
+(7) When a pod is deleted, K8S terminates all of the containers that are part of the pod. K8S sends a SIGTERM signal to the main process of the container and waits a certain number of seconds, 30 is the default, for the main process to shut down gracefully. If it doesn't shut down in the given time, K8S sends a SIGKILL to the OS, and the OS kills it. To ensure processes are always shut down gracefully, they need to handle the SIGTERM signal properly.
+(8) Exit code 137 corresponds to 128 + 9 (SIGKILL). Likewise, exit code 143 corresponds to 128 + 15 (SIGTERM).
+
+To discover possible API object fields.
+>`\>` kubectl explain pods<br>
+>`\>` kubectl explain pod.spec
+
 >`\>` kubectl get pods<br>
 >`\>` kubectl get pods -n [namespace-name]
 
@@ -140,7 +162,43 @@ To display only the names.
 >`\>` kubectl get pods -o name --all-namespaces<br>
 >`\>` kubectl get pods -o name -n [namespace-name]
 
+To display pods using a label selector.
+>`\> kubectl get pod -l [label-name]
+
+To display the log of a pod running one container.
+>`\>` kubectl logs [pod-name] -n [namespace-name]
+
+To display the log of a pod running more than one container.
+>`\>` kubectl logs [pod-name] -c [container-name] -n [namespace-name]
+
+To obtain the log of a crashed container.
+>`\>` kubectl logs [pod-name] --previous -n [namespace-name]
+
+To display more details of a pod.<br>
+To see why the container had to be restarted, find:
+Last State:
+  Exit Code:
+>`\>` kubectl describe pod [pod-name] -n [namespace-name]
+
+To delete a pod by name.
+>`\>` kubectl delete pod [pod-name]<br>
+>`\>` kubectl delete pod [pod-name1] [pod-name2]
+
+To delete all pods by deleting the namespace.<br>
+The pods will be deleted along with the namespace.
+>`\>` kubectl delete ns [namespace-name]
+
+To delete all pods, but not the namespace.<br>
+If the pods were created by the ReplicationController, then when the pods are deleted, the ReplicationController will create new ones. To delete the pods, the ReplicationController must be deleted as well.
+>`\>` kubectl delete pod --all -n [namespace-name]
+
+To delete almost all resources in a namespace.<br>
+Certain resources will not be deleted; e.g., Secrets.<br>
+The K8S service will be deleted, but it should be recreated automatically in a few seconds.
+>`\>` kubectl delete all --all -n [namespace-name]
+
 **Services**<br>
+When a service is created, it gets a static IP, which never changes during the lifetime of the service. Hence, clients should connect to the service through its static IP address and not to pods directly (pods are ephemeral). The service ensures one of the pods receives the connection, regardless of the pod's current IP address.
 >`\>` kubectl get services
 
 **Replicaset**<br>
@@ -174,8 +232,9 @@ Log to console.
 >`\>` kubectl logs [pod-name] -n [namespace-name]
 
 **Interactive Terminal**<br>
-Get interactive terminal.
->`\>` kubectl exec -it [pod-name] -- [/bin/bash]/[/bin/sh]
+Run a shell inside an existing container.<br>
+*The shell must be available in the image.*
+>`\>` kubectl exec -it [pod-name] -- [shell]
 
 **Metadata**<br>
 Get metadata about pod.
