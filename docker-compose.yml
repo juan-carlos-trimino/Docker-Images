@@ -143,13 +143,13 @@ services:
   ########################
   # NATS (Message-queue) #
   ########################
-  nats:
+#  nats:
     # Note: If your service specifies a build option, variables defined in 'environment' are not automatically visible during the build. Use the args sub-option of build to define build-time environment variables. Docker-compose provides the ability to pass environment variables into the container without storing the values directly in the image.
-    image: veni-vidi-vici/nats-2.0.2:nanoserver-20H2
-    isolation: process
-    networks:
-      - backend
-    restart: unless-stopped
+#    image: veni-vidi-vici/nats-2.0.2:nanoserver-20H2
+#    isolation: process
+#    networks:
+#      - backend
+#    restart: unless-stopped
 
   ####################
   ### Applications ###
@@ -157,37 +157,37 @@ services:
   #####################
   # Publishes to NATS #
   #####################
-  nats-publisher:
-    depends_on:
-      - nats
-      - nats-subscriber
+#  nats-publisher:
+#    depends_on:
+#      - nats
+#      - nats-subscriber
     #environment:
     #  MessageQueue: "Url=nats://message-queue:4222"
-    image: veni-vidi-vici/nats-publisher-1.0.0:2.2-runtime-nanoserver-20H2
-    isolation: process
-    networks:
-      - backend
-    restart: on-failure:5
+#    image: veni-vidi-vici/nats-publisher-1.0.0:2.2-runtime-nanoserver-20H2
+#    isolation: process
+#    networks:
+#      - backend
+#    restart: on-failure:5
 
   ######################
   # Subscribes to NATS #
   ######################
-  nats-subscriber:
-    depends_on:
-      - nats
+#  nats-subscriber:
+#    depends_on:
+#      - nats
     # These are actually the default values in the code, so they are not needed in the Compose file. But it can be useful to explicitly set them since the Compose file as the complete deployment guide for the distributed solution.
     #environment:
     #  MessageQueue: "Url=nats://natsmq:4222"
-    image: veni-vidi-vici/nats-subscriber-1.0.0:2.2-runtime-nanoserver-20H2
-    isolation: process
+#    image: veni-vidi-vici/nats-subscriber-1.0.0:2.2-runtime-nanoserver-20H2
+#    isolation: process
     #deploy:
       # Default.
     #  mode: replicated
       # Number of containers that should be running at any given time.
     #  replicas: 3
-    networks:
-      - backend
-    restart: on-failure:5
+#    networks:
+#      - backend
+#    restart: on-failure:5
 
   ##############
   # msfinances #

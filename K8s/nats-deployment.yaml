@@ -10,7 +10,7 @@ metadata:
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: nats-deployment
+  name: nats-server-deployment
   namespace: nats-namespace
 spec:
   # Only the current and previous revisions (ReplicaSets) are preserved.
@@ -47,8 +47,7 @@ spec:
       containers:
         - name: nats
           imagePullPolicy: IfNotPresent
-          #image: veni-vidi-vici/nats-2.0.2:nanoserver-20H2
-          image: nats:2.2.1
+          image: nats:2.2.2-alpine3.13
           ports:
             - name: client
               containerPort: 4222
@@ -159,20 +158,18 @@ metadata:
 spec:
   type: ClusterIP
   ports:
-    - name: without-tls
-      # Host
-      port: 5672
-      # Pod
-      targetPort: without-tls
+    - name: nats-server
       protocol: TCP
-    - name: with-tls
-      port: 5671
-      targetPort: with-tls
+      port: 4222
+      targetPort: 4222
+    - name: nats-management
       protocol: TCP
-    - name: ui-admin
-      port: 15672
-      targetPort: ui-admin
+      port: 8222
+      targetPort: 8222
+    - name: nats-cluster
       protocol: TCP
+      port: 6222
+      targetPort: 6222
   selector:
     # Pod selector; all Pods with the service-label=nats label will be part of this service.
     service-label: nats
