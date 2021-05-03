@@ -16,7 +16,7 @@ https://report-uri.com/home/pem_decoder
 
 <br>
 
-## JWT
+## JSON Web Token (JWT)
 JWT decoder<br>
 http://jwt.io
 
@@ -457,6 +457,10 @@ Deleting a ReplicaSet will delete all its pods.
 <br>
 
 ## ConfigMap
+#### Notes
+1. A key must be a valid DNS subdomain; i.e., it may only contain alphanumeric characters, dashes, underscores, and dots. It may optionally include a leading dot.
+2. The contents of a ConfigMap's entries are shown in clear text.
+
 ### Listing
 List all configmaps available in the current K8S namespace.
 >`\>` kubectl get configmaps
@@ -465,9 +469,12 @@ List all configmaps available in the current K8S namespace.
 
 ## Secret
 #### Notes
-1. Because how K8S handles Secrets internally, always use **Secret** over **ConfigMap** to store sensitive data. K8S ensures that Secrets are only accessible to the Pods that need them, and Secrets are never written to disk; Secrets are kept in memory. K8S writes Secrets to disk only at the master node, where all Secrets are stored in etcd. etcd is the distributed key/value database use by K8S, and since K8S 1.7+, etcd stores Secrets only in an encrypted format.
-2. K8S provisions a Secret to each container in a Pod; this is called the *default token secret*.
-3. Each container in a K8S Pod has access to this JWT from its filesystem in the directory /var/run/secrets/kuberenetes.io/serviceaccount. This JWT is bound to a K8S service account; e.g., to access the K8S API server from a container, use this JWT for authentication.
+1. The maximum size of a Secret is limited to 1MB.
+2. The contents of a Secret's entries are shown as Base64-encoded strings.
+3. A Secret's entries can contain plain-text or binary value.
+3. Because how K8S handles Secrets internally, always use **Secret** over **ConfigMap** to store sensitive data. K8S ensures that Secrets are only accessible to the Pods that need them, and Secrets are never written to disk; Secrets are kept in memory. K8S writes Secrets to disk only at the master node, where all Secrets are stored in etcd. etcd is the distributed key/value database use by K8S, and since K8S 1.7+, etcd stores Secrets only in an encrypted format.
+4. K8S provisions a Secret to each container in a Pod; this is called the *default token secret*.
+5. Each container in a K8S Pod has access to this JWT from its filesystem in the directory /var/run/secrets/kuberenetes.io/serviceaccount. This JWT is bound to a K8S service account; e.g., to access the K8S API server from a container, use this JWT for authentication.
 
 ### Listing
 **List the structure of a Secret.**
