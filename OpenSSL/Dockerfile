@@ -163,7 +163,7 @@ RUN SETX /M PATH "C:\openssl\bin;%PATH%" & `
     SETX /M OPENSSL_CONF "C:\openssl\openssl.cnf" & `
     SETX /M SSL_CERT_DIR "C:\openssl-certs"
 
-# The directory where certificates and private keys are stored (OPENSSLDIR).
+# The directory where certificates and private keys are stored.
 VOLUME C:/openssl-certs
 
 # The Nano Server image uses a least-privilege user by default. Volumes are not accessible by that user; hence, this Dockerfile switches to the administrative account so that when a container is run from this image, volume directories can be accessed.

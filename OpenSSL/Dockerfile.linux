@@ -1,0 +1,80 @@
+# OpenSSL
+FROM alpine:3.13
+
+# Add metadata to the image.
+LABEL copyright="Copyright (C) 2020 Juan Carlos Trimino. All rights reserved."
+LABEL version="1.0.0"
+LABEL maintainer="juancarlos@trimino.com"
+
+
+# Default variables.
+ENV COUNTY="USA"
+ENV STATE="Texas"
+ENV LOCATION="Houston"
+ENV ORGANISATION="????????"
+ENV ROOT_CN="Root"
+ENV ISSUER_CN="Example Ltd"
+ENV PUBLIC_CN="*.example.com"
+ENV ROOT_NAME="root"
+ENV ISSUER_NAME="example"
+ENV PUBLIC_NAME="public"
+ENV RSA_KEY_NUMBITS="2048"
+ENV DAYS="365"
+ENV KEYSTORE_NAME="keystore"
+ENV KEYSTORE_PASS="changeit"
+ENV CERT_DIR="/etc/ssl/certs"
+
+
+
+ENV OPENSSL_DIR="/openssl"
+ENV OPENSSL_VERSION="1.1.1k"
+ENV PATH=${OPENSSL_DIR}/bin:$PATH
+ENV SSL_CERT_DIR=${OPENSSL_DIR}/certs/
+ENV LD_LIBRARY_PATH=${OPENSSL_DIR}/lib:$LD_LIBRARY_PATH
+ENV OPENSSL_CONF=${OPENSSL_DIR}/openssl.cnf
+
+# set -> Set or unset values of shell options and positional parameters.
+# Start tracing.
+RUN set -x && \
+    # To install packages without caching them locally, which is recommended for keeping \
+    # containers small, include the --no-cache flag. By using the flag, there is no need to use \
+    # the "rm -rf /var/cache/apk/*" command at the end of the RUN instruction. \
+    # \
+    # To get the latest security upgrades and bugfixes available for all the packages of a \
+    # running system, first update the list of available packages and then upgrade the installed \
+    # packages. \
+    apk update --no-cache && \
+    apk upgrade --no-cache && \
+    apk add --no-cache curl perl alpine-sdk zlib-dev linux-headers && \
+    curl --create-dirs -o ${OPENSSL_DIR}/openssl-${OPENSSL_VERSION}.tar.gz \
+      "https://www.openssl.org/source/openssl-${OPENSSL_VERSION}.tar.gz" && \
+    cd ${OPENSSL_DIR} && \
+    tar -xvf openssl-${OPENSSL_VERSION}.tar.gz && \
+    rm -rf openssl-${OPENSSL_VERSION}.tar.gz && \
+    cd openssl-${OPENSSL_VERSION} && \
+    # --prefix & --openssldir -> Control the configuration of installed components. \
+    # shared -> Build a shared object in addition to the static archive. \
+    #           The other option is no-shared, which forces static linking and makes \
+    #           self-contained command-line tools. If this option is not used, the \
+    #           LD_LIBRARY_PATH configuration must be set. \
+    # enable-ec_nistp_64_gcc_128 -> This parameter activates optimized versions of certain \
+    #                               frequently used elliptic curves. This optimization depends on \
+    #                               a compiler feature that can't be automatically detected, \
+    #                               which is why it's disabled by default. \
+    ./config --prefix=${OPENSSL_DIR} --openssldir=${OPENSSL_DIR} shared zlib \
+      -DOPENSSL_TLS_SECURITY_LEVEL=2 enable-ec_nistp_64_gcc_128 && \
+    make && \
+    # make test && \
+    # Install OpenSSL. \
+    make install && \
+    cd .. && \
+    rm -rf openssl-${OPENSSL_VERSION} && \
+    # Stop tracing. \
+    set +x
+
+# The directory where certificates and private keys are stored.
+VOLUME ${SSL_CERT_DIR}
+
+#ENTRYPOINT ["openssl"]
+# A common idiom for keeping a container alive indefinitely.
+#ENTRYPOINT ["tail", "-f", "/dev/null"]
