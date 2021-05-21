@@ -3,14 +3,18 @@ Usage
 Windows
 -------
 Create self-signed certificate on Windows using OpenSSL inside docker.
->`>` docker run -d --rm -v C:\jct\Repos\Volumes\OpenSSL:c:/openssl-certs veni-vidi-vici/openssl-1.1.1i:nanoserver-20H2
->`>` docker run -it --rm -v C:\jct\Repos\Volumes\OpenSSL:c:/openssl-certs [name-of-container-image][:version-or-variation]
+>`>` docker run -d --rm -v C:\jct\Repos\Volumes\OpenSSL:c:/openssl-certs veni-vidi-vici/openssl-1.1.1i:nanoserver-20H2<br>
 >`>` docker run -it --rm -v C:\jct\Repos\Volumes\OpenSSL:c:/openssl-certs veni-vidi-vici/openssl-1.1.1i:nanoserver-20H2
 
 Linux
 -----
 >`\>` docker build -t veni-vidi-vici/openssl-1.1.1k:alpine-3.13 -f ./OpenSSL/Dockerfile.linux ./OpenSSL<br>
->`\>` docker run -it --rm veni-vidi-vici/openssl-1.1.1k:alpine-3.13 sh
+>`\>` docker run -it --rm -v /jct/Repos/Volumes/OpenSSL:/openssl-certs veni-vidi-vici/openssl-1.1.1k:alpine-3.13<br><br>
+To use the shell, remove the following line from Dockerfile.linux:<br>
+**ENTRYPOINT ["openssl"]**<br>
+>`\>` docker run -it --rm -v /jct/Repos/Volumes/OpenSSL:/openssl-certs veni-vidi-vici/openssl-1.1.1k:alpine-3.13 sh<br>
+Then from the command prompt, type:<br>
+`\>` openssl
 
 <br>
 
