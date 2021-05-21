@@ -29,7 +29,7 @@ ENV CERT_DIR="/etc/ssl/certs"
 ENV OPENSSL_DIR="/openssl"
 ENV OPENSSL_VERSION="1.1.1k"
 ENV PATH=${OPENSSL_DIR}/bin:$PATH
-ENV SSL_CERT_DIR=${OPENSSL_DIR}/certs/
+ENV SSL_CERT_DIR=${OPENSSL_DIR}-certs
 ENV LD_LIBRARY_PATH=${OPENSSL_DIR}/lib:$LD_LIBRARY_PATH
 ENV OPENSSL_CONF=${OPENSSL_DIR}/openssl.cnf
 
@@ -75,6 +75,6 @@ RUN set -x && \
 # The directory where certificates and private keys are stored.
 VOLUME ${SSL_CERT_DIR}
 
-#ENTRYPOINT ["openssl"]
+ENTRYPOINT ["openssl"]
 # A common idiom for keeping a container alive indefinitely.
 #ENTRYPOINT ["tail", "-f", "/dev/null"]
