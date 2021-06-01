@@ -1,4 +1,33 @@
 ***
+# Theorems
+## CAP Theorem
+(https://en.wikipedia.org/wiki/CAP_theorem)<br>
+The theorem, proven by Eric Brewer, states that *a distributed system can only have two of the following three properties*: **Consistency, Availability, and Partition-Tolerant (CAP)**.
+Since a distributed system will always suffer from occasional network partition, it can only be *either* **consistent** *or* **available**. Distributed systems are generally configured to favor **availability** over **consistency**; favoring **availability** over **consistency** means that when a client makes a request for information, it will always get an answer, but that answer may be stale.<br>
+
+The recommended minimum size of a *quorum (majority) distributed system cluster* is three (3) to provide fault tolerance in the case of failure.<br>
+| Servers | No. Required for Majority | Failure Tolerance |
+|:-------:|:-------------------------:|:-----------------:|
+| 1 | 1 | 0 |
+| 2 | 2 | 0 |
+| 3 | 2 | 1 |
+| 4 | 3 | 1 |
+| 5 | 3 | 2 |
+| 6 | 4 | 2 |
+| 7 | 4 | 3 |
+<br>
+
+Please note the following:
+1. If there is only one server, writes (data) will be lost in the event of failure.
+2. If there are two servers and one fails, the remaining server will be unable to reach a quorum; writes will be lost until the second server returns.
+3. If more servers are added, fault tolerance is improved; however, write performance is reduced since data need to be replicated to more servers.
+4. If the size of the cluster grows beyond seven (7), the probability of losing enough servers to not have a quorum is low enough that is not worth the performance trade-off.
+5. If a distributed system has more than seven (7) servers, five (5) or seven (7) servers can be used to form the cluster, and the remaining servers run clients that can query the system but do not take part in the quorum.
+6. Even numbers are generally best avoided since they increase the cluster size (decreasing performance) but do not improve failure tolerance.
+
+<br>
+
+***
 # Tools
 ## Base64
 Convert a binary file to a base64-encoded text file.<br>
