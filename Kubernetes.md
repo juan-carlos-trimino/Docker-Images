@@ -6,15 +6,15 @@ The theorem, proven by Eric Brewer, states that *a distributed system can only h
 Since a distributed system will always suffer from occasional network partition, it can only be *either* **consistent** *or* **available**. Distributed systems are generally configured to favor **availability** over **consistency**; favoring **availability** over **consistency** means that when a client makes a request for information, it will always get an answer, but that answer may be stale.<br>
 
 The recommended minimum size of a *quorum (majority) distributed system cluster* is three (3) to provide fault tolerance in the case of failure.<br>
-| Servers | No. Required for Majority | Failure Tolerance |
-|:-------:|:-------------------------:|:-----------------:|
-| 1 | 1 | 0 |
-| 2 | 2 | 0 |
-| 3 | 2 | 1 |
-| 4 | 3 | 1 |
-| 5 | 3 | 2 |
-| 6 | 4 | 2 |
-| 7 | 4 | 3 |
+|Servers|No. Required for Majority|Failure Tolerance|
+|:---:|:---:|:---:|
+|1|1|0|
+|2|2|0|
+|3|2|1|
+|4|3|1|
+|5|3|2|
+|6|4|2|
+|7|4|3|
 <br>
 
 Please note the following:
@@ -449,9 +449,12 @@ If this is a cluster IP, it is only accessible from inside the cluster. The prim
 #### Notes
 1. There are three ways to expose a K8s Service outside a K8s cluster: **NodePort Service**, **LoadBalancer Service**, and **Ingress**.
 2. Ingress
-   1. Ingress is a K8s resource that routes traffic from outside the cluster to a K8s Service over HTTP or HTTPS.
-   2. Ingress can expose one or more K8s Services through a single IP address.
-   3. In order for an Ingress resource to work, an Ingress controller must be running in the cluster.
+   - Ingress (noun) - The act of going in or entering; the right to enter; a means or place of entering; entryway.
+   - Ingress is a K8s resource that routes traffic from outside the cluster to a K8s Service over HTTP or HTTPS.
+   - An Ingress controller must be running in the cluster for Ingress to work; some K8s environments provide their unique implementations of the controller whereas others do not.
+   - Ingress can expose one or more K8s Services through a single IP address; the host and path in the HTTP/HTTPS request determine which service receives the request.
+   - When a client opens a TLS connection to an Ingress controller, the controller terminates the TLS connection. The communication between the client and the controller is encrypted, but the communication between the controller and the pod is not.
+   - If the Ingress controller needs to support TLS, it will require a public certificate and a private key. The private key must be stored in a K8s Secret resource.
 
 #### Ingress
 **Enable/disable the Ingress add-on in Minikube**
@@ -464,13 +467,13 @@ Since the namespace that the pod is in is not known, use --all-namespaces.
 >`\>` kubectl get pods --all-namespaces
 
 **Access a Service through Ingress**<br>
-To access a Service through http://trimino.example.com (from *host:* in the Ingress resource), ensure the domain name resolves to the IP of the Ingress controller.<br>
+To access a Service through the domain name (see *host:* in the Ingress resource definition yaml file; e.g., http://trimino.com), ensure the domain name resolves to the IP of the Ingress controller.<br>
 To obtain the IP address of the Ingress.<br>
 >`\>` kubectl get ingresses<br>
 
-Once the IP is obtained, configure the DNS server to resolve trimino.example.com to that IP, or add the following line to /etc/hosts in Linux (in Windows C:\Windows\system32\drivers\etc\hosts)<br>
+Once the IP is obtained, configure the DNS server to resolve trimino.com to that IP, or add the following line to /etc/hosts in Linux (in Windows C:\Windows\system32\drivers\etc\hosts)<br>
 
-192.168.45.100&nbsp;&nbsp;&nbsp;&nbsp;trimino.example.com
+192.168.45.100&nbsp;&nbsp;&nbsp;&nbsp;trimino.com
 
 <br>
 
