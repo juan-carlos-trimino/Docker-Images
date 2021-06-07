@@ -1,4 +1,33 @@
 ***
+# Theorems
+## CAP Theorem
+(https://en.wikipedia.org/wiki/CAP_theorem)<br>
+The theorem, proven by Eric Brewer, states that *a distributed system can only have two of the following three properties*: **Consistency, Availability, and Partition-Tolerant (CAP)**.
+Since a distributed system will always suffer from occasional network partition, it can only be *either* **consistent** *or* **available**. Distributed systems are generally configured to favor **availability** over **consistency**; favoring **availability** over **consistency** means that when a client makes a request for information, it will always get an answer, but that answer may be stale.<br>
+
+The recommended minimum size of a *quorum (majority) distributed system cluster* is three (3) to provide fault tolerance in the case of failure.<br>
+|Servers|No. Required for Majority|Failure Tolerance|
+|:---:|:---:|:---:|
+|1|1|0|
+|2|2|0|
+|3|2|1|
+|4|3|1|
+|5|3|2|
+|6|4|2|
+|7|4|3|
+<br>
+
+Please note the following:
+1. If there is only one server, writes (data) will be lost in the event of failure.
+2. If there are two servers and one fails, the remaining server will be unable to reach a quorum; writes will be lost until the second server returns.
+3. If more servers are added, fault tolerance is improved; however, write performance is reduced since data need to be replicated to more servers.
+4. If the size of the cluster grows beyond seven (7), the probability of losing enough servers to not have a quorum is low enough that is not worth the performance trade-off.
+5. If a distributed system has more than seven (7) servers, five (5) or seven (7) servers can be used to form the cluster, and the remaining servers run clients that can query the system but do not take part in the quorum.
+6. Even numbers are generally best avoided since they increase the cluster size (decreasing performance) but do not improve failure tolerance.
+
+<br>
+
+***
 # Tools
 ## Base64
 Convert a binary file to a base64-encoded text file.<br>
@@ -10,21 +39,35 @@ http://www.base64decode.org
 
 <br>
 
+## JSON
+JSON Formatter and Validator<br>
+https://jsonformatter.curiousconcept.com
+
+<br>
+
+## JSON Web Token (JWT) [RFC 7519]
+Decode, verify, and generate JWT.<br>
+http://jwt.io
+
+<br>
+
+## JSON Web Key (JWK) [RFC 7517]
+A JWK is a JSON representation of a cryptographic key.<br>
+
+JWK to PEM Converter.<br>
+https://8gwifi.org/jwkconvertfunctions.jsp
+
+<br>
+
 ## Privacy Enhanced Mail (PEM)
 Decode a PEM file.<br>
 https://report-uri.com/home/pem_decoder
 
 <br>
 
-## JSON Web Token (JWT)
-JWT decoder<br>
-http://jwt.io
-
-<br>
-
 ***
 # Minikube
-Setup a single-node K8S cluster on a local machine.<br>
+Setup a single-node K8s cluster on a local machine.<br>
 https://kubernetes.io/docs/setup/minikube/
 
 #### Notes
@@ -33,7 +76,7 @@ https://kubernetes.io/docs/setup/minikube/
 3. Since Minikube doesn't support *LoadBalancer* services, services will never get an external IP.
 
 ### Cluster
-**Start a K8S cluster (Windows).**<br>
+**Start a K8s cluster (Windows).**<br>
 Once the VM is running, go to *Control Panel -> Administrative Tools -> Hyper-V Manager -> Virtual Machines -> minikube* and double-click on **minikube** to connect to the newly created VM (**minikube**); use **docker** for username and **tcuser** for the password.
 >`\>` minikube start --vm-driver=hyperv
 
@@ -109,7 +152,7 @@ The image will be cached and automatically pulled into all future minikube clust
 
 ***
 # Docker Desktop
-Setup a single-node K8S cluster on a local machine.<br>
+Setup a single-node K8s cluster on a local machine.<br>
 https://docs.docker.com/desktop/
 
 **Display the current context.**
@@ -121,25 +164,34 @@ https://docs.docker.com/desktop/
 <br>
 
 ***
-# Kubernetes (K8S)
+# Kubernetes (K8s)
 ## Architecture Overview
-K8S uses the *client-server architecture*. A K8S cluster consists of one or more master nodes and one or more worker nodes.
+K8s uses the *client-server architecture*. A K8s cluster consists of one or more master nodes and one or more worker nodes.
 
 <br>
 
 ### Master Node (Control Plane)
 The master node controls and manages the cluster and consists of four main components:
-1. *API Server* exposes the K8S API and provides the frontend to the cluster's shared state through which all other components interact.
+1. *API Server* exposes the K8s API and provides the frontend to the cluster's shared state through which all other components interact.
+   1. It is the central component used by all other components and clients (e.g., kubectl).
+   2. It provides a CRUD (Create, Read, Update, Delete) interface for querying and modifying the cluster state over a RESTful API.
+   3. It uses etcd to store the state.
 2. *Scheduler* schedules the apps by assigning a worker node to each deployable component of the app.
+   1. It monitors the API server's watch mechanism and assigns a cluster node to the new pod.
+   2. It updates the pod definition through the API server. The API server notifies the Kubelet (using the watch mechanism) that a pod has been scheduled. When the Kubelet on the target node receives the notification, it creates and runs the pod's containers.
+   3. By default, pods belonging to the same Service or ReplicaSet are distributed across multiple nodes, but this is not always guaranteed.
+   4. A cluster may have multiple Schedulers running, and a pod may specify the Scheduler that should schedule it by setting the *schedulerName* property in the pod spec. Pods without the *schedulerName* property set or with the *schedulerName* property set to *default-scheduler* are scheduled using the default Scheduler; all other pods are ignored by the default Scheduler.
 3. *Controller Manager* performs cluster-level functions such as replicating components, keeping track of worker nodes, etc.
+   1. x
 4. *etcd* is a key:value distributed data store that persistently stores the cluster configuration.
+   1. x
 
 <br>
 
 ### Worker Node
-K8S runs workloads (containers) on worker nodes; a worker node consists of three main components:
+K8s runs workloads (containers) on worker nodes; a worker node consists of three main components:
 1. *Kubelet* communicates with the API Server and manages containers running in a Pod on its node.
-2. *Kube-Proxy* load-balances network traffic between application components.
+2. *K8s Service Proxy (Kube-Proxy)* load-balances network traffic between application components.
 3. *Container Runtime* runs the containers; e.g., Docker.
 
 <br>
@@ -153,17 +205,23 @@ K8S runs workloads (containers) on worker nodes; a worker node consists of three
    If this environment variable is not set, *kubectl* uses the default editor.
 
 ## Version
-**Display the *kubectl* (K8S client) version.**
+**Display the *kubectl* (K8s client) version.**
 >`\>` kubectl version --client<br>
 >`\>` kubectl version --client --short<br>
 >`\>` kubectl version --client -o="yaml"<br>
 >`\>` kubectl version --client -o="json"
 
 **Display the client (*kubectl*) and server versions.**
->`\>` kubectl version
->`\>` kubectl version --short  
->`\>` kubectl version -o="yaml"  
+>`\>` kubectl version<br>
+>`\>` kubectl version --short<br>
+>`\>` kubectl version -o="yaml"<br>
 >`\>` kubectl version -o="json"
+
+<br>
+
+## Control Plane Components
+**Status of Components**
+>`\>` kubectl get componentstatuses
 
 <br>
 
@@ -226,14 +284,14 @@ If an issue occurs while creating the Deployment, a set of errors or warnings wi
 
 ## Pods
 #### Notes
-1. Pods represent the basic deployable unit in K8S.
-2. K8S assigns an IP address to a pod after the pod has been scheduled to a node and before it is started.
+1. Pods represent the basic deployable unit in K8s.
+2. K8s assigns an IP address to a pod after the pod has been scheduled to a node and before it is started.
 3. As soon as a pod is scheduled to a node, the Kubelet on that node will run its containers, and it will keep them running as long as the pod exists. If a container's main process crashes, the Kubelet will restart the container.
-4. Since containers are not standalone K8S objects, they can't be listed individually.
+4. Since containers are not standalone K8s objects, they can't be listed individually.
 5. It's common for a pod to contain only a single container, but when a pod contains multiple containers, all of them are run on a single worker node.
 6. Because most of the container's filesystem comes from the container image, the filesystem of each container, by default, is fully isolated from other containers. But it is possible to have containers share file directories using *Volume*.
 7. Container logs are automatically rotated daily and every time the log file reaches 10MB in size. Note that container logs can only be retrieved from running pods. Once a pod is deleted, its logs are also deleted.
-8. When a pod is deleted, K8S terminates all of the containers that are part of the pod. K8S sends a SIGTERM signal to the main process of the container and waits a certain number of seconds, 30 is the default, for the main process to shut down gracefully. If it doesn't shut down in the given time, K8S sends a SIGKILL to the Operating System (OS), and the OS kills it. To ensure processes are always shut down gracefully, they need to handle the SIGTERM signal properly.
+8. When a pod is deleted, K8s terminates all of the containers that are part of the pod. K8s sends a SIGTERM signal to the main process of the container and waits a certain number of seconds, 30 is the default, for the main process to shut down gracefully. If it doesn't shut down in the given time, K8s sends a SIGKILL to the Operating System (OS), and the OS kills it. To ensure processes are always shut down gracefully, they need to handle the SIGTERM signal properly.
 9. To see the reason the previous container terminated, check the Exit Code. The exit code is the sum of two numbers: 128 + x, where x is the signal number sent to the process that caused it to terminate. For example, an exit code of 137 equals 128 + 9 (SIGKILL); likewise, an exit code of 143 equals 128 + 15 (SIGTERM).
 
 ### Listing
@@ -290,7 +348,7 @@ If the pods were created by the ReplicationController, then when the pods are de
 >`\>` kubectl exec [pod-name] -n [namespace-name] -- [env | ls -al | COMMAND]
 
 **Find the ENTRYPOINT and CMD of a container**<br>
-If the container is crashing continuously (e.g., CrashLoopBackOff), then inspect the container while running in K8S. To do so, change the container ENTRYPOINT or K8S *command* under *containers*. In Linux, set *command* to *tail -f /dev/null* or *sleep infinity*.
+If the container is crashing continuously (e.g., CrashLoopBackOff), then inspect the container while running in K8s. To do so, change the container ENTRYPOINT or K8s *command* under *containers*. In Linux, set *command* to *tail -f /dev/null* or *sleep infinity*.
 >`\>` docker pull [image]<br>
 >`\>` docker inspect [image-id]
 
@@ -354,7 +412,7 @@ Container logs are automatically rotated daily and every time the log file reach
 #### Notes
 1. A service is a resource that creates a single point of entry to a group of pods providing the same service. When a service is created, it gets a static IP, which never changes during the lifetime of the service. Hence, clients should connect to the service through its static IP address and not to pods directly (pods are ephemeral). The service ensures one of the pods receives the connection, regardless of the pod's current IP address.
 2. Services deal with TCP and UPD packets.
-3. For a Service of the LoadBalancer type to work, K8S uses an external load balancer.
+3. For a Service of the LoadBalancer type to work, K8s uses an external load balancer.
 4. A service forwards each connection to a randomly selected backing pod. To redirect all requests made by the same client IP to the same pod, set the service's *sessionAffinity* property to ClientIP (the default is None). The session affinities supported by Kubernetes are: **None** and **ClientIP**.
 5. When a service exposes multiple ports, each port must be given a name. All of the service's ports will be exposed through the service cluster IP.
 6. The service *fully qualified domain name (FQDN)*<br>
@@ -381,11 +439,41 @@ If this is a cluster IP, it is only accessible from inside the cluster. The prim
 >`\>` kubectl delete svc [svc-name]
 
 ### Endpoints
-#### Note
+#### Notes
 1. The service's pod selector is used to build a list of IPs and ports, which is stored in the Endpoints resource. When a client connects to a service, the service proxy selects from the Endpoints resource one pair of IP and port and redirects the incoming connection to the server listening at that location.
 
 **List Endpoints information**
 >`\>` kubectl get endpoints [svc-name]
+
+### Exposing Services Externally
+#### Notes
+1. There are three ways to expose a K8s Service outside a K8s cluster: **NodePort Service**, **LoadBalancer Service**, and **Ingress**.
+2. Ingress
+   - Ingress (noun) - The act of going in or entering; the right to enter; a means or place of entering; entryway.
+   - Ingress is a K8s resource that routes traffic from outside the cluster to a K8s Service over HTTP or HTTPS.
+   - An Ingress controller must be running in the cluster for Ingress to work; some K8s environments provide their unique implementations of the controller whereas others do not.
+   - Ingress can expose one or more K8s Services through a single IP address; the host and path in the HTTP/HTTPS request determine which service receives the request.
+   - When a client opens a TLS connection to an Ingress controller, the controller terminates the TLS connection. The communication between the client and the controller is encrypted, but the communication between the controller and the pod is not.
+   - If the Ingress controller needs to support TLS, it will require a public certificate and a private key. The private key must be stored in a K8s Secret resource.
+
+#### Ingress
+**Enable/disable the Ingress add-on in Minikube**
+>`\>` minikube addons list<br>
+>`\>` minikube addons enable ingress<br>
+>`\>` minikube addons disable ingress
+
+**List the pod running the Ingress controller**<br>
+Since the namespace that the pod is in is not known, use --all-namespaces.
+>`\>` kubectl get pods --all-namespaces
+
+**Access a Service through Ingress**<br>
+To access a Service through the domain name (see *host:* in the Ingress resource definition yaml file; e.g., http://trimino.com), ensure the domain name resolves to the IP of the Ingress controller.<br>
+To obtain the IP address of the Ingress.<br>
+>`\>` kubectl get ingresses<br>
+
+Once the IP is obtained, configure the DNS server to resolve trimino.com to that IP, or add the following line to /etc/hosts in Linux (in Windows C:\Windows\system32\drivers\etc\hosts)<br>
+
+192.168.45.100&nbsp;&nbsp;&nbsp;&nbsp;trimino.com
 
 <br>
 
@@ -435,24 +523,31 @@ Deleting a ReplicaSet will delete all its pods.
 
 ## Service Accounts
 #### Notes
-1. K8S uses two types of accounts for authentication and authorization: user accounts and service accounts. While K8S creates and manages service accounts, user accounts are not created or managed by K8S. A service account provides an identity to a Pod, and K8S uses the service account to authenticate a Pod to the API server.
-2. K8S binds each Pod to a service account. Multiple Pods can be bound to the same service account, but multiple service accounts can't be bound to the same Pod. That is, when a K8S namespace is created, by default K8S creates a service account called *default*. This service account is assigned to all the Pods that are created in the namespace, unless a Pod is created under a specific service account.
-3. By default, at the time a K8S cluster is created, K8S creates a service account for the default namespace.
-4. At the time of creating the service account, K8S creates a token secret (JWT) and attaches it to the service account. All Pods bound to this service account can use the token secret to authenticate to the API server.
+1. K8s uses two types of accounts for *authentication* and *authorization*: *user accounts* and *service accounts*. While K8s creates and manages service accounts, user accounts are not created or managed by K8s.
+2. A service account provides an identity to a pod, and K8s uses the service account to authenticate a pod to the API server.
+3. K8s binds each pod to a service account; multiple pods can be bound to the same service account, but a pod can be bound to exactly one service account. That is, when a K8s namespace is created, by default K8s creates a service account called *default*. This service account is assigned to all the pods that are created in the namespace, unless a pod is created under a specific service account.
+4. A pod can only be bound to a service account from the same namespace.
+5. A namespace contains its own default service account, but additional service accounts can be created, if necessary.
+6. By default, at the time a K8s cluster is created, K8s creates a service account for the default namespace.
+7. At the time of creating a service account, K8s creates a token secret and attaches it to the service account. All pods bound to this service account can use the token secret to authenticate to the API server. (The authentication tokens used in service accounts are JSON Web Tokens (JWT).)
 
 ### Listing
+**List all service accounts available in the current K8s namespace.**
+>`\>` kubectl get serviceaccounts<br>
+>`\>` kubectl get sa<br>
+
 **List more information about the default service account.**
 >`\>` kubectl get serviceaccount default -o yaml
 
-**List all service accounts available in the current K8S namespace.**
->`\>` kubectl get serviceaccounts
+**List more information in YAML format about a given service account.**
+>`\>` kubectl get sa [serviceaccount-name] -o yaml
+
+**Inspecting a service account.**
+>`\>` kubectl describe sa [serviceaccount-name]
 
 ### Creation
 **Create a service account.**
 >`\>` kubectl create serviceaccount [serviceaccount-name]
-
-**List more information in YAML format about a given service account.**
->`\>` kubectl get serviceaccount [serviceaccount-name] -o yaml
 
 <br>
 
@@ -462,7 +557,7 @@ Deleting a ReplicaSet will delete all its pods.
 2. The contents of a ConfigMap's entries are shown in clear text.
 
 ### Listing
-List all configmaps available in the current K8S namespace.
+List all configmaps available in the current K8s namespace.
 >`\>` kubectl get configmaps
 
 <br>
@@ -472,9 +567,9 @@ List all configmaps available in the current K8S namespace.
 1. The maximum size of a Secret is limited to 1MB.
 2. The contents of a Secret's entries are shown as Base64-encoded strings.
 3. A Secret's entries can contain plain-text or binary value.
-3. Because how K8S handles Secrets internally, always use **Secret** over **ConfigMap** to store sensitive data. K8S ensures that Secrets are only accessible to the Pods that need them, and Secrets are never written to disk; Secrets are kept in memory. K8S writes Secrets to disk only at the master node, where all Secrets are stored in etcd. etcd is the distributed key/value database use by K8S, and since K8S 1.7+, etcd stores Secrets only in an encrypted format.
-4. K8S provisions a Secret to each container in a Pod; this is called the *default token secret*.
-5. Each container in a K8S Pod has access to this JWT from its filesystem in the directory /var/run/secrets/kuberenetes.io/serviceaccount. This JWT is bound to a K8S service account; e.g., to access the K8S API server from a container, use this JWT for authentication.
+3. Because how K8s handles Secrets internally, always use **Secret** over **ConfigMap** to store sensitive data. K8s ensures that Secrets are only accessible to the Pods that need them, and Secrets are never written to disk; Secrets are kept in memory. K8s writes Secrets to disk only at the master node, where all Secrets are stored in etcd. etcd is the distributed key/value database use by K8s, and since K8s 1.7+, etcd stores Secrets only in an encrypted format.
+4. K8s provisions a Secret to each container in a Pod; this is called the *default token secret*.
+5. Each container in a K8s Pod has access to this JWT from its filesystem in the directory /var/run/secrets/kuberenetes.io/serviceaccount. This JWT is bound to a K8s service account; e.g., to access the K8s API server from a container, use this JWT for authentication.
 
 ### Listing
 **List the structure of a Secret.**
@@ -485,9 +580,9 @@ List all configmaps available in the current K8S namespace.
 
 **List the structure of the default token secret in YAML format.**<br>
 The name/value pairs under the *data* element carry the confidential data in base64-encoded format. The default token secret has three name/value pairs:<br>
-ca.crt - The root certificate of the K8S cluster.
+ca.crt - The root certificate of the K8s cluster.
 #### Notes
-1. Use a tool to base64-decode to a file; the PEM-encoded root certificate of the K8S cluster.
+1. Use a tool to base64-decode to a file; the PEM-encoded root certificate of the K8s cluster.
 2. Use a tool to decode the PEM file.
 
 token  - This is a **JSON Web Token** (**JWT**), which is base64-encoded.
