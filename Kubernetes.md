@@ -412,14 +412,15 @@ Container logs are automatically rotated daily and every time the log file reach
 #### Notes
 1. A service is a resource that creates a single point of entry to a group of pods providing the same service. When a service is created, it gets a static IP, which never changes during the lifetime of the service. Hence, clients should connect to the service through its static IP address and not to pods directly (pods are ephemeral). The service ensures one of the pods receives the connection, regardless of the pod's current IP address.
 2. Services deal with TCP and UPD packets.
-3. For a Service of the LoadBalancer type to work, K8s uses an external load balancer.
-4. A service forwards each connection to a randomly selected backing pod. To redirect all requests made by the same client IP to the same pod, set the service's *sessionAffinity* property to ClientIP (the default is None). The session affinities supported by Kubernetes are: **None** and **ClientIP**.
+3. Label selectors determine which pods belong to a Service.
+4. A service forwards each connection to a randomly selected backing pod. To redirect all requests made by the same client to the same pod, set the service's *spec.sessionAffinity* property to ClientIP (the default is None). The session affinities supported by Kubernetes are: **None** and **ClientIP**.
 5. When a service exposes multiple ports, each port must be given a name. All of the service's ports will be exposed through the service cluster IP.
 6. The service *fully qualified domain name (FQDN)*<br>
    svc-name.default.svc.cluster.local<br>
    svc-name = service name<br>
    default = namespace the service is defined in<br>
    svc.cluster.local = a configurable cluster domain suffix used in all cluster local service names.
+7. For a Service of the LoadBalancer type to work, K8s uses an external load balancer.
 
 ### Listing
 **List services**<br>
@@ -437,6 +438,26 @@ If this is a cluster IP, it is only accessible from inside the cluster. The prim
 ### Deletion
 **Delete a service by name**
 >`\>` kubectl delete svc [svc-name]
+
+### Services and Environment Variables
+When a pod is started, K8s initializes a set of environment variables for each service that exists at that moment. If a service is created before the pods are created, processes in the pods can get the IP address and port of the service by inspecting its enviroment variables.<br>
+
+**List environment variables inside an existing container by running the *env* command**<br>
+The name of the environment variables for a given service will be:<br>
+[service-name]_SERVICE_HOST=xxx.xxx.xxx.xxx<br>
+[service-name]_SERVICE_PORT=xxx<br>
+
+Note that dashes in the service name are converted to underscores and all letters are uppercased.
+>`\>` kubectl exec [pod-name] env
+
+### Services and DNS
+List all pods in the kube-system namespace; one of the pods is called *kube-dns*.
+>`\>` kubectl get pods -n kube-system
+
+As its name suggests, this pod runs a DNS server, which all other pods running in the cluster are automatically configured to use; K8s modifies each container's /etc/resolv.conf file. 
+
+
+
 
 ### Endpoints
 #### Notes
