@@ -1,26 +1,24 @@
-# Docker Desktop
-**https://dockr.ly/docker-for-windows**
+# [Docker Desktop](https://dockr.ly/docker-for-windows)
 
 # Docker Version and Info
->`>` docker version
+>`\>` docker version
 
->`>` docker -v
+>`\>` docker -v
 
->`>` docker info
+>`\>` docker info
 
 # Notes
-1. Docker logging is powerful and pluggable, but it only reads log entries from the container's **console output stream**.
+1. Docker logging is powerful and pluggable, but it only reads log entries from the container's **`console output stream`**.
 2. Windows Versions  
-   Because applications in Windows Server containers run processes directly on the host, the version of Windows on the server **needs to match** the version of Windows inside the container. But if the applications are running in Hyper-V containers, the version of Windows on the server does not need to match the version of Windows inside the container.
-3. Nano Server is a minimal operating system built for running apps in containers. It is not a full version of Windows, and it can't be run as the OS on a VM or a physical machine. Furthermore, not all Windows apps can run in a Nano Server container.
+   Because applications in `Windows Server` containers run processes directly on the host, the version of Windows on the server **`needs to match`** the version of Windows inside the container. But if the applications are running in Hyper-V containers, the version of Windows on the server does not need to match the version of Windows inside the container.
+3. `Nano Server` is a minimal operating system built for running apps in containers. It is not a full version of Windows, and it can't be run as the OS on a VM or a physical machine. Furthermore, not all Windows apps can run in a Nano Server container.
 
-# Docker Compose
-**https://docs.docker.com/compose/compose-file/**
+# [Docker Compose](https://docs.docker.com/compose/compose-file/)
 ## Notes
 1. Docker Compose works with services and applications. An application is a single unit composed of one or more services; services are deployed as containers at runtime. Docker Compose is used to define all of the resources of an application -- services, networks, volumes, etc. -- and the dependencies among them. Since a container is a single instance of an image, a service is a template to run a container from an image with a known configuration. By using services, an application can scale up or down the number of containers running from the same image and using the same configuration as a single unit. Services are used in Docker Compose and with a cluster of Docker Engines running in Docker Swarm; services are not used in a standalone Docker Engine.
-2. Since Docker Compose **doesn't guarantee the order in which containers are created**, start-up dependencies among services have to be captured in the service definition with the depends_on attribute. Capturing dependencies with this attribute is acceptable for a distributed application running on a single machine, but it doesn't scale. When running on a cluster, an orchestrator is required to manage distributing the workload.
+2. Since Docker Compose **`doesn't guarantee the order in which containers are created`**, start-up dependencies among services have to be captured in the service definition with the depends_on attribute. Capturing dependencies with this attribute is acceptable for a distributed application running on a single machine, but it doesn't scale. When running on a cluster, an orchestrator is required to manage distributing the workload.
    Note:
-    Capturing dependencies like this is fine for running distributed applications on a single machine, but **it doesn't scale**. When you're running in a cluster you want the orchestrator to manage distributing the workload. It can't do that effectively if you have explicit dependencies, because it needs to make sure all the containers running the dependent service are healthy before it starts the consuming containers. See Docker Swarm.
+    Capturing dependencies like this is fine for running distributed applications on a single machine, but **`it doesn't scale`**. When you're running in a cluster you want the orchestrator to manage distributing the workload. It can't do that effectively if you have explicit dependencies, because it needs to make sure all the containers running the dependent service are healthy before it starts the consuming containers. See Docker Swarm.
 3. After executing the 'docker-compose up' command, containers can be managed using the Compose CLI or the standard Docker CLI.
 4. The Docker Compose file represents the desired state of the application. When a docker-compose command is executed, it compares the Composite file to the existing state of the application in Docker and makes any changes needed to get the desired state; e.g., starting containers, stopping containers, creating volumes, etc.
 5. All Docker Compose commands are processed by comparing the Compose file to the services running on Docker; hence, it is required to have access to the Compose file to run any Docker Compose commands.
@@ -30,89 +28,89 @@
 9. Warning!!! Ports can be specified without quotes, but this is best avoided as it can cause confusion when YAML parses statements such as 56:56 as a base 60 number.
 
 ### Start the application
-The **up** command creates resources specified in the Compose file that do not exist, and it creates and starts containers for all the services.
->`>` docker-compose up -d
+The **`up`** command creates resources specified in the Compose file that do not exist, and it creates and starts containers for all the services.
+>`\>` docker-compose up -d
 
 ### Scale a container
->`>` docker-compose up -d --scale container-name-or-id=2
+>`\>` docker-compose up -d --scale container-name-or-id=2
 
 ### Stop the application
-The **down** command stops all running containers and removes the resources. Networks are removed, if they were created by Docker Compose, but volumes are not removed thereby retaining all application data.
->`>` docker-compose down
+The **`down`** command stops all running containers and removes the resources. Networks are removed, if they were created by Docker Compose, but volumes are not removed thereby retaining all application data.
+>`\>` docker-compose down
 
 ### Stop all running containers
-The **stop** command stops all running containers without removing them or other resources. Stopping a container ends the running process with a graceful shutdown.
->`>` docker-compose stop
+The **`stop`** command stops all running containers without removing them or other resources. Stopping a container ends the running process with a graceful shutdown.
+>`\>` docker-compose stop
 
 ### Stop a container
->`>` docker-compose stop service-name
+>`\>` docker-compose stop service-name
 
 ### Kill all containers
-The **kill** command stops all containers by forcibly ending the running processes.
->`>` docker-compose kill
+The **`kill`** command stops all containers by forcibly ending the running processes.
+>`\>` docker-compose kill
 
 ### Start all stopped containers
 The **start** command starts all stopped containers via the entry point of the containers.
->`>` docker-compose start
+>`\>` docker-compose start
 
 ### List all running containers
->`>` docker-compose ps
+>`\>` docker-compose ps
 
 ### Check memory and CPU usage of all running containers
->`>` docker-compose top
+>`\>` docker-compose top
 
 ### Display the log entries of all runninng containers
->`>` docker-compose logs
->`>` docker-compose logs --tail 5
+>`\>` docker-compose logs
+>`\>` docker-compose logs --tail 5
 
 # Images
 ## Notes
-1. When identifying a container/image by its id, **there is no need to specify the entire id**; specify enough characters to uniquely identify it.
+1. When identifying a container/image by its id, **`there is no need to specify the entire id`**; specify enough characters to uniquely identify it.
 2. If a file is deleted in the same layer that it's created, it won't be included in the image. Because of this, Dockerfiles often download a tarball or other archive file, unpack it, and immediately remove the archive file in one RUN instruction.
 
 ### Building images
 **name-of-container-image = {user-name-of-registry}/{app-name}**
->`>` docker image build --tag [name-of-container-image][:version-or-variation] .
+>`\>` docker image build --tag [name-of-container-image][:version-or-variation] .
 
->`>` docker image build --file Dockerfile.nats --tag [name-of-container-image][:version-or-variation] .
+>`\>` docker image build --file Dockerfile.nats --tag [name-of-container-image][:version-or-variation] .
 
->`>` docker image build --build-arg ENV_NAME=TEST --tag [name-of-container-image][:version-or-variation] .
+>`\>` docker image build --build-arg ENV_NAME=TEST --tag [name-of-container-image][:version-or-variation] .
 
 **When a build fails, it can be very useful to launch the layer before the failure**
->`>` docker container run --rm -it [image-id]
+>`\>` docker container run --rm -it [image-id]
 
 ### Tagging
 **Tagging an image under an additional tag; creates an additional tag for the image**
->`>` docker tag [old-image-tag] [new-image-tag]
+>`\>` docker tag [old-image-tag] [new-image-tag]
 
 ### Pushing the image to Docker Hub
 **Login to Docker Hub; need userId and password**
->`>` docker login
+>`\>` docker login
 
->`>` docker push [image-tag]
+>`\>` docker push [image-tag]
 
 ### Displaying
 **Display the full set of layers that make up an image**
->`>` docker history [image-name-or-id]
+>`\>` docker history [image-name-or-id]
 
 ### Listing
 **List images**
->`>` docker image ls
+>`\>` docker image ls
 
->`>` docker images
+>`\>` docker images
 
->`>` docker image ls --all
+>`\>` docker image ls --all
 
->`>` docker image ls -a
+>`\>` docker image ls -a
 
->`>` docker image ls --filter reference=[name-of-container-image][:version-or-variation]
->`>` docker image ls --filter reference=[name-of-container-image]
+>`\>` docker image ls --filter reference=[name-of-container-image][:version-or-variation]
+>`\>` docker image ls --filter reference=[name-of-container-image]
 
 **List untagged images (dangling - TAG=<none>)**
->`>` docker images -f "dangling=true"
+>`\>` docker images -f "dangling=true"
 
 **List untagged image ids (dangling - TAG=<none>)**
->`>` docker images -f "dangling=true" -q
+>`\>` docker images -f "dangling=true" -q
 
 ### Removing
 **Remove given image**
@@ -131,7 +129,7 @@ The **start** command starts all stopped containers via the entry point of the c
 >`PS>` docker rmi $(docker images -f "dangling=true" -q) -f
 
 **Remove all images older than 6 months --> 4320h = 24 hour/day * 30 days/month * 6 months**
->`>` docker image prune --all --filter "until=4320h"
+>`\>` docker image prune --all --filter "until=4320h"
 
 # Containers
 ## Notes
@@ -148,59 +146,59 @@ The **start** command starts all stopped containers via the entry point of the c
         Version 1903 (OS Build 18362.295)*  
 
    By infinitely running ping (-t) against the localhost in a Windows nano server container in process-isolation mode (--isolation=process), 'ping.exe' is directly running on the host (instead of a virtual macine); this is why it can be seeing in the host system's task manager while the container is running:
-    >`>` docker container run --rm --name pinger --isolation=process mcr.microsoft.com/windows/nanoserver:1903 cmd.exe /c ping 127.0.0.1 -t
+    >`\>` docker container run --rm --name pinger --isolation=process mcr.microsoft.com/windows/nanoserver:1903 cmd.exe /c ping 127.0.0.1 -t
 3. When Docker runs a container, it starts the process specified in the Dockerfile or the command line; Docker watches that process, and when that process ends, the containers exits. But if the application starts multiple processes in a container, Docker will only monitor the last process that started. Ideally, there will be one process per container; otherwise, the application will have to take on the responsability of managing all other processes. **This is a recommendation and not a requirement.**
 4. When identifying a container/image by its id, **there is no need to specify the entire id**; specify enough characters to uniquely identify it.
 5. To exit a container while keeping it running in the background, **<kbd>Ctrl</kbd>PQ or <kbd>Ctrl</kbd>+<kbd>Shift</kbd>pq**.
 
 ### Running containers
 **Task container**
->`>` docker container run [name-of-container-image][:version-or-variation]
+>`\>` docker container run [name-of-container-image][:version-or-variation]
 
->`>` docker container run --name source image-share-volume ...
+>`\>` docker container run --name source image-share-volume ...
 
->`>` docker container run -it --volumes-from source image-share-volume cmd
+>`\>` docker container run -it --volumes-from source image-share-volume cmd
 
->`>` docker container run -it --volumes-from source:ro image-share-volume cmd
+>`\>` docker container run -it --volumes-from source:ro image-share-volume cmd
 
->`>` docker container run --volume {host-location-must-exist}:{container-location-does-not-need-to-exist-but-hidden-if-it-does} image-share-volume ...
+>`\>` docker container run --volume {host-location-must-exist}:{container-location-does-not-need-to-exist-but-hidden-if-it-does} image-share-volume ...
 
 **Interactive container**
->`>` docker container run --interactive --tty [name-of-container-image][:version-or-variation] cmd
+>`\>` docker container run --interactive --tty [name-of-container-image][:version-or-variation] cmd
 
->`>` docker container run -it --name container-name [name-of-container-image][:version-or-variation] cmd
+>`\>` docker container run -it --name container-name [name-of-container-image][:version-or-variation] cmd
 
 **Detach container**
->`>` docker container run --detach [name-of-container-image][:version-or-variation]
+>`\>` docker container run --detach [name-of-container-image][:version-or-variation]
 
->`>` docker container run --detach --publish {host-port}:{container-port} [name-of-container-image][:version-or-variation]
+>`\>` docker container run --detach --publish {host-port}:{container-port} [name-of-container-image][:version-or-variation]
 
->`>` docker container run -d -p {host-port}:{container-port} [name-of-container-image][:version-or-variation]
+>`\>` docker container run -d -p {host-port}:{container-port} [name-of-container-image][:version-or-variation]
 
 ### IDs and Names
 **Get the container id**
->`>` docker ps --filter "[name=container-name]" --format "{{ .ID }}"
+>`\>` docker ps --filter "[name=container-name]" --format "{{ .ID }}"
 
 **Names of all running containers**
 >`PS>` docker inspect -f '{{ .Name }}' $(docker ps -q)
 
 ### Listing
 **List all active containers**
->`>` docker container ls
+>`\>` docker container ls
 
->`>` docker ps
+>`\>` docker ps
 
 **List all containers**
->`>` docker container ls --all
+>`\>` docker container ls --all
 
->`>` docker container ls -a
+>`\>` docker container ls -a
 
 ### Stopping/Removing/Killing
 **Stop a running container**  
 When a **docker stop** command is issued, Docker sends a SIGTERM signal to the main process in the container and waits up to ten (10) seconds for the main process to stop. If the main process doesn't comply with the request within the timeout period, Docker sends a SIGKILL. Whereas the main process can ignore a SIGTERM, the SIGKILL goes straight to the kernel thereby terminating the main process; the main process is forcibly killed without having an opportunity to exit gracefully. To ensure a gracefully exit, the main process needs to handle the SIGTERM signal. To change the default 10 seconds to wait, use the --time (-t) option.
->`>` docker container stop [container-name-or-id]
+>`\>` docker container stop [container-name-or-id]
 
->`>` docker container stop --time=20 [container-name-or-id]
+>`\>` docker container stop --time=20 [container-name-or-id]
 
 **Stop all running containers**
 >`PS>` docker ps -q | foreach { docker stop $_ }
@@ -212,29 +210,29 @@ When a **docker stop** command is issued, Docker sends a SIGTERM signal to the m
 >`PS>` docker container ls -aq | foreach { docker rm -f $_ }
 
 **Kill a running container**
->`>` docker container kill [container-name-or-id]
+>`\>` docker container kill [container-name-or-id]
 
->`>` docker container kill -s=1 [container-name-or-id]
+>`\>` docker container kill -s=1 [container-name-or-id]
 
 ### IP Addresses and Ports
 **IP Address**
->`>` docker inspect -f '{{.NetworkSettings.Networks.nat.IPAddress}}' [container-name-or-id]
+>`\>` docker inspect -f '{{.NetworkSettings.Networks.nat.IPAddress}}' [container-name-or-id]
 
 >`PS>` docker container inspect --format '{{ .NetworkSettings.Networks.nat.IPAddress }}' [container-name-or-id]
 
 **Publish all of the exposed ports from the container image to random ports on the host**
->`>` docker container run -d --publish-all -v c:\app-state:c:\app-state --name appv1 [name-of-container-image][:version-or-variation]
+>`\>` docker container run -d --publish-all -v c:\app-state:c:\app-state --name appv1 [name-of-container-image][:version-or-variation]
 
->`>` docker container run -d -P -v c:\app-state:c:\app-state --name appv1 [name-of-container-image][:version-or-variation]
+>`\>` docker container run -d -P -v c:\app-state:c:\app-state --name appv1 [name-of-container-image][:version-or-variation]
 
 **Ports**
->`>` docker container port [container-name-or-id]
+>`\>` docker container port [container-name-or-id]
 
->`>` docker inspect [container-name-or-id]
+>`\>` docker inspect [container-name-or-id]
 
 ### Displaying
 **Display the timestamp**
->`>` docker container logs -t [container-name-or-id]
+>`\>` docker container logs -t [container-name-or-id]
 
 **Display the labels**
 >`PS>` docker container inspect -f '{{ json .Config.Labels }}' [container-name-or-id] | ConvertFrom-Json
@@ -243,30 +241,30 @@ When a **docker stop** command is issued, Docker sends a SIGTERM signal to the m
 >`PS>` docker container inspect -f '{{ .RestartCount }}' $(docker ps -q)
 
 **Display the Healthcheck logs**
->`>` docker inspect --format '{{ json .State.Health }}' [container-name-or-id] | ConvertFrom-Json | ConvertTo-Json
+>`\>` docker inspect --format '{{ json .State.Health }}' [container-name-or-id] | ConvertFrom-Json | ConvertTo-Json
 
 ### Logging/Streaming
 **Logging containers**
->`>` docker container logs [container-name-or-id]
+>`\>` docker container logs [container-name-or-id]
 
 >`PS>` docker container logs [container-name-or-id] | where { $_ -like '*Error *' }
 
 **Stream the logs from a running container (*Ctrl+C to exit*)**
->`>` docker container logs -f [container-name-or-id]
+>`\>` docker container logs -f [container-name-or-id]
 
 **Stream events (*Ctrl+C to exit*)**
->`>` docker events
+>`\>` docker events
 
->`>` docker events --since '2019-10-23T15:49:29'
+>`\>` docker events --since '2019-10-23T15:49:29'
 
->`>` docker events --since '2019-10-23T00:35:30' --until '2019-10-23T00:36:05'
+>`\>` docker events --since '2019-10-23T00:35:30' --until '2019-10-23T00:36:05'
 
->`>` docker events --filter 'event=stop'
+>`\>` docker events --filter 'event=stop'
 
->`>` docker events --filter '[container=container-name-or-id]' --filter 'event=stop'
+>`\>` docker events --filter '[container=container-name-or-id]' --filter 'event=stop'
 
 **Return a live stream of resource usage (*Ctrl+C to exit*)**
->`>` docker stats [container-name-or-id] [container-name-or-id...]
+>`\>` docker stats [container-name-or-id] [container-name-or-id...]
 
 ### Inspecting
 **Mounts**
@@ -274,7 +272,7 @@ When a **docker stop** command is issued, Docker sends a SIGTERM signal to the m
 
 ### Resources usage
 **Processes, memory, CPU**
->`>` docker container top [container-name-or-id]
+>`\>` docker container top [container-name-or-id]
 
 ### Stats
 **Stats on all running containers**
@@ -283,40 +281,40 @@ When a **docker stop** command is issued, Docker sends a SIGTERM signal to the m
 # Volumes
 ### Creation
 **Create a volume**
->`>` docker volume create [volume-name]
+>`\>` docker volume create [volume-name]
 
 ### Removal
 **Remove a volume**
->`>` docker volume rm [volume-name-or-id]
+>`\>` docker volume rm [volume-name-or-id]
 
 **Remove all volumes**
 >`PS>` docker volume ls | foreach { docker volume rm -f $_ }
 
 **Remove all unused local volumes; i.e., volumes which are not referenced by any containers**
->`>` docker volume prune
+>`\>` docker volume prune
 
 **Do not prompt for confirmation (-f -> --force)**
->`>` docker volume prune -f
+>`\>` docker volume prune -f
 
 ### Listing
 **List all volumes**
->`>` docker volume ls
+>`\>` docker volume ls
 
 **List all volumes not referenced by any containers (-f -> --filter)**
->`>` docker volume ls -f dangling=true
+>`\>` docker volume ls -f dangling=true
 
 ### Location
 **Location where the data is physically stored on the host**
->`>` docker volume inspect --format '{{ .Mountpoint }}' [volume-name]
->`>` docker volume inspect -f '{{ .Mountpoint }}' [volume-name]
+>`\>` docker volume inspect --format '{{ .Mountpoint }}' [volume-name]
+>`\>` docker volume inspect -f '{{ .Mountpoint }}' [volume-name]
 
 ### Displaying
 **Display the Name and Driver entries separated by a colon for all volumes**
->`>` docker volume ls --format "{{.Name}}: {{.Driver}}"
+>`\>` docker volume ls --format "{{.Name}}: {{.Driver}}"
 
 ### Inspecting
 **Inspect a volume**
->`>` docker inspect [volume-name-or-id]
+>`\>` docker inspect [volume-name-or-id]
 
 # Networks
 ## Notes
@@ -326,32 +324,32 @@ When a **docker stop** command is issued, Docker sends a SIGTERM signal to the m
    * Overlay driver - It runs distributed applications in Docker Swarm.
 2. The use of **0.0.0.0** as IP address binds to **all network interfaces**, which is needed to allow the container to be accessed from the host or other containers.
 3. When publishing ports to the host, Docker publishes to all interfaces (0.0.0.0) by default. By specifying the interface to bind explicitly, the attack surface is reduced since only traffic from the explicitly bound interface is allowed; e.g.,
-    >`>` docker container run -p 172.123.34.23:80:80 ...
+    >`\>` docker container run -p 172.123.34.23:80:80 ...
 4. The **hosts** file is an Operating System file that maps hostnames to IP addresses; it is a plain text file. It is located at **C:\Windows\System32\drivers\etc\hosts**.
 
 ### Creation
 **Create a network**
->`>` docker network create --driver [-d] nat [network-name]
+>`\>` docker network create --driver [-d] nat [network-name]
 
 ### Removing
 **Remove a network**
->`>` docker network rm [network-name-or-id]
+>`\>` docker network rm [network-name-or-id]
 
 ### Connection
 **Connect container to network**
->`>` docker network connect [network-name-or-id] [container-name-or-id]
+>`\>` docker network connect [network-name-or-id] [container-name-or-id]
 
 ### Disconnection
 **Disconnect container from network**
->`>` docker network disconnect [network-name-or-id] [container-name-or-id]
+>`\>` docker network disconnect [network-name-or-id] [container-name-or-id]
 
 ### Listing
 **List Docker networks**
->`>` docker network ls
+>`\>` docker network ls
 
 ### Inspecting
 **Inspect a network**
->`>` docker network inspect [network-name-or-id]
+>`\>` docker network inspect [network-name-or-id]
 
 # Dockerfile
 ## The Build Context
@@ -398,7 +396,7 @@ In **Windows**, volume directories need to be empty. In the Dockerfile, files ca
 Bind mounts have limited functionality compared to volumes. When a bind mount is used, a file or directory on the host is mounted into a container. The file or directory is referenced by its full or relative path on the host. By contrast, when a volume is used, a new directory is created within Docker's storage directory on the host, and Docker manages that directory's contents. You can't use Docker CLI commands to directly manage bind mounts.
 
 To mount the host *c:\host_dir* folder to the container path *c:\container_dir*
->`>` docker container run –it --rm --name [mount1] -v c:\host_dir:c:\container_dir mcr.microsoft.com/windows/servercore:1903 powershell
+>`\>` docker container run –it --rm --name [mount1] -v c:\host_dir:c:\container_dir mcr.microsoft.com/windows/servercore:1903 powershell
 
 >`PS C:\>` Set-Location -Path .\container_dir;
 
@@ -412,7 +410,7 @@ To see the file in the host
 >`C:\>` dir c:\host_dir
 
 To mount the host c:\host_dir folder to another container (mount2) path c:\container_dir
->`>` docker container run -it --rm --name mount2 --mount type=bind,source=c:\host_dir,target=c:\container_dir mcr.microsoft.com/windows/servercore:1903 powershell
+>`\>` docker container run -it --rm --name mount2 --mount type=bind,source=c:\host_dir,target=c:\container_dir mcr.microsoft.com/windows/servercore:1903 powershell
 
 >`PS C:\>` Get-ChildItem -Path .\container_dir\ -File;
 

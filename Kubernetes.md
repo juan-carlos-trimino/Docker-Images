@@ -29,25 +29,22 @@ Please note the following:
 
 ***
 # Tools
-## Base64
+## [Base64](https://www.browserling.com/tools/file-to-base64)
 Convert a binary file to a base64-encoded text file.<br>
-https://www.browserling.com/tools/file-to-base64
 
 Base64 Encode and Decode<br>
-https://base64.guru/converter/decode/file
+https://base64.guru/converter/decode/file<br>
 http://www.base64decode.org
 
 <br>
 
-## JSON
+## [JSON](https://jsonformatter.curiousconcept.com)
 JSON Formatter and Validator<br>
-https://jsonformatter.curiousconcept.com
 
 <br>
 
-## JSON Web Token (JWT) [RFC 7519]
+## [JSON Web Token (JWT) [RFC 7519]](http://jwt.io)
 Decode, verify, and generate JWT.<br>
-http://jwt.io
 
 <br>
 
@@ -59,25 +56,23 @@ https://8gwifi.org/jwkconvertfunctions.jsp
 
 <br>
 
-## Privacy Enhanced Mail (PEM)
+## [Privacy Enhanced Mail (PEM)](https://report-uri.com/home/pem_decoder)
 Decode a PEM file.<br>
-https://report-uri.com/home/pem_decoder
 
 <br>
 
 ***
-# Minikube
+# [Minikube](https://kubernetes.io/docs/setup/minikube/)
 Setup a single-node K8s cluster on a local machine.<br>
-https://kubernetes.io/docs/setup/minikube/
 
 #### Notes
 1. Minikube runs Kubernetes inside a Virtual Machine (VM) run through either VirtualBox or Hyper-V.
 2. Minikube will only run Linux based containers.
-3. Since Minikube doesn't support *LoadBalancer* services, services will never get an external IP.
+3. Since Minikube doesn't support *`LoadBalancer`* services, services will never get an external IP.
 
 ### Cluster
 **Start a K8s cluster (Windows).**<br>
-Once the VM is running, go to *Control Panel -> Administrative Tools -> Hyper-V Manager -> Virtual Machines -> minikube* and double-click on **minikube** to connect to the newly created VM (**minikube**); use **docker** for username and **tcuser** for the password.
+Once the VM is running, go to *`Control Panel -> Administrative Tools -> Hyper-V Manager -> Virtual Machines -> minikube`* and double-click on *`minikube`* to connect to the newly created VM (**minikube**); use **docker** for username and **tcuser** for the password.
 >`\>` minikube start --vm-driver=hyperv
 
 **Debug installation failure (Windows).**
@@ -166,33 +161,33 @@ https://docs.docker.com/desktop/
 ***
 # Kubernetes (K8s)
 ## Architecture Overview
-K8s uses the *client-server architecture*. A K8s cluster consists of one or more master nodes and one or more worker nodes.
+K8s uses the *`client-server architecture`*. A K8s cluster consists of one or more master nodes and one or more worker nodes.
 
 <br>
 
 ### Master Node (Control Plane)
 The master node controls and manages the cluster and consists of four main components:
-1. *API Server* exposes the K8s API and provides the frontend to the cluster's shared state through which all other components interact.
+1. *`API Server`* exposes the K8s API and provides the frontend to the cluster's shared state through which all other components interact.
    1. It is the central component used by all other components and clients (e.g., kubectl).
    2. It provides a CRUD (Create, Read, Update, Delete) interface for querying and modifying the cluster state over a RESTful API.
    3. It uses etcd to store the state.
-2. *Scheduler* schedules the apps by assigning a worker node to each deployable component of the app.
+2. *`Scheduler`* schedules the apps by assigning a worker node to each deployable component of the app.
    1. It monitors the API server's watch mechanism and assigns a cluster node to the new pod.
    2. It updates the pod definition through the API server. The API server notifies the Kubelet (using the watch mechanism) that a pod has been scheduled. When the Kubelet on the target node receives the notification, it creates and runs the pod's containers.
    3. By default, pods belonging to the same Service or ReplicaSet are distributed across multiple nodes, but this is not always guaranteed.
    4. A cluster may have multiple Schedulers running, and a pod may specify the Scheduler that should schedule it by setting the *schedulerName* property in the pod spec. Pods without the *schedulerName* property set or with the *schedulerName* property set to *default-scheduler* are scheduled using the default Scheduler; all other pods are ignored by the default Scheduler.
-3. *Controller Manager* performs cluster-level functions such as replicating components, keeping track of worker nodes, etc.
-   1. x
-4. *etcd* is a key:value distributed data store that persistently stores the cluster configuration.
-   1. x
+3. *`Controller Manager`* performs cluster-level functions such as replicating components, keeping track of worker nodes, etc.
+   1. jct
+4. *`etcd`* is a key:value distributed data store that persistently stores the cluster configuration.
+   1. jct
 
 <br>
 
 ### Worker Node
 K8s runs workloads (containers) on worker nodes; a worker node consists of three main components:
-1. *Kubelet* communicates with the API Server and manages containers running in a Pod on its node.
-2. *K8s Service Proxy (Kube-Proxy)* load-balances network traffic between application components.
-3. *Container Runtime* runs the containers; e.g., Docker.
+1. *`Kubelet`* communicates with the API Server and manages containers running in a Pod on its node.
+2. *`K8s Service Proxy (Kube-Proxy)`* load-balances network traffic between application components.
+3. *`Container Runtime`* runs the containers; e.g., Docker.
 
 <br>
 
@@ -232,13 +227,13 @@ K8s runs workloads (containers) on worker nodes; a worker node consists of three
 
 ## Nodes
 **Get all nodes in the cluster.**
->`>` kubectl get nodes
+>`\>` kubectl get nodes
 
 **Get additional details for given node.**
->`>` kubectl describe node [node-name]
+>`\>` kubectl describe node [node-name]
 
 **Get additional details for all nodes.**
->`>` kubectl describe node
+>`\>` kubectl describe node
 
 <br>
 
@@ -302,7 +297,7 @@ If an issue occurs while creating the Deployment, a set of errors or warnings wi
 >`\>` kubectl get pods --all-namespaces
 
 **List pods using a label selector.**
->`\> kubectl get pod -l [label-name]
+>`\>` kubectl get pod -l [label-name]
 
 **List only the names.**
 >`\>` kubectl get pods -o name --all-namespaces<br>
@@ -324,7 +319,7 @@ Find why the container had to be restarted.<br>
 
 ### Creation
 **Create a pod.**
->`>` kubectl create -f filename.yaml
+>`\>` kubectl create -f filename.yaml
 
 ### Deletion
 **Delete all pods by deleting the namespace.**<br>
@@ -415,7 +410,7 @@ Container logs are automatically rotated daily and every time the log file reach
 3. Label selectors determine which pods belong to a Service.
 4. A service forwards each connection to a randomly selected backing pod. To redirect all requests made by the same client to the same pod, set the service's *spec.sessionAffinity* property to ClientIP (the default is None). The session affinities supported by Kubernetes are: **None** and **ClientIP**.
 5. When a service exposes multiple ports, each port must be given a name. All of the service's ports will be exposed through the service cluster IP.
-6. The service *fully qualified domain name (FQDN)*<br>
+6. The service *`fully qualified domain name (FQDN)`*<br>
    svc-name.default.svc.cluster.local<br>
    svc-name = service name<br>
    default = namespace the service is defined in<br>
@@ -444,18 +439,32 @@ When a pod is started, K8s initializes a set of environment variables for each s
 
 **List environment variables inside an existing container by running the *env* command**<br>
 The name of the environment variables for a given service will be:<br>
-[service-name]_SERVICE_HOST=xxx.xxx.xxx.xxx<br>
-[service-name]_SERVICE_PORT=xxx<br>
+[service-name]_SERVICE_HOST=`xxx.xxx.xxx.xxx`<br>
+[service-name]_SERVICE_PORT=`xxxxx`<br>
 
 Note that dashes in the service name are converted to underscores and all letters are uppercased.
 >`\>` kubectl exec [pod-name] env
 
 ### Services and DNS
-List all pods in the kube-system namespace; one of the pods is called *kube-dns*.
+List all pods in the kube-system namespace; one of the pods is called *```kube-dns```*.
 >`\>` kubectl get pods -n kube-system
 
-As its name suggests, this pod runs a DNS server, which all other pods running in the cluster are automatically configured to use; K8s modifies each container's /etc/resolv.conf file. 
+As its name suggests, the pod ```xxxxx``` runs a DNS server; K8s modifies each container's /etc/resolv.conf file to ensure that all other pods running in the cluster are automatically configured to use the DNS server. Since the DNS server knows all of the services running in the cluster, any DNS query performed by a process running in a pod will be handled by the server. But whether a pod uses the DNS server or not is determined by the *dnsPolicy* property in each pod's spec. Finally, because each service gets a DNS entry in the DNS server pod, a pod that knows the name of the service can access it through its FQDN.
 
+Use the *kubectl exec* command to run a shell. (**The shell's executable must be available in the container image.**)
+>`\>` kubectl exec -it [pod-name] [shell]<br>
+
+Once inside the container, use the *curl* command to access the service by using one of the following:
+>`\>` @@@@@ curl http://[service-name].[namespace-of-service].svc.cluster.local<br>
+
+or
+>`\>` @@@@@ curl http://[service-name].[namespace-of-service]<br>
+
+or
+>`\>` @@@@@ curl http://[service-name]<br>
+
+To display the /etc/resolv.conf file.
+>`\>` cat /etc/resolv.conf
 
 
 
