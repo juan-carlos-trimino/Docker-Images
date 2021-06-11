@@ -1,6 +1,10 @@
 # [Docker Desktop](https://dockr.ly/docker-for-windows)
+- Browse to the `Desktop` homepage and install the *`stable`* version.<br>
+- Docker Desktop can run Windows and Linux containers.
 
 # Docker Version and Info
+To verify the installation.<br>
+(It displays the versions for the Docker `client` (CLI) and the Docker `server` (the service that manages containers).
 >`\>` docker version
 
 >`\>` docker -v
@@ -145,14 +149,20 @@ The **start** command starts all stopped containers via the entry point of the c
         Microsoft Windows  
         Version 1903 (OS Build 18362.295)*  
 
-   By infinitely running ping (-t) against the localhost in a Windows nano server container in process-isolation mode (--isolation=process), 'ping.exe' is directly running on the host (instead of a virtual macine); this is why it can be seeing in the host system's task manager while the container is running:
+   By infinitely running ping (-t) against the localhost in a Windows nano server container in process-isolation mode (--isolation=process), `ping.exe` is directly running on the host (instead of a virtual machine); this is why it can be seeing in the host system's task manager while the container is running:
     >`\>` docker container run --rm --name pinger --isolation=process mcr.microsoft.com/windows/nanoserver:1903 cmd.exe /c ping 127.0.0.1 -t
+
+    (Since Linux containers always run with the process-isolation mode of --isolation=process, there is no need to specify the process-isolation mode.)
 3. When Docker runs a container, it starts the process specified in the Dockerfile or the command line; Docker watches that process, and when that process ends, the containers exits. But if the application starts multiple processes in a container, Docker will only monitor the last process that started. Ideally, there will be one process per container; otherwise, the application will have to take on the responsability of managing all other processes. **This is a recommendation and not a requirement.**
 4. When identifying a container/image by its id, **there is no need to specify the entire id**; specify enough characters to uniquely identify it.
 5. To exit a container while keeping it running in the background, **<kbd>Ctrl</kbd>PQ or <kbd>Ctrl</kbd>+<kbd>Shift</kbd>pq**.
 
 ### Running containers
-**Task container**
+`docker run` is the short form of `docker container run`.<br><br>
+**Task container**<br>
+Display the host name of a Windows Nano Server container; the container ID **is** the container's hostname.
+>`\>` docker run mcr.microsoft.com/windows/nanoserver:20H2 hostname
+
 >`\>` docker container run [name-of-container-image][:version-or-variation]
 
 >`\>` docker container run --name source image-share-volume ...
@@ -351,12 +361,12 @@ When a **docker stop** command is issued, Docker sends a SIGTERM signal to the m
 **Inspect a network**
 >`\>` docker network inspect [network-name-or-id]
 
-# Dockerfile
+# [Dockerfile](https://docs.docker.com/engine/reference/builder/)
 ## The Build Context
 1. The **docker build** command requires a Dockerfile and a build context, which may be empty. The build context is the set of local files and directories that can be referenced from ADD or COPY instructions in the Dockerfile and is normally specified as a path to a directory.
 2. Only the instructions **FROM**, **RUN**, **COPY**, and **ADD** create layers in the final image. Other instructions configure things, add metadata, or tell Docker to do something at run time, such as expose a port or run a command.
 
-**\# escape=\`**  
+**\# [escape](https://docs.docker.com/engine/reference/builder/#escape)=\`**  
 Parser directives do not add layers to the build and will not be shown as a build step. Once a comment, empty line, or builder instruction has been processed, Docker no longer looks for parser directives. Hence, all parser directives must be at the very top of a Dockerfile.  
 Use the backtick (**\`**) option for the escape character to split commands over multiple lines rather than the default backslash **\\** option.
 
@@ -365,7 +375,7 @@ Use the backtick (**\`**) option for the escape character to split commands over
 **FROM ${BASE_OS_LAYER}:${BASE_OS_LAYER_VERSION}**  
 A Dockerfile must start with a **FROM** instruction. The **FROM** instruction specifies the Base Image from which you are building. **FROM** may only be preceded by one or more **ARG** instructions, which declare arguments that are used in **FROM** lines in the Dockerfile.
 
-**SHELL ["cmd", "/S", "/C"]**  
+**[SHELL ["cmd", "/S", "/C"]](https://docs.docker.com/engine/reference/builder/#shell)**  
 The default shell on **Linux is ["/bin/sh", "-c"]** and on **Windows is ["cmd", "/S", "/C"]**.  
 &nbsp;&nbsp;**/S** --> Modify the treatment of string after **/C** or **/K**.  
 &nbsp;&nbsp;**/C** --> Carry out the command specified by string and then terminate.  
@@ -379,12 +389,12 @@ The following instructions can be affected by the **SHELL** instruction when the
 **$ErrorActionPreference** determines how PowerShell responds to a non-terminating error (an error that does not stop a cmdlet processing) at the command line or in a script, cmdlet, or provider, such as the errors generated by the Write-Error cmdlet.  
 **$ProgressPreference** determines how PowerShell responds to progress updates generated by a script, cmdlet or provider, such as the progress bars generated by the Write-Progress cmdlet.
 
-**ENV**  
+**[ENV](https://docs.docker.com/engine/reference/builder/#env)**  
 Settings added to the Dockerfile with **ENV** become **part of the image** so every container run from the image will have these values set. When you run a container, you can add new environment variables or replace the values of existing image variables using the **--env** or **-e** option.  
 
 To keep environment values safer, Docker lets you load them from a file rather than specifying them in plain text in the **docker container run** command. Isolating values in a file means that the file itself can be secured so that only administrators and the Docker service account can access it. The environment file is a simple-text format, with one line for each environment variable, written as a key-value pair. To run the container and load the file contents as environment variables, you can use the --env-file option. Note: Environment values still are not secure. If someone gains access to your app, he could print out all the environment variables and get your secrets.
 
-**VOLUME**
+**[VOLUME](https://docs.docker.com/engine/reference/builder/#volume)**<br>
 Volumes are created and managed by Docker; volumes are units of storage. When a volume is created, it is stored within a directory on the host, which is managed by Docker (**/var/lib/docker/volumes/ on Linux** or **C:\ProgramData\docker\volumes on Windows**). Non-Docker processes should not modify this part of the filesystem. A given volume can be mounted into multiple containers simultaneously. When no running container is using a volume, the volume is still available to Docker and is not removed automatically. They have a separate life cycle to containers so they can be created independently and then mounted inside one or more containers. Volumes are the best way to persist data in Docker.
 
 You specify volumes with a target directory, which is the location inside the container where the volume is mounted. When you run a container with a volume defined in the image, the volume is mapped to a physical location on the host, which is specific to that one container. More containers running from the same image will have their volumes mapped to a different host location.
@@ -418,7 +428,7 @@ To mount the host c:\host_dir folder to another container (mount2) path c:\conta
 
 >`PS C:\>` <kbd>Ctrl</kbd>+<kbd>Shift</kbd>pq
 
-**HEALTHCHECK**
+**[HEALTHCHECK](https://docs.docker.com/engine/reference/builder/#healthcheck)**<br>
 The options that can appear before **CMD** are:  
 --interval=30s (default)  
 &nbsp;&nbsp;The health check will first run 'interval' seconds after the container is started, and then again 'interval' seconds after each previous check completes.  
@@ -436,20 +446,20 @@ The command's exit status indicates the health status of the container. The poss
 **1**: unhealthy - the container is not working correctly  
 **2**: reserved - do not use this exit code
 
-**EXPOSE**  
+**[EXPOSE](https://docs.docker.com/engine/reference/builder/#expose)**<br>
 The instruction informs Docker that the container listens on the specified network port at runtime; the port listens on **TCP** (default) or **UDP**.
 
 The instruction does not actually publish the port. It functions as a type of documentation about which ports are intended to be published. To actually publish the port when running the container, use the **-p** (**--publish**) flag on **docker container run** to publish and map one or more ports, or the **-P** (**--publish-all**) flag to publish all exposed ports and map them to high-order ports. Containers in the same Docker network can always access one another's port; ports only need to be published to make them available outside Docker.
 
-**WORKDIR**  
+**[WORKDIR](https://docs.docker.com/engine/reference/builder/#workdir)**<br>
 The instruction sets the working directory for any subsequent **RUN**, **CMD**, **ENTRYPOINT**, **COPY**, and **ADD** instructions. If the working directory doesn't exist, it will be created even if it's not used in any subsequent Dockerfile instruction.
 
-**COPY**  
+**[COPY](https://docs.docker.com/engine/reference/builder/#copy)**<br>
 The instruction copies files or directories from <src> (build context) to the filesystem of the container at the path <dest>; the <dest> is an absolute path, or a path relative to **WORKDIR**. Paths outside the build context cannot be specified. The exec format ["<src>", "<dest>"] is required for paths containing spaces.
 
-**RUN**  
+**[RUN](https://docs.docker.com/engine/reference/builder/#run)**<br>
 
-**CMD**  
+**[CMD](https://docs.docker.com/engine/reference/builder/#cmd)**<br>
 The instruction has three forms:  
 1. The exec form, which is the prefer form: **CMD ["executable","param1","param2"]**
    * The exec form is parsed as a **JSON** array, which means that double-quotes (") must be used around words instead of single-quotes (').
@@ -463,7 +473,7 @@ There can only be one **CMD** instruction in a Dockerfile. If more than one **CM
 
 The **CMD** instruction is overridden by any arguments to *docker container run* after the image name.
 
-**ENTRYPOINT**  
+**[ENTRYPOINT](https://docs.docker.com/engine/reference/builder/#entrypoint)**<br>
 The instruction has two forms:
 1. The exec form, which is the **prefer** form: **ENTRYPOINT ["executable", "param1", "param2"]**
    * The exec form is parsed as a **JSON** array, which means that double-quotes (") must be used around words instead of single-quotes (').
