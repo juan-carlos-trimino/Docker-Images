@@ -446,27 +446,25 @@ Note that dashes in the service name are converted to underscores and all letter
 >`\>` kubectl exec [pod-name] env
 
 ### Services and DNS
-List all pods in the kube-system namespace; one of the pods is called *```kube-dns```*.
+K8s includes a DNS server for use in service discovery; *CoreDNS* is the recommended DNS Server, replacing *Kube-DNS* as of v1.12. K8s assigns each service a virtual static IP address within the cluster (ClusterIP) and generates an internal DNS entry that resolves to this IP address; any request that reaches this IP address will be routed to one of the pods in the group. In general, K8s services support A, CNAME, and SRV records. K8s assigns A records to services of the form `service-name.namespace-of-service.svc.cluster.local`.
+
+List all pods in the *kube-system* namespace; one of the pods is called *`*dns*`*.
 >`\>` kubectl get pods -n kube-system
 
-As its name suggests, the pod ```xxxxx``` runs a DNS server; K8s modifies each container's /etc/resolv.conf file to ensure that all other pods running in the cluster are automatically configured to use the DNS server. Since the DNS server knows all of the services running in the cluster, any DNS query performed by a process running in a pod will be handled by the server. But whether a pod uses the DNS server or not is determined by the *dnsPolicy* property in each pod's spec. Finally, because each service gets a DNS entry in the DNS server pod, a pod that knows the name of the service can access it through its FQDN.
+As its name suggests, the pod *`*dns*`* runs a DNS server; K8s modifies each container's */etc/resolv.conf* file to ensure that all other pods running in the cluster are automatically configured to use the DNS server. Since the DNS server knows all of the services running in the cluster, any DNS query performed by a process running in a pod will be handled by the DNS server. Because each service gets a DNS entry in the DNS server pod, a pod that knows the name of the service can access it through its FQDN. Finally, whether a pod uses the DNS server or not is determined by the *dnsPolicy* property in each pod's spec.
 
-Use the *kubectl exec* command to run a shell. (**The shell's executable must be available in the container image.**)
+Use the *kubectl exec* command to run a shell.<br>
+*(The shell must be available in the container image.)*
 >`\>` kubectl exec -it [pod-name] [shell]<br>
 
 Once inside the container, use the *curl* command to access the service by using one of the following:
->`\>` @@@@@ curl http://[service-name].[namespace-of-service].svc.cluster.local<br>
-
-or
->`\>` @@@@@ curl http://[service-name].[namespace-of-service]<br>
-
-or
->`\>` @@@@@ curl http://[service-name]<br>
+*(The curl command must be available in the container image.)*
+>`\>` curl http://[service-name].[namespace-of-service].svc.cluster.local<br>
+>`\>` curl http://[service-name].[namespace-of-service]<br>
+>`\>` curl http://[service-name]<br>
 
 To display the /etc/resolv.conf file.
 >`\>` cat /etc/resolv.conf
-
-
 
 ### Endpoints
 #### Notes

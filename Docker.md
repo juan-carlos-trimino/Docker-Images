@@ -454,8 +454,11 @@ The instruction does not actually publish the port. It functions as a type of do
 **[WORKDIR](https://docs.docker.com/engine/reference/builder/#workdir)**<br>
 The instruction sets the working directory for any subsequent **RUN**, **CMD**, **ENTRYPOINT**, **COPY**, and **ADD** instructions. If the working directory doesn't exist, it will be created even if it's not used in any subsequent Dockerfile instruction.
 
+**[ADD](https://docs.docker.com/engine/reference/builder/#add)**<br>
+The instruction copies from the build context in the host files or directories, or remote URLs from `source` and adds them to the filesystem of the image at the path `destination`.
+
 **[COPY](https://docs.docker.com/engine/reference/builder/#copy)**<br>
-The instruction copies files or directories from <src> (build context) to the filesystem of the container at the path <dest>; the <dest> is an absolute path, or a path relative to **WORKDIR**. Paths outside the build context cannot be specified. The exec format ["<src>", "<dest>"] is required for paths containing spaces.
+The instruction copies files or directories from `source` (build context in the host) to the filesystem of the container at the path `destination`; the `destination` is an absolute path, or a path relative to **WORKDIR**. Paths outside the build context cannot be specified. Furthermore, the instruction copies files or directories from a previous stage to the current stage in a multi-stage build.
 
 **[RUN](https://docs.docker.com/engine/reference/builder/#run)**<br>
 
