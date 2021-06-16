@@ -9,11 +9,11 @@ Create self-signed certificate on Windows using OpenSSL inside docker.
 Linux
 -----
 >`\>` docker build -t veni-vidi-vici/openssl-1.1.1k:alpine-3.13 -f ./OpenSSL/Dockerfile.linux ./OpenSSL<br>
->`\>` docker run -it --rm -v /jct/Repos/Volumes/OpenSSL:/openssl-certs veni-vidi-vici/openssl-1.1.1k:alpine-3.13<br><br>
-To use the shell, remove the following line from Dockerfile.linux:<br>
-**ENTRYPOINT ["openssl"]**<br>
->`\>` docker run -it --rm -v /jct/Repos/Volumes/OpenSSL:/openssl-certs veni-vidi-vici/openssl-1.1.1k:alpine-3.13 sh<br>
-Then from the command prompt, type:<br>
+>`\>` docker run -it --rm -v /jct/Repos/Volumes/OpenSSL:/openssl-certs veni-vidi-vici/openssl-1.1.1k:alpine-3.13<br>
+
+To use the `sh` shell.<br>
+>`\>` docker run -it --rm --entrypoint /bin/sh -v /jct/Repos/Volumes/OpenSSL:/openssl-certs veni-vidi-vici/openssl-1.1.1k:alpine-3.13<br>
+Then from the command prompt, type.<br>
 `\>` openssl
 
 <br>
