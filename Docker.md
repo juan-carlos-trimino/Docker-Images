@@ -484,3 +484,121 @@ The instruction has two forms:
 2. The shell form: **ENTRYPOINT command param1 param2**
 
 Only the last **ENTRYPOINT** instruction in the Dockerfile will have an effect.
+
+***
+# Quick Overview of Linux Local User Accounts
+User accounts stored in a Linux system locally are called *local user accounts*, and there are three main types.
+
+## User Accounts
+### Root (Superuser) Account
+The root account has full access to the system, and it is only used to perform system level administrative tasks.
+
+### System (Daemon) Accounts
+A system account is needed for the operation of system-specific functions. It is started during boot-up, by using the command root or the init command process and usually run in the background.
+
+### Regular User Accounts
+A regular user account cannot run administrator-level commands, but it provides interactive access to the system. Furthermore, the account has limited access to critical system files and directories, but it has access to files and directories that it owns or has permissions to read, write, or execute.
+
+## User Management Files
+Information about users and groups for the *local user accounts* are kept in four text files named */etc/passwd, /etc/shadow, /etc/group, and /etc/gshadow*; Linux maintains a backup copy for each of these files named */etc/passwd-, /etc/shadow-, /etc/group-, and /etc/gshadow-*.
+
+To list these files.
+>`$` ls -l /etc/pass* /etc/group* /etc/shad* /etc/gshad*
+
+
+
+
+
+xxxx
+
+### /etc/passwd
+A file of seven colon-delimited fields containing basic information about users. It contains a list of users, each on a separate line.<br><br>
+**username:password:uid:gid:optional:description:home-directory:shell**<br>
+**username**<br>
+The name used when the user logs into the system.<br>
+**password**<br>
+The encrypted password (or an x if shadow passwords are used).<br>
+**uid**<br>
+The UserID (UID) number assigned to the user in the system.<br>
+**gid**<br>
+The primary GroupID (GID) number of the user in the system.<br>
+**optional**<br>
+An optional comment field, which is used to add extra information about the user (such as the full name). The field can contain multiple comma-separated entries.<br>
+**home-directory**<br>
+The absolute path of the user's home directory.<br>
+**Shell**<br>
+The absolute path of the program that is automatically launched when the user logs into the system (usually an interactive shell such as /bin/bash).
+
+
+
+
+xxxxxxxxxxxx
+
+### /etc/shadow
+A file readable only by root and users with root privileges and contains the encrypted passwords of the users, each on a separate line.<br><br>
+**username:encrypted-password:date-of-last-password-change:minimum-password-age:maximum-password-age:password-warning-period:password-inactivity-period:account-expiration-date:reserved-field**<br>
+**username**<br>
+The name used when user logs into the system.<br>
+**encrypted-password**<br>
+The encrypted password of the user (if the value is !, the account is locked).<br>
+**date-of-last-password-change**<br>
+The date of the last password change, as number of days since 01/01/1970. A value of 0 means that the user must change the password at the next access.<br>
+**minimum-password-age**<br>
+The minimum number of days, after a password change, which must pass before the user will be allowed to change the password again.<br>
+**maximum-password-age**<br>
+The maximum number of days that must pass before a password change is required.<br>
+**password-warning-period**<br>
+The number of days, before the password expires, during which the user is warned that the password must be changed.<br>
+**password-inactivity-period**<br>
+The number of days after a password expires during which the user should update the password. After this period, if the user does not change the password, the account will be disabled.<br>
+**account-expiration-date**<br>
+The date, as number of days since 01/01/1970, in which the user account will be disabled. An empty field means that the user account will never expire.<br>
+**reserved-field**<br>
+A field that is reserved for future use.
+
+### /etc/group
+A file readable only by root and by users with root privileges that contains encrypted passwords for groups, each on a separate line.<br>
+
+
+A file of four colon-delimited fields containing basic information about groups. It contains a list of groups, each on a separate line.<br><br>
+In Linux, every user must be a member of at least one group; hence, when a user account is created, Linux creates a group and adds the user account to the group. This group is the primary group for the user account, and it uses the same name as the user account. Besides the primary group, additional groups can be setup as per requirementxxxxxxxxx.
+
+
+**group-name:group-password:gid:group-members**<br>
+**group-name**<br>
+The name of the group.<br>
+**group-password**<br>
+The encrypted password of the group (or an x if shadow passwords are used).<br>
+**gid**<br>
+The ID number assigned to the group in the system.<br>
+**group-members**<br>
+A comma-delimited list of users belonging to the group, except those for whom this is the primary group.
+(Since a group may contain several members and a user can be a member of several groups, a user's primary group xxxxxxxcan't be revealed from this filexxxxxxxxx. xxxxTo reveal a user's primary group information, always the /etc/passwd file should be usedxxxxxxxx.)
+
+
+
+### /etc/gshadow
+A file readable only by root and by users with root privileges that contains encrypted passwords for groups, each on a separate line.<br><br>
+A file of four colon-delimited fields file containing encrypted group passwords.
+This file stores group password and other password related information. Password information of each group is stored in an individual line. There are four fields in each line.
+
+**group-name:encrypted-password:group-administrators:group-members**<br>
+**group-name**<br>
+The name of the group.<br>
+**encrypted-password**<br>
+The encrypted password for the group (it is used when a user, who is not a member of the group, wants to join the group using the newgrp command — if the password starts with !, no one is allowed to access the group with newgrp).
+**group-administrators**<br>
+A comma-delimited list of the administrators of the group (they can change the password of the group and can add or remove group members with the gpasswd command).
+**group-members**<br>
+A comma-delimited list of the members of the group.
+
+
+
+
+
+
+Display only the entry that refers to a specific user or group.
+>`$` grep username /etc/passwd
+>`$` cat /etc/passwd | grep username
+
+
