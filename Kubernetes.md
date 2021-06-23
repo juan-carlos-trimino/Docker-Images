@@ -160,6 +160,8 @@ https://docs.docker.com/desktop/
 
 ***
 # Kubernetes (K8s)
+A container orchestration is *an abstraction over the network*.
+
 ## Architecture Overview
 K8s uses the *`client-server architecture`*. A K8s cluster consists of one or more master nodes and one or more worker nodes.
 
@@ -168,9 +170,9 @@ K8s uses the *`client-server architecture`*. A K8s cluster consists of one or mo
 ### Master Node (Control Plane)
 The master node controls and manages the cluster and consists of four main components:
 1. *`API Server`* exposes the K8s API and provides the frontend to the cluster's shared state through which all other components interact.
-   1. It is the central component used by all other components and clients (e.g., kubectl).
+   1. It is the central component used by all other components and clients (e.g., kubectl, scheduler); K8s system components communicate only with the API server.
    2. It provides a CRUD (Create, Read, Update, Delete) interface for querying and modifying the cluster state over a RESTful API.
-   3. It uses etcd to store the state.
+   3. It uses etcd to store the state and is the only component that communicates with etcd.
 2. *`Scheduler`* schedules the apps by assigning a worker node to each deployable component of the app.
    1. It monitors the API server's watch mechanism and assigns a cluster node to the new pod.
    2. It updates the pod definition through the API server. The API server notifies the Kubelet (using the watch mechanism) that a pod has been scheduled. When the Kubelet on the target node receives the notification, it creates and runs the pod's containers.
@@ -179,7 +181,10 @@ The master node controls and manages the cluster and consists of four main compo
 3. *`Controller Manager`* performs cluster-level functions such as replicating components, keeping track of worker nodes, etc.
    1. jct
 4. *`etcd`* is a key:value distributed data store that persistently stores the cluster configuration.
-   1. jct
+   1. It is the only place K8s stores cluster state and metadata.
+   2. The API server is the only component that talks to etcd directly.
+   3. Prior to K8s version 1.7, the JSON manifest of a *Secret* resource was stored as clear text. From version 1.7, Secrets are encrypted.
+   4. See [CAP Theorem](#cap-theorem).
 
 <br>
 

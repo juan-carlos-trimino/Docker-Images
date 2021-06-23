@@ -1,8 +1,21 @@
+***
 # [Docker Desktop](https://dockr.ly/docker-for-windows)
 - Browse to the `Desktop` homepage and install the *`stable`* version.<br>
 - Docker Desktop can run Windows and Linux containers.
 
-# Docker Version and Info
+<br>
+
+***
+# Docker
+Docker provides *an abstraction over the physical machine*; it not only packages the application, but all its dependencies as well.
+
+## Notes
+1. Docker logging is powerful and pluggable, but it only reads log entries from the container's **`console output stream`**.
+2. Windows Versions  
+   Because applications in `Windows Server` containers run processes directly on the host, the version of Windows on the server **`needs to match`** the version of Windows inside the container. But if the applications are running in Hyper-V containers, the version of Windows on the server does not need to match the version of Windows inside the container.
+3. `Nano Server` is a minimal operating system built for running apps in containers. It is not a full version of Windows, and it can't be run as the OS on a VM or a physical machine. Furthermore, not all Windows apps can run in a Nano Server container.
+
+### Version and Info
 To verify the installation.<br>
 (It displays the versions for the Docker `client` (CLI) and the Docker `server` (the service that manages containers).
 >`\>` docker version
@@ -11,12 +24,9 @@ To verify the installation.<br>
 
 >`\>` docker info
 
-# Notes
-1. Docker logging is powerful and pluggable, but it only reads log entries from the container's **`console output stream`**.
-2. Windows Versions  
-   Because applications in `Windows Server` containers run processes directly on the host, the version of Windows on the server **`needs to match`** the version of Windows inside the container. But if the applications are running in Hyper-V containers, the version of Windows on the server does not need to match the version of Windows inside the container.
-3. `Nano Server` is a minimal operating system built for running apps in containers. It is not a full version of Windows, and it can't be run as the OS on a VM or a physical machine. Furthermore, not all Windows apps can run in a Nano Server container.
+<br>
 
+***
 # [Docker Compose](https://docs.docker.com/compose/compose-file/)
 ## Notes
 1. Docker Compose works with services and applications. An application is a single unit composed of one or more services; services are deployed as containers at runtime. Docker Compose is used to define all of the resources of an application -- services, networks, volumes, etc. -- and the dependencies among them. Since a container is a single instance of an image, a service is a template to run a container from an image with a known configuration. By using services, an application can scale up or down the number of containers running from the same image and using the same configuration as a single unit. Services are used in Docker Compose and with a cluster of Docker Engines running in Docker Swarm; services are not used in a standalone Docker Engine.
@@ -67,6 +77,9 @@ The **start** command starts all stopped containers via the entry point of the c
 >`\>` docker-compose logs
 >`\>` docker-compose logs --tail 5
 
+<br>
+
+***
 # Images
 ## Notes
 1. When identifying a container/image by its id, **`there is no need to specify the entire id`**; specify enough characters to uniquely identify it.
@@ -135,6 +148,9 @@ The **start** command starts all stopped containers via the entry point of the c
 **Remove all images older than 6 months --> 4320h = 24 hour/day * 30 days/month * 6 months**
 >`\>` docker image prune --all --filter "until=4320h"
 
+<br>
+
+***
 # Containers
 ## Notes
 1.	From the Docker Desktop menu, select which daemon (Linux or Windows) the Docker CLI uses. Select **Switch to Windows containers...** to use Windows containers, or select **Switch to Linux containers...** to use Linux containers (the default).
@@ -288,6 +304,9 @@ When a **docker stop** command is issued, Docker sends a SIGTERM signal to the m
 **Stats on all running containers**
 >`PS>` docker stats $(docker ps -q)
 
+<br>
+
+***
 # Volumes
 ### Creation
 **Create a volume**
@@ -326,6 +345,9 @@ When a **docker stop** command is issued, Docker sends a SIGTERM signal to the m
 **Inspect a volume**
 >`\>` docker inspect [volume-name-or-id]
 
+<br>
+
+***
 # Networks
 ## Notes
 1. Docker on Windows has several networking options. **The default is the network address translation (nat)**. This driver isolates containers from the physical network, and it assigns each container its own IP address in a subnet managed by Docker. On the host, containers can be accessed by their IP addresses, but outside the host, containers can be accessed only through published ports. With the nat driver, other networks can be created, or other drivers can be used for different network configurations:
@@ -361,6 +383,9 @@ When a **docker stop** command is issued, Docker sends a SIGTERM signal to the m
 **Inspect a network**
 >`\>` docker network inspect [network-name-or-id]
 
+<br>
+
+***
 # [Dockerfile](https://docs.docker.com/engine/reference/builder/)
 ## The Build Context
 1. The **docker build** command requires a Dockerfile and a build context, which may be empty. The build context is the set of local files and directories that can be referenced from ADD or COPY instructions in the Dockerfile and is normally specified as a path to a directory.
@@ -485,6 +510,8 @@ The instruction has two forms:
 
 Only the last **ENTRYPOINT** instruction in the Dockerfile will have an effect.
 
+<br>
+
 ***
 # Quick Overview of Linux Local User Accounts
 User accounts stored in a Linux system locally are called *local user accounts*, and there are three main types.
@@ -505,100 +532,73 @@ Information about users and groups for the *local user accounts* are kept in fou
 To list these files.
 >`$` ls -l /etc/pass* /etc/group* /etc/shad* /etc/gshad*
 
-
-
-
-
-xxxx
+Display only the entry that refers to a specific user or group.
+>`$` grep [username | groupname] /etc/passwd<br>
+>`$` cat /etc/passwd | grep [username | groupname]
 
 ### /etc/passwd
-A file of seven colon-delimited fields containing basic information about users. It contains a list of users, each on a separate line.<br><br>
-**username:password:uid:gid:optional:description:home-directory:shell**<br>
+A file of seven colon-delimited (`:`) fields containing basic information about users; i.e., a list of users, each on a separate line.<br><br>
+**username:password:uid:gid:gecos:home-directory:shell**<br>
 **username**<br>
 The name used when the user logs into the system.<br>
 **password**<br>
-The encrypted password (or an x if shadow passwords are used).<br>
+An `x` character indicates that the encrypted password is stored in */etc/shadow*.<br>
 **uid**<br>
-The UserID (UID) number assigned to the user in the system.<br>
+The user ID (UID) number assigned to the user in the system.<br>
+The **root** user has the UID of **0**. Most Linux distros reserve the first **100** UIDs for system use; new users are assigned UIDs starting from **500** or **1000**<br>
 **gid**<br>
-The primary GroupID (GID) number of the user in the system.<br>
-**optional**<br>
-An optional comment field, which is used to add extra information about the user (such as the full name). The field can contain multiple comma-separated entries.<br>
+The primary group ID (GID) number of the user in the system; it is stored in */etc/group*.<br>
+The **root group** has the GID of **0**. Most Linux distros reserve the first **100** GIDs for system use; new groups are assigned GIDs starting from **1000**.
+**gecos**<br>
+An optional comment field that is used to add extra information about the user. The field can contain multiple comma-separated (`,`) entries.<br>
 **home-directory**<br>
 The absolute path of the user's home directory.<br>
-**Shell**<br>
-The absolute path of the program that is automatically launched when the user logs into the system (usually an interactive shell such as /bin/bash).
-
-
-
-
-xxxxxxxxxxxx
+**shell**<br>
+The absolute path of the command or shell that is automatically launched when the user logs into the system; it is usually an interactive shell such as */bin/bash* or */bin/sh*, but it does not need to be a shell.
 
 ### /etc/shadow
-A file readable only by root and users with root privileges and contains the encrypted passwords of the users, each on a separate line.<br><br>
-**username:encrypted-password:date-of-last-password-change:minimum-password-age:maximum-password-age:password-warning-period:password-inactivity-period:account-expiration-date:reserved-field**<br>
+A file of nine colon-delimited (`:`) fields; it is readable only by the *root and users with root privileges* and contains the encrypted passwords of the users, each on a separate line.<br><br>
+**username:password:last-password-change:minimum:maximum:warn:inactive:expire:reserved**<br>
 **username**<br>
 The name used when user logs into the system.<br>
-**encrypted-password**<br>
-The encrypted password of the user (if the value is !, the account is locked).<br>
-**date-of-last-password-change**<br>
-The date of the last password change, as number of days since 01/01/1970. A value of 0 means that the user must change the password at the next access.<br>
-**minimum-password-age**<br>
+**password**<br>
+The *encrypted password* of the user.<br>
+**last-password-change**<br>
+The date of the last password change, as number of days since `Jan 1, 1970`.<br>
+**minimum**<br>
 The minimum number of days, after a password change, which must pass before the user will be allowed to change the password again.<br>
-**maximum-password-age**<br>
+**maximum**<br>
 The maximum number of days that must pass before a password change is required.<br>
-**password-warning-period**<br>
-The number of days, before the password expires, during which the user is warned that the password must be changed.<br>
-**password-inactivity-period**<br>
+**warn**<br>
+The number of days before the password expires during which the user is warned that the password must be changed.<br>
+**inactive**<br>
 The number of days after a password expires during which the user should update the password. After this period, if the user does not change the password, the account will be disabled.<br>
-**account-expiration-date**<br>
-The date, as number of days since 01/01/1970, in which the user account will be disabled. An empty field means that the user account will never expire.<br>
-**reserved-field**<br>
-A field that is reserved for future use.
+**expire**<br>
+The date, as number of days since `Jan 1, 1970`, in which the user account will be disabled. An empty field means that the user account will never expire.<br>
+**reserved**<br>
+It is reserved for future use.
 
 ### /etc/group
-A file readable only by root and by users with root privileges that contains encrypted passwords for groups, each on a separate line.<br>
-
-
-A file of four colon-delimited fields containing basic information about groups. It contains a list of groups, each on a separate line.<br><br>
-In Linux, every user must be a member of at least one group; hence, when a user account is created, Linux creates a group and adds the user account to the group. This group is the primary group for the user account, and it uses the same name as the user account. Besides the primary group, additional groups can be setup as per requirementxxxxxxxxx.
-
-
-**group-name:group-password:gid:group-members**<br>
-**group-name**<br>
+A file of four colon-delimited fields containing basic information about groups; i.e., a list of groups, each on a separate line.<br>
+In Linux, every user must be a member of at least one group; hence, when a user account is created, Linux creates a group and adds the user account to the group. This group is the *primary group* for the user account, and it uses the same name as the user account. Besides the primary group, additional groups can be created as per requirement.<br><br>
+**groupname:password:gid:grouplist**<br>
+**groupname**<br>
 The name of the group.<br>
-**group-password**<br>
-The encrypted password of the group (or an x if shadow passwords are used).<br>
+**password**<br>
+An `x` character indicates that the encrypted password is stored in */etc/gshadow*.<br>
 **gid**<br>
-The ID number assigned to the group in the system.<br>
-**group-members**<br>
-A comma-delimited list of users belonging to the group, except those for whom this is the primary group.
-(Since a group may contain several members and a user can be a member of several groups, a user's primary group xxxxxxxcan't be revealed from this filexxxxxxxxx. xxxxTo reveal a user's primary group information, always the /etc/passwd file should be usedxxxxxxxx.)
-
-
+The group ID number assigned to the group in the system.<br>
+**grouplist**<br>
+A comma-delimited (`,`) list of users belonging to the group.
 
 ### /etc/gshadow
-A file readable only by root and by users with root privileges that contains encrypted passwords for groups, each on a separate line.<br><br>
-A file of four colon-delimited fields file containing encrypted group passwords.
-This file stores group password and other password related information. Password information of each group is stored in an individual line. There are four fields in each line.
-
-**group-name:encrypted-password:group-administrators:group-members**<br>
+A file of four colon-delimited (`:`) fields; it is readable only by the *root and users with root privileges* and contains the encrypted passwords of the groups, each on a separate line.<br><br>
+**groupname:password:administrators:grouplist**<br>
 **group-name**<br>
 The name of the group.<br>
-**encrypted-password**<br>
-The encrypted password for the group (it is used when a user, who is not a member of the group, wants to join the group using the newgrp command — if the password starts with !, no one is allowed to access the group with newgrp).
-**group-administrators**<br>
-A comma-delimited list of the administrators of the group (they can change the password of the group and can add or remove group members with the gpasswd command).
-**group-members**<br>
-A comma-delimited list of the members of the group.
-
-
-
-
-
-
-Display only the entry that refers to a specific user or group.
->`$` grep username /etc/passwd
->`$` cat /etc/passwd | grep username
-
-
+**password**<br>
+The *encrypted password* for the group.<br>
+**administrators**<br>
+A comma-delimited (`,`) list of the administrators of the group.<br>
+**grouplist**<br>
+A comma-delimited (`,`) list of the members of the group.
