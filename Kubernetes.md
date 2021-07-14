@@ -179,7 +179,9 @@ The master node controls and manages the cluster and consists of four main compo
    3. By default, pods belonging to the same Service or ReplicaSet are distributed across multiple nodes, but this is not always guaranteed.
    4. A cluster may have multiple Schedulers running, and a pod may specify the Scheduler that should schedule it by setting the *schedulerName* property in the pod spec. Pods without the *schedulerName* property set or with the *schedulerName* property set to *default-scheduler* are scheduled using the default Scheduler; all other pods are ignored by the default Scheduler.
 3. *`Controller Manager`* performs cluster-level functions such as replicating components, keeping track of worker nodes, etc.
-   1. jct
+   1. The Controller Manager process embeds the *core control loops* (controllers); e.g., Node Controller, Enpoints Controller, Namespace Controller, et al.
+   2. It ensures that the *actual state* of the system converges toward the *desired state* by watching the API Server for changes to resources.
+   3. Controllers do not communicate with each other directly; each controller connects to the API Server and monitors the watch mechanism.
 4. *`etcd`* is a key:value distributed data store that persistently stores the cluster configuration.
    1. It is the only place K8s stores cluster state and metadata.
    2. The API server is the only component that talks to etcd directly.
