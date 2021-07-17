@@ -41,14 +41,17 @@ http://www.base64decode.org
 ## [JSON](https://jsonformatter.curiousconcept.com)
 JSON Formatter and Validator<br>
 
+## [JSONLint](https://jsonlint.com)
+JSON Validator<br>
+
 <br>
 
-## [JSON Web Token (JWT) [RFC 7519]](http://jwt.io)
+## [JSON Web Token (JWT)](http://jwt.io) [[RFC 7519]](https://www.ietf.org/rfc/rfc7519.txt)
 Decode, verify, and generate JWT.<br>
 
 <br>
 
-## JSON Web Key (JWK) [RFC 7517]
+## [JSON Web Key (JWK) [RFC 7517]](https://www.ietf.org/rfc/rfc7517.txt)
 A JWK is a JSON representation of a cryptographic key.<br>
 
 JWK to PEM Converter.<br>
@@ -159,7 +162,8 @@ https://docs.docker.com/desktop/
 <br>
 
 ***
-# Kubernetes (K8s)
+# [Kubernetes (K8s)](https://kubernetes.io/docs/)
+K8s is an orchestration service that simplifies the deployment, management, and scaling of containerized applications.<br>
 A container orchestration is *an abstraction over the network*.
 
 ## Architecture Overview
