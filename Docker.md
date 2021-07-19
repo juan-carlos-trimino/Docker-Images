@@ -6,14 +6,14 @@
 <br>
 
 ***
-# Docker
+# [Docker](https://docs.docker.com/)
 Docker provides *an abstraction over the physical machine*; it not only packages the application, but all its dependencies as well.
 
 ## Notes
 1. Docker logging is powerful and pluggable, but it only reads log entries from the container's **`console output stream`**.
-2. Windows Versions  
-   Because applications in `Windows Server` containers run processes directly on the host, the version of Windows on the server **`needs to match`** the version of Windows inside the container. But if the applications are running in Hyper-V containers, the version of Windows on the server does not need to match the version of Windows inside the container.
-3. `Nano Server` is a minimal operating system built for running apps in containers. It is not a full version of Windows, and it can't be run as the OS on a VM or a physical machine. Furthermore, not all Windows apps can run in a Nano Server container.
+2. Windows Versions<br>
+   Because applications in [Windows Server](https://hub.docker.com/_/microsoft-windows-servercore) containers run processes directly on the host, the version of Windows on the server **`needs to match`** the version of Windows inside the container. But if the applications are running in Hyper-V containers, the version of Windows on the server does not need to match the version of Windows inside the container.
+3. [Nano Server](https://hub.docker.com/_/microsoft-windows-nanoserver) is a minimal operating system built for running apps in containers. It is not a full version of Windows, and it can't be run as the OS on a VM or a physical machine. Furthermore, not all Windows apps can run in a Nano Server container.
 
 ### Version and Info
 To verify the installation.<br>
@@ -30,23 +30,23 @@ To verify the installation.<br>
 # [Docker Compose](https://docs.docker.com/compose/compose-file/)
 ## Notes
 1. Docker Compose works with services and applications. An application is a single unit composed of one or more services; services are deployed as containers at runtime. Docker Compose is used to define all of the resources of an application -- services, networks, volumes, etc. -- and the dependencies among them. Since a container is a single instance of an image, a service is a template to run a container from an image with a known configuration. By using services, an application can scale up or down the number of containers running from the same image and using the same configuration as a single unit. Services are used in Docker Compose and with a cluster of Docker Engines running in Docker Swarm; services are not used in a standalone Docker Engine.
-2. Since Docker Compose **`doesn't guarantee the order in which containers are created`**, start-up dependencies among services have to be captured in the service definition with the depends_on attribute. Capturing dependencies with this attribute is acceptable for a distributed application running on a single machine, but it doesn't scale. When running on a cluster, an orchestrator is required to manage distributing the workload.
-   Note:
+2. Since Docker Compose **`doesn't guarantee the order in which containers are created`**, start-up dependencies among services have to be captured in the service definition with the `depends_on` attribute. Capturing dependencies with this attribute is acceptable for a distributed application running on a single machine, but it doesn't scale. When running on a cluster, an orchestrator is required to manage distributing the workload.<br>
+   Note:<br>
     Capturing dependencies like this is fine for running distributed applications on a single machine, but **`it doesn't scale`**. When you're running in a cluster you want the orchestrator to manage distributing the workload. It can't do that effectively if you have explicit dependencies, because it needs to make sure all the containers running the dependent service are healthy before it starts the consuming containers. See Docker Swarm.
-3. After executing the 'docker-compose up' command, containers can be managed using the Compose CLI or the standard Docker CLI.
+3. After executing the `docker-compose up` command, containers can be managed using the Compose CLI or the standard Docker CLI.
 4. The Docker Compose file represents the desired state of the application. When a docker-compose command is executed, it compares the Composite file to the existing state of the application in Docker and makes any changes needed to get the desired state; e.g., starting containers, stopping containers, creating volumes, etc.
 5. All Docker Compose commands are processed by comparing the Compose file to the services running on Docker; hence, it is required to have access to the Compose file to run any Docker Compose commands.
-6. If 'docker-compose up' is run repeatedly from the same Compose file, no changes will be made after the first run since the definition of the application has not changed; hence, Docker Compose can be used to manage application upgrades.
-7. Docker Compose supports override files. When running 'docker-compose' commands, the commands can accept multiple files as arguments; Compose will join all of the files together in the order specified in the command from left to right. Override files are used to add new sections to the application definition, or they can replace existing definitions. (The default configuration is designed for development use.)
-8. Be careful when modifying Compose files of running applications. If the definition of a running service is removed from the Compose file, Docker Compose will not recognize that the removed service is part of the application, and the containers created from the removed service will not be included in the difference checks. This results in orphaned containers.
-9. Warning!!! Ports can be specified without quotes, but this is best avoided as it can cause confusion when YAML parses statements such as 56:56 as a base 60 number.
+6. If `docker-compose up` is run repeatedly from the same Compose file, no changes will be made after the first run since the definition of the application has not changed; hence, Docker Compose can be used to manage application upgrades.
+7. Docker Compose supports override files. When running `docker-compose` commands, the commands can accept multiple files as arguments; Compose will join all of the files together in the order specified in the command from left to right. Override files are used to add new sections to the application definition, or they can replace existing definitions. (The default configuration is designed for development use.)
+8. *Be careful when modifying Compose files of running applications.* If the definition of a running service is removed from the Compose file, Docker Compose will not recognize that the removed service is part of the application, and the containers created from the removed service will not be included in the difference checks. This results in orphaned containers.
+9. ***Warning!!!*** Ports can be specified without quotes, but this is best avoided as it can cause confusion when YAML parses statements such as 56:56 as a base 60 number.
 
 ### Start the application
 The **`up`** command creates resources specified in the Compose file that do not exist, and it creates and starts containers for all the services.
 >`\>` docker-compose up -d
 
 ### Scale a container
->`\>` docker-compose up -d --scale container-name-or-id=2
+>`\>` docker-compose up -d --scale [container-name-or-id]=2
 
 ### Stop the application
 The **`down`** command stops all running containers and removes the resources. Networks are removed, if they were created by Docker Compose, but volumes are not removed thereby retaining all application data.
@@ -57,7 +57,7 @@ The **`stop`** command stops all running containers without removing them or oth
 >`\>` docker-compose stop
 
 ### Stop a container
->`\>` docker-compose stop service-name
+>`\>` docker-compose stop [service-name]
 
 ### Kill all containers
 The **`kill`** command stops all containers by forcibly ending the running processes.
@@ -74,7 +74,7 @@ The **start** command starts all stopped containers via the entry point of the c
 >`\>` docker-compose top
 
 ### Display the log entries of all runninng containers
->`\>` docker-compose logs
+>`\>` docker-compose logs<br>
 >`\>` docker-compose logs --tail 5
 
 <br>
@@ -83,7 +83,7 @@ The **start** command starts all stopped containers via the entry point of the c
 # Images
 ## Notes
 1. When identifying a container/image by its id, **`there is no need to specify the entire id`**; specify enough characters to uniquely identify it.
-2. If a file is deleted in the same layer that it's created, it won't be included in the image. Because of this, Dockerfiles often download a tarball or other archive file, unpack it, and immediately remove the archive file in one RUN instruction.
+2. *If a file is deleted in the same layer that it's created, it won't be included in the image.* Because of this, Dockerfiles often download a tarball or other archive file, unpack it, and immediately remove the archive file in one RUN instruction.
 
 ### Building images
 **name-of-container-image = {user-name-of-registry}/{app-name}**
@@ -120,7 +120,7 @@ The **start** command starts all stopped containers via the entry point of the c
 
 >`\>` docker image ls -a
 
->`\>` docker image ls --filter reference=[name-of-container-image][:version-or-variation]
+>`\>` docker image ls --filter reference=[name-of-container-image][:version-or-variation]<br>
 >`\>` docker image ls --filter reference=[name-of-container-image]
 
 **List untagged images (dangling - TAG=<none>)**
@@ -159,47 +159,48 @@ The **start** command starts all stopped containers via the entry point of the c
 
    Select a Windows base image from Dockerhub that **matches** the kernel of your host's Windows version. For Windows 10–1809, that's the :1809 version/tag of nanoserver, servercore and windows (or any higher-level image, that builds up on one of these).
 
-   To find the version of Windows  
-   **C:\>** winver  
-        *Windows 10  
-        Microsoft Windows  
-        Version 1903 (OS Build 18362.295)*  
+   To find the version of Windows<br>
+   **C:\>** winver<br>
+        *Windows 10<br>
+        Microsoft Windows<br>
+        Version 1903 (OS Build 18362.295)*<br>
 
-   By infinitely running ping (-t) against the localhost in a Windows nano server container in process-isolation mode (--isolation=process), `ping.exe` is directly running on the host (instead of a virtual machine); this is why it can be seeing in the host system's task manager while the container is running:
-    >`\>` docker container run --rm --name pinger --isolation=process mcr.microsoft.com/windows/nanoserver:1903 cmd.exe /c ping 127.0.0.1 -t
+   By infinitely running ping (-t) against the localhost in a Windows nano server container in process-isolation mode (`--isolation=process`), `ping.exe` is directly running on the host (instead of a virtual machine); this is why it can be seeing in the host system's task manager while the container is running:
+    >`\>` docker run --rm --name pinger --isolation=process mcr.microsoft.com/windows/nanoserver:1903 cmd.exe /c ping 127.0.0.1 -t
 
-    (Since Linux containers always run with the process-isolation mode of --isolation=process, there is no need to specify the process-isolation mode.)
-3. When Docker runs a container, it starts the process specified in the Dockerfile or the command line; Docker watches that process, and when that process ends, the containers exits. But if the application starts multiple processes in a container, Docker will only monitor the last process that started. Ideally, there will be one process per container; otherwise, the application will have to take on the responsability of managing all other processes. **This is a recommendation and not a requirement.**
+    (Since Linux containers always run with the process-isolation mode of `--isolation=process`, there is no need to specify the process-isolation mode.)
+3. When Docker runs a container, it starts the process specified in the Dockerfile or the command line; Docker watches that process, and when that process ends, the containers exits. But if the application starts multiple processes in a container, Docker will only monitor the last process that started. Ideally, there will be one process per container; **this is a recommendation and not a requirement**. Otherwise, the application will have to take on the responsability of managing all other processes.
 4. When identifying a container/image by its id, **there is no need to specify the entire id**; specify enough characters to uniquely identify it.
 5. To exit a container while keeping it running in the background, **<kbd>Ctrl</kbd>PQ or <kbd>Ctrl</kbd>+<kbd>Shift</kbd>pq**.
 
 ### Running containers
-`docker run` is the short form of `docker container run`.<br><br>
+**`docker run`** is the short form of **`docker container run`**.<br><br>
 **Task container**<br>
 Display the host name of a Windows Nano Server container; the container ID **is** the container's hostname.
 >`\>` docker run mcr.microsoft.com/windows/nanoserver:20H2 hostname
 
->`\>` docker container run [name-of-container-image][:version-or-variation]
+>`\>` docker run [name-of-container-image][:version-or-variation]
 
->`\>` docker container run --name source image-share-volume ...
+>`\>` docker run --name source image-share-volume ...
 
->`\>` docker container run -it --volumes-from source image-share-volume cmd
+>`\>` docker run -it --volumes-from source image-share-volume cmd
 
->`\>` docker container run -it --volumes-from source:ro image-share-volume cmd
+>`\>` docker run -it --volumes-from source:ro image-share-volume cmd
 
->`\>` docker container run --volume {host-location-must-exist}:{container-location-does-not-need-to-exist-but-hidden-if-it-does} image-share-volume ...
+>`\>` docker run --volume {host-location-must-exist}:{container-location-does-not-need-to-exist-but-hidden-if-it-does} image-share-volume ...
 
-**Interactive container**
->`\>` docker container run --interactive --tty [name-of-container-image][:version-or-variation] cmd
+**Interactive container**<br>
+The `-t` and `-i` options enable terminal redirection for interactive text-based programs. The `-t` option allocates a `pseudo-tty (terminal)` and attaches it to the standard input of the container. The `-i` option keeps the `standard input (STDIN)` of the container open, even if not attached, so the main process can continue waiting for input.
+>`\>` docker run --interactive --tty [name-of-container-image][:version-or-variation] cmd
 
->`\>` docker container run -it --name container-name [name-of-container-image][:version-or-variation] cmd
+>`\>` docker run -it --name [container-name] [name-of-container-image][:version-or-variation] cmd
 
 **Detach container**
->`\>` docker container run --detach [name-of-container-image][:version-or-variation]
+>`\>` docker run --detach [name-of-container-image][:version-or-variation]
 
->`\>` docker container run --detach --publish {host-port}:{container-port} [name-of-container-image][:version-or-variation]
+>`\>` docker run --detach --publish {host-port}:{container-port} [name-of-container-image][:version-or-variation]
 
->`\>` docker container run -d -p {host-port}:{container-port} [name-of-container-image][:version-or-variation]
+>`\>` docker run -d -p {host-port}:{container-port} [name-of-container-image][:version-or-variation]
 
 ### IDs and Names
 **Get the container id**
@@ -220,8 +221,8 @@ Display the host name of a Windows Nano Server container; the container ID **is*
 >`\>` docker container ls -a
 
 ### Stopping/Removing/Killing
-**Stop a running container**  
-When a **docker stop** command is issued, Docker sends a SIGTERM signal to the main process in the container and waits up to ten (10) seconds for the main process to stop. If the main process doesn't comply with the request within the timeout period, Docker sends a SIGKILL. Whereas the main process can ignore a SIGTERM, the SIGKILL goes straight to the kernel thereby terminating the main process; the main process is forcibly killed without having an opportunity to exit gracefully. To ensure a gracefully exit, the main process needs to handle the SIGTERM signal. To change the default 10 seconds to wait, use the --time (-t) option.
+**Stop a running container**<br>
+When a `docker stop` command is issued, Docker sends a `SIGTERM` signal to the main process in the container and waits up to ten (10) seconds for the main process to stop. If the main process doesn't comply with the request within the timeout period, Docker sends a `SIGKILL`. Whereas the main process can ignore a `SIGTERM`, the `SIGKILL` goes straight to the kernel thereby terminating the main process; the main process is forcibly killed without having an opportunity to exit gracefully. To ensure a gracefully exit, the main process needs to handle the `SIGTERM` signal. To change the default 10 seconds to wait, use the --time (-t) option.
 >`\>` docker container stop [container-name-or-id]
 
 >`\>` docker container stop --time=20 [container-name-or-id]
@@ -247,9 +248,9 @@ When a **docker stop** command is issued, Docker sends a SIGTERM signal to the m
 >`PS>` docker container inspect --format '{{ .NetworkSettings.Networks.nat.IPAddress }}' [container-name-or-id]
 
 **Publish all of the exposed ports from the container image to random ports on the host**
->`\>` docker container run -d --publish-all -v c:\app-state:c:\app-state --name appv1 [name-of-container-image][:version-or-variation]
+>`\>` docker run -d --publish-all -v c:\app-state:c:\app-state --name appv1 [name-of-container-image][:version-or-variation]
 
->`\>` docker container run -d -P -v c:\app-state:c:\app-state --name appv1 [name-of-container-image][:version-or-variation]
+>`\>` docker run -d -P -v c:\app-state:c:\app-state --name appv1 [name-of-container-image][:version-or-variation]
 
 **Ports**
 >`\>` docker container port [container-name-or-id]
@@ -290,9 +291,12 @@ When a **docker stop** command is issued, Docker sends a SIGTERM signal to the m
 >`\>` docker events --filter '[container=container-name-or-id]' --filter 'event=stop'
 
 **Return a live stream of resource usage (*Ctrl+C to exit*)**
->`\>` docker stats [container-name-or-id] [container-name-or-id...]
+>`\>` docker stats [container-name-or-id] [container-name-or-id] [...]
 
 ### Inspecting
+**Verify the container started without errors.**
+>`\>` docker ps --format 'table {{.ID}}\t{{.Names}}\t{{.Status}}'
+
 **Mounts**
 >`PS>` docker container inspect --format '{{ json .Mounts }}' [container-name] | ConvertFrom-Json
 
@@ -334,7 +338,7 @@ When a **docker stop** command is issued, Docker sends a SIGTERM signal to the m
 
 ### Location
 **Location where the data is physically stored on the host**
->`\>` docker volume inspect --format '{{ .Mountpoint }}' [volume-name]
+>`\>` docker volume inspect --format '{{ .Mountpoint }}' [volume-name]<br>
 >`\>` docker volume inspect -f '{{ .Mountpoint }}' [volume-name]
 
 ### Displaying
@@ -387,20 +391,25 @@ When a **docker stop** command is issued, Docker sends a SIGTERM signal to the m
 
 ***
 # [Dockerfile](https://docs.docker.com/engine/reference/builder/)
+A Dockerfile is a mechanism to automate the building of container images. Building an image from a Dockerfile is a three-step process:
+1. Create a working directory.
+2. Write the Dockerfile.
+3. Build the image.
+
 ## The Build Context
 1. The **docker build** command requires a Dockerfile and a build context, which may be empty. The build context is the set of local files and directories that can be referenced from ADD or COPY instructions in the Dockerfile and is normally specified as a path to a directory.
 2. Only the instructions **FROM**, **RUN**, **COPY**, and **ADD** create layers in the final image. Other instructions configure things, add metadata, or tell Docker to do something at run time, such as expose a port or run a command.
 
-**\# [escape](https://docs.docker.com/engine/reference/builder/#escape)=\`**  
-Parser directives do not add layers to the build and will not be shown as a build step. Once a comment, empty line, or builder instruction has been processed, Docker no longer looks for parser directives. Hence, all parser directives must be at the very top of a Dockerfile.  
-Use the backtick (**\`**) option for the escape character to split commands over multiple lines rather than the default backslash **\\** option.
+**\# [escape](https://docs.docker.com/engine/reference/builder/#escape)=\`**<br>
+Parser directives do not add layers to the build and will not be shown as a build step. Once a comment, empty line, or builder instruction has been processed, Docker no longer looks for parser directives. Hence, all parser directives must be at the very top of a Dockerfile.<br>
+Use the ``backtick (`)`` option for the escape character to split commands over multiple lines rather than the default `backslash (\)` option.
 
 **ARG BASE_OS_LAYER**  
 **ARG BASE_OS_LAYER_VERSION**  
-**FROM ${BASE_OS_LAYER}:${BASE_OS_LAYER_VERSION}**  
+**[FROM \${BASE_OS_LAYER}:\${BASE_OS_LAYER_VERSION}](https://docs.docker.com/engine/reference/builder/#from)**  
 A Dockerfile must start with a **FROM** instruction. The **FROM** instruction specifies the Base Image from which you are building. **FROM** may only be preceded by one or more **ARG** instructions, which declare arguments that are used in **FROM** lines in the Dockerfile.
 
-**[SHELL ["cmd", "/S", "/C"]](https://docs.docker.com/engine/reference/builder/#shell)**  
+**[SHELL](https://docs.docker.com/engine/reference/builder/#shell)**  
 The default shell on **Linux is ["/bin/sh", "-c"]** and on **Windows is ["cmd", "/S", "/C"]**.  
 &nbsp;&nbsp;**/S** --> Modify the treatment of string after **/C** or **/K**.  
 &nbsp;&nbsp;**/C** --> Carry out the command specified by string and then terminate.  
@@ -431,7 +440,7 @@ In **Windows**, volume directories need to be empty. In the Dockerfile, files ca
 Bind mounts have limited functionality compared to volumes. When a bind mount is used, a file or directory on the host is mounted into a container. The file or directory is referenced by its full or relative path on the host. By contrast, when a volume is used, a new directory is created within Docker's storage directory on the host, and Docker manages that directory's contents. You can't use Docker CLI commands to directly manage bind mounts.
 
 To mount the host *c:\host_dir* folder to the container path *c:\container_dir*
->`\>` docker container run –it --rm --name [mount1] -v c:\host_dir:c:\container_dir mcr.microsoft.com/windows/servercore:1903 powershell
+>`\>` docker run –it --rm --name [mount1] -v c:\host_dir:c:\container_dir mcr.microsoft.com/windows/servercore:1903 powershell
 
 >`PS C:\>` Set-Location -Path .\container_dir;
 
@@ -445,7 +454,7 @@ To see the file in the host
 >`C:\>` dir c:\host_dir
 
 To mount the host c:\host_dir folder to another container (mount2) path c:\container_dir
->`\>` docker container run -it --rm --name mount2 --mount type=bind,source=c:\host_dir,target=c:\container_dir mcr.microsoft.com/windows/servercore:1903 powershell
+>`\>` docker run -it --rm --name mount2 --mount type=bind,source=c:\host_dir,target=c:\container_dir mcr.microsoft.com/windows/servercore:1903 powershell
 
 >`PS C:\>` Get-ChildItem -Path .\container_dir\ -File;
 

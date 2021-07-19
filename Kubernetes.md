@@ -38,6 +38,14 @@ http://www.base64decode.org
 
 <br>
 
+## [curl](https://curl.se/)
+Command line tool and library.
+
+## [curl options](https://gist.github.com/eneko/dc2d8edd9a4b25c5b0725dd123f98b10)
+List of curl options.
+
+<br>
+
 ## [JSON](https://jsonformatter.curiousconcept.com)
 JSON Formatter and Validator<br>
 
