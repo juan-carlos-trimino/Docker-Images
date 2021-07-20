@@ -70,10 +70,14 @@ RUN set -x && \
     # Stop tracing. \
     set +x
 
-RUN addgroup --gid 1000 groupContainer && \
-    adduser --ingroup groupContainer --uid 1000 --disabled-password --shell /bin/sh userContainer
+RUN groupadd --force --gid 1001 openssl && \
+    useradd --uid 1001 --gid openssl --shell /sbin/nologin --comment "openssl user" openssl && \
+    chown -R openssl:openssl ${OPENSSL_DIR} && \
+    chmod -R 755 ${OPENSSL_DIR}
 
-USER userContainer
+USER openssl
+
+WORKDIR ${OPENSSL_DIR}
 
 # The directory where certificates and private keys are stored.
 VOLUME ${SSL_CERT_DIR}
