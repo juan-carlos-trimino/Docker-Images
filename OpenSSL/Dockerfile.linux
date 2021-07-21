@@ -70,10 +70,11 @@ RUN set -x && \
     # Stop tracing. \
     set +x
 
-RUN groupadd --force --gid 1001 openssl && \
-    useradd --uid 1001 --gid openssl --shell /sbin/nologin --comment "openssl user" openssl && \
-    chown -R openssl:openssl ${OPENSSL_DIR} && \
-    chmod -R 755 ${OPENSSL_DIR}
+RUN addgroup --gid 1001 openssl && \
+    # --no-create-home --home ${OPENSSL_DIR} \
+    adduser --uid 1001 --ingroup openssl --disabled-password --shell /sbin/nologin openssl
+    # chown -R openssl:openssl ${OPENSSL_DIR} && \
+    # chmod -R 755 ${OPENSSL_DIR}
 
 USER openssl
 
