@@ -611,3 +611,52 @@ The *encrypted password* for the group.<br>
 A comma-delimited (`,`) list of the administrators of the group.<br>
 **grouplist**<br>
 A comma-delimited (`,`) list of the members of the group.
+
+<br>
+
+***
+# Useful Linux Commands
+## UserId and GroupId
+**Get list of all users.**<br>
+The `getent` command displays entries from databases configured in the file `/etc/nsswitch.conf`, which includes the `passwd` database.
+>`\>` getent passwd<br>
+>`\>` cat /etc/passwd
+
+**Check hether a user exists.**
+>`\>` getent passwd | grep [username]<br>
+>`\>` getent passwd [username]
+
+**Display the number of user accounts in the system.**<br>
+>`\>` getent passwd | wc -l
+
+**Check the UID_MIN and UID_MAX values in the system.**
+>`\>` grep -E '^UID_MIN|^UID_MAX' /etc/login.defs
+
+**Display all regular users in the system.**<br>
+To get the range, use the `grep -E` above.
+>`\>` getent passwd {1000..60000}
+
+
+
+
+Display account aging information.
+>`\>` chage -l [username]
+
+Display first entry in the `/etc/passwd` file.
+>`\>` head -1 /etc/passwd
+
+Display all accounts with uid=0.
+>`\>` awk -F: '($3 == "0") {print}' /etc/passwd
+
+Locking/unlocking accounts.
+>`\>` passwd -l [username]
+>`\>` passwd -u [username]
+
+
+
+
+chsh -s [shell] [username]
+chsh -s /sbin/nologin [username]
+
+
+
