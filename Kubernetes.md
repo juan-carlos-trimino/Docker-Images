@@ -1,7 +1,6 @@
 ***
-# Theorems
-## CAP Theorem
-(https://en.wikipedia.org/wiki/CAP_theorem)<br>
+# Theorems, methodologies, et al.
+## [CAP Theorem](https://en.wikipedia.org/wiki/CAP_theorem)
 The theorem, proven by Eric Brewer, states that *a distributed system can only have two of the following three properties*: **Consistency, Availability, and Partition-Tolerant (CAP)**.
 Since a distributed system will always suffer from occasional network partition, it can only be *either* **consistent** *or* **available**. Distributed systems are generally configured to favor **availability** over **consistency**; favoring **availability** over **consistency** means that when a client makes a request for information, it will always get an answer, but that answer may be stale.<br>
 
@@ -24,6 +23,11 @@ Please note the following:
 4. If the size of the cluster grows beyond seven (7), the probability of losing enough servers to not have a quorum is low enough that is not worth the performance trade-off.
 5. If a distributed system has more than seven (7) servers, five (5) or seven (7) servers can be used to form the cluster, and the remaining servers run clients that can query the system but do not take part in the quorum.
 6. Even numbers are generally best avoided since they increase the cluster size (decreasing performance) but do not improve failure tolerance.
+
+<br>
+
+## [The Twelve-Factor App](https://12factor.net/)
+A methodology for building `Software-as-a-Service` applications.
 
 <br>
 
@@ -157,9 +161,8 @@ The image will be cached and automatically pulled into all future minikube clust
 <br>
 
 ***
-# Docker Desktop
-Setup a single-node K8s cluster on a local machine.<br>
-https://docs.docker.com/desktop/
+# [Docker Desktop](https://docs.docker.com/desktop/)
+Setup a single-node K8s cluster on a local machine.
 
 **Display the current context.**
 >`\>` kubectl config current-context
@@ -296,7 +299,7 @@ If an issue occurs while creating the Deployment, a set of errors or warnings wi
 
 <br>
 
-## Pods
+## [Pods](https://kubernetes.io/docs/concepts/workloads/pods/)
 #### Notes
 1. Pods represent the basic deployable unit in K8s.
 2. K8s assigns an IP address to a pod after the pod has been scheduled to a node and before it is started.
@@ -422,7 +425,7 @@ Container logs are automatically rotated daily and every time the log file reach
 
 <br>
 
-## Service
+## [Service](https://kubernetes.io/docs/concepts/services-networking/service/)
 #### Notes
 1. A service is a resource that creates a single point of entry to a group of pods providing the same service. When a service is created, it gets a static IP, which never changes during the lifetime of the service. Hence, clients should connect to the service through its static IP address and not to pods directly (pods are ephemeral). The service ensures one of the pods receives the connection, regardless of the pod's current IP address.
 2. Services deal with TCP and UPD packets.
@@ -524,7 +527,7 @@ Once the IP is obtained, configure the DNS server to resolve trimino.com to that
 
 <br>
 
-## Namespaces
+## [Namespaces](https://kubernetes.io/docs/concepts/overview/working-with-objects/namespaces/)
 #### Notes
 1. Kubernetes groups resources into namespaces; resource names only need to be unique within a namespace.
 2. When performing an action (listing, modifying, etc.) on a namespace, *kubectl* performs the action in the default namespace configured in the current *kubectl* context. To perform the action on another namespace, pass the --namespace (or -n) flag to *kubectl*.
@@ -546,7 +549,7 @@ Warning: This command does not delete all resources; some resources are **not** 
 
 <br>
 
-## ReplicaSet
+## [ReplicaSet](https://kubernetes.io/docs/concepts/workloads/controllers/replicaset/)
 #### Notes
 1. A ReplicaSet constantly monitors the list of running pods and ensures the actual number of pods with matching label selector always matches the desired number.
 
@@ -564,7 +567,7 @@ Deleting a ReplicaSet will delete all its pods.
 
 <br>
 
-## ReplicationController (Deprecated instead use ReplicaSet)
+## [ReplicationController](https://kubernetes.io/docs/concepts/workloads/controllers/replicationcontroller/) (Deprecated instead use [ReplicaSet](#replicaset))
 
 <br>
 
@@ -598,7 +601,7 @@ Deleting a ReplicaSet will delete all its pods.
 
 <br>
 
-## ConfigMap
+## [ConfigMap](https://kubernetes.io/docs/concepts/configuration/configmap/)
 #### Notes
 1. A key must be a valid DNS subdomain; i.e., it may only contain alphanumeric characters, dashes, underscores, and dots. It may optionally include a leading dot.
 2. The contents of a ConfigMap's entries are shown in clear text.
@@ -609,7 +612,7 @@ List all configmaps available in the current K8s namespace.
 
 <br>
 
-## Secret
+## [Secret](https://kubernetes.io/docs/concepts/configuration/secret/)
 #### Notes
 1. The maximum size of a Secret is limited to 1MB.
 2. The contents of a Secret's entries are shown as Base64-encoded strings.
@@ -644,7 +647,7 @@ token  - This is a **JSON Web Token** (**JWT**), which is base64-encoded.
 
 <br>
 
-## DaemonSet
+## [DaemonSet](https://kubernetes.io/docs/concepts/workloads/controllers/daemonset/)
 #### Notes
 1. DaemonSet runs only a single pod replica on each node.
 2. Because DaemonSet bypasses the Scheduler, it can deploy pods to nodes that have been made un-schedulable, which prevents pods from being deployed to them.

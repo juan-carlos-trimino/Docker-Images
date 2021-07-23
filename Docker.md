@@ -133,6 +133,15 @@ The **start** command starts all stopped containers via the entry point of the c
 **Remove given image**
 >`PS>` docker image rm [container-name-or-id]
 
+**Remove unused images**
+>`\>` docker image prune
+
+**Do not prompt for confirmation (-f -> --force)**
+>`\>` docker image prune -f
+
+**Remove all unused images, not just dangling ones (-a -> --all)**
+>`\>` docker image prune -a
+
 **Remove given image (force removal)**
 >`PS>` docker image rm -f [container-name-or-id]
 
@@ -237,9 +246,14 @@ When a `docker stop` command is issued, Docker sends a `SIGTERM` signal to the m
 >`PS>` docker container ls -aq | foreach { docker rm -f $_ }
 
 **Kill a running container**
->`\>` docker container kill [container-name-or-id]
-
+>`\>` docker container kill [container-name-or-id]<br>
 >`\>` docker container kill -s=1 [container-name-or-id]
+
+**Remove all stopped containers**
+>`\>` docker container prune
+
+**Do not prompt for confirmation (-f -> --force)**
+>`\>` docker container prune -f
 
 ### IP Addresses and Ports
 **IP Address**
@@ -617,39 +631,36 @@ A comma-delimited (`,`) list of the members of the group.
 ***
 # Useful Linux Commands
 ## UserId and GroupId
-**Get list of all users.**<br>
+**Get list of all users**<br>
 The `getent` command displays entries from databases configured in the file `/etc/nsswitch.conf`, which includes the `passwd` database.
 >`\>` getent passwd<br>
 >`\>` cat /etc/passwd
 
-**Check hether a user exists.**
+**Check whether a user exists**
 >`\>` getent passwd | grep [username]<br>
 >`\>` getent passwd [username]
 
-**Display the number of user accounts in the system.**<br>
+**Display the number of user accounts in the system**<br>
 >`\>` getent passwd | wc -l
 
-**Check the UID_MIN and UID_MAX values in the system.**
+**Check the UID_MIN and UID_MAX values in the system**
 >`\>` grep -E '^UID_MIN|^UID_MAX' /etc/login.defs
 
-**Display all regular users in the system.**<br>
+**Display all regular users in the system**<br>
 To get the range, use the `grep -E` above.
 >`\>` getent passwd {1000..60000}
 
-
-
-
-Display account aging information.
+**Display account aging information**
 >`\>` chage -l [username]
 
-Display first entry in the `/etc/passwd` file.
+**Display first entry in the `/etc/passwd` file**
 >`\>` head -1 /etc/passwd
 
-Display all accounts with uid=0.
+**Display all accounts with uid=0**
 >`\>` awk -F: '($3 == "0") {print}' /etc/passwd
 
-Locking/unlocking accounts.
->`\>` passwd -l [username]
+**Locking/unlocking accounts**
+>`\>` passwd -l [username]<br>
 >`\>` passwd -u [username]
 
 
