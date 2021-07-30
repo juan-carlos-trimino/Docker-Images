@@ -87,10 +87,8 @@ The **start** command starts all stopped containers via the entry point of the c
 
 ### Building images
 **name-of-container-image = {user-name-of-registry}/{app-name}**
->`\>` docker image build --tag [name-of-container-image][:version-or-variation] .
-
->`\>` docker image build --file Dockerfile.nats --tag [name-of-container-image][:version-or-variation] .
-
+>`\>` docker image build --tag [name-of-container-image][:version-or-variation] .<br>
+>`\>` docker image build --file Dockerfile.nats --tag [name-of-container-image][:version-or-variation] .<br>
 >`\>` docker image build --build-arg ENV_NAME=TEST --tag [name-of-container-image][:version-or-variation] .
 
 **When a build fails, it can be very useful to launch the layer before the failure**
@@ -101,9 +99,8 @@ The **start** command starts all stopped containers via the entry point of the c
 >`\>` docker tag [old-image-tag] [new-image-tag]
 
 ### Pushing the image to Docker Hub
-**Login to Docker Hub; need userId and password**
->`\>` docker login
-
+**Login to Docker Hub; need `userId` and `password`**
+>`\>` docker login<br>
 >`\>` docker push [image-tag]
 
 ### Displaying
@@ -112,14 +109,10 @@ The **start** command starts all stopped containers via the entry point of the c
 
 ### Listing
 **List images**
->`\>` docker image ls
-
->`\>` docker images
-
->`\>` docker image ls --all
-
->`\>` docker image ls -a
-
+>`\>` docker image ls<br>
+>`\>` docker images<br>
+>`\>` docker image ls --all<br>
+>`\>` docker image ls -a<br>
 >`\>` docker image ls --filter reference=[name-of-container-image][:version-or-variation]<br>
 >`\>` docker image ls --filter reference=[name-of-container-image]
 
@@ -216,7 +209,7 @@ The `-t` and `-i` options enable terminal redirection for interactive text-based
 >`\>` docker ps --filter "[name=container-name]" --format "{{ .ID }}"
 
 **Names of all running containers**
->`PS>` docker inspect -f '{{ .Name }}' $(docker ps -q)
+>`PS>` docker inspect -f '{{.Name}}' $(docker ps -q)
 
 ### Listing
 **List all active containers**
@@ -304,8 +297,14 @@ When a `docker stop` command is issued, Docker sends a `SIGTERM` signal to the m
 
 >`\>` docker events --filter '[container=container-name-or-id]' --filter 'event=stop'
 
-**Return a live stream of resource usage (*Ctrl+C to exit*)**
+**Return a live stream of stats from the list of running containers on the host (*Ctrl+C to exit*)**
 >`\>` docker stats [container-name-or-id] [container-name-or-id] [...]
+
+**Return a live stream of stats from `all` running containers on the host (*Ctrl+C to exit*)**<br>
+The `docker ps` gets the IDs of all running containers.<br>
+The IDs are used as input to `docker inspect` to obtain the names.<br>
+The names are used as input `docker stats`.
+>`PS>` docker stats \$(docker inspect --format '{{ .Name }}' $(docker ps -q))
 
 ### Inspecting
 **Verify the container started without errors.**
@@ -414,33 +413,47 @@ A Dockerfile is a mechanism to automate the building of container images. Buildi
 1. The **docker build** command requires a Dockerfile and a build context, which may be empty. The build context is the set of local files and directories that can be referenced from ADD or COPY instructions in the Dockerfile and is normally specified as a path to a directory.
 2. Only the instructions **FROM**, **RUN**, **COPY**, and **ADD** create layers in the final image. Other instructions configure things, add metadata, or tell Docker to do something at run time, such as expose a port or run a command.
 
+**Lines that begin with a `hash`, or `pound`, symbol (`#`) are comments.**<br>
+**Instructions `are not case-sensitive`, but the convention is to make instructions all uppercase to improve visibility.**
+
 **\# [escape](https://docs.docker.com/engine/reference/builder/#escape)=\`**<br>
 Parser directives do not add layers to the build and will not be shown as a build step. Once a comment, empty line, or builder instruction has been processed, Docker no longer looks for parser directives. Hence, all parser directives must be at the very top of a Dockerfile.<br>
 Use the ``backtick (`)`` option for the escape character to split commands over multiple lines rather than the default `backslash (\)` option.
 
-**ARG BASE_OS_LAYER**  
-**ARG BASE_OS_LAYER_VERSION**  
-**[FROM \${BASE_OS_LAYER}:\${BASE_OS_LAYER_VERSION}](https://docs.docker.com/engine/reference/builder/#from)**  
+**[ARG](https://docs.docker.com/engine/reference/builder/#arg) BASE_OS_LAYER**<br>
+**ARG BASE_OS_LAYER_VERSION**<br>
+**[FROM](https://docs.docker.com/engine/reference/builder/#from) \${BASE_OS_LAYER}:\${BASE_OS_LAYER_VERSION}**<br>
 A Dockerfile must start with a **FROM** instruction. The **FROM** instruction specifies the Base Image from which you are building. **FROM** may only be preceded by one or more **ARG** instructions, which declare arguments that are used in **FROM** lines in the Dockerfile.
 
-**[SHELL](https://docs.docker.com/engine/reference/builder/#shell)**  
-The default shell on **Linux is ["/bin/sh", "-c"]** and on **Windows is ["cmd", "/S", "/C"]**.  
-&nbsp;&nbsp;**/S** --> Modify the treatment of string after **/C** or **/K**.  
-&nbsp;&nbsp;**/C** --> Carry out the command specified by string and then terminate.  
-The **SHELL** instruction must be written in **JSON** form in a Dockerfile.  
-The **SHELL** instruction is particularly useful on Windows where there are two commonly used and quite different native shells: **cmd** and **powershell** as well as alternate shells available including **sh**.  
-The **SHELL** instruction can appear multiple times. Each **SHELL** instruction overrides all previous **SHELL** instructions and affects all subsequent instructions.  
+**[SHELL](https://docs.docker.com/engine/reference/builder/#shell)**<br>
+The default shell on **Linux is ["/bin/sh", "-c"]** and on **Windows is ["cmd", "/S", "/C"]**.<br>
+&nbsp;&nbsp;**/S** --> Modify the treatment of string after **/C** or **/K**.<br>
+&nbsp;&nbsp;**/C** --> Carry out the command specified by string and then terminate.<br>
+The **SHELL** instruction must be written in **JSON** form in a Dockerfile.<br>
+The **SHELL** instruction is particularly useful on Windows where there are two commonly used and quite different native shells: **cmd** and **powershell** as well as alternate shells available including **sh**.<br>
+The **SHELL** instruction can appear multiple times. Each **SHELL** instruction overrides all previous **SHELL** instructions and affects all subsequent instructions.<br>
 The following instructions can be affected by the **SHELL** instruction when the shell form of them is used in a Dockerfile: **RUN**, **CMD**, and **ENTRYPOINT**.
 
-**SHELL ["powershell", "-Command", "$ErrorActionPreference = 'Stop'; $ProgressPreference = 'SilentlyContinue';"]**  
-**-Command** executes the specified commands (and any parameters) as though they were typed at the Windows PowerShell command prompt, and then exits, unless the NoExit parameter is specified.  
-**$ErrorActionPreference** determines how PowerShell responds to a non-terminating error (an error that does not stop a cmdlet processing) at the command line or in a script, cmdlet, or provider, such as the errors generated by the Write-Error cmdlet.  
+**SHELL ["powershell", "-Command", "$ErrorActionPreference = 'Stop'; $ProgressPreference = 'SilentlyContinue';"]**<br>
+**-Command** executes the specified commands (and any parameters) as though they were typed at the Windows PowerShell command prompt, and then exits, unless the NoExit parameter is specified.<br>
+**$ErrorActionPreference** determines how PowerShell responds to a non-terminating error (an error that does not stop a cmdlet processing) at the command line or in a script, cmdlet, or provider, such as the errors generated by the Write-Error cmdlet.<br>
 **$ProgressPreference** determines how PowerShell responds to progress updates generated by a script, cmdlet or provider, such as the progress bars generated by the Write-Progress cmdlet.
 
-**[ENV](https://docs.docker.com/engine/reference/builder/#env)**  
-Settings added to the Dockerfile with **ENV** become **part of the image** so every container run from the image will have these values set. When you run a container, you can add new environment variables or replace the values of existing image variables using the **--env** or **-e** option.  
+**[ENV](https://docs.docker.com/engine/reference/builder/#env)**<br>
+Settings added to the Dockerfile with **ENV** become **part of the image** so every container run from the image will have these values set. When you run a container, you can add new environment variables or replace the values of existing image variables using the **--env** or **-e** option.
 
 To keep environment values safer, Docker lets you load them from a file rather than specifying them in plain text in the **docker container run** command. Isolating values in a file means that the file itself can be secured so that only administrators and the Docker service account can access it. The environment file is a simple-text format, with one line for each environment variable, written as a key-value pair. To run the container and load the file contents as environment variables, you can use the --env-file option. Note: Environment values still are not secure. If someone gains access to your app, he could print out all the environment variables and get your secrets.
+
+**[WORKDIR](https://docs.docker.com/engine/reference/builder/#workdir)**<br>
+The instruction sets the working directory for any subsequent **RUN**, **CMD**, **ENTRYPOINT**, **COPY**, and **ADD** instructions. If the working directory doesn't exist, it will be created even if it's not used in any subsequent Dockerfile instruction.
+
+**[ADD](https://docs.docker.com/engine/reference/builder/#add)**<br>
+The instruction copies from the build context in the host files or directories, or remote URLs from `source` and adds them to the filesystem of the image at the path `destination`.
+
+**[COPY](https://docs.docker.com/engine/reference/builder/#copy)**<br>
+The instruction copies files or directories from `source` (build context in the host) to the filesystem of the container at the path `destination`; the `destination` is an absolute path, or a path relative to **WORKDIR**. Paths outside the build context cannot be specified. Furthermore, the instruction copies files or directories from a previous stage to the current stage in a multi-stage build.
+
+**[RUN](https://docs.docker.com/engine/reference/builder/#run)**<br>
 
 **[VOLUME](https://docs.docker.com/engine/reference/builder/#volume)**<br>
 Volumes are created and managed by Docker; volumes are units of storage. When a volume is created, it is stored within a directory on the host, which is managed by Docker (**/var/lib/docker/volumes/ on Linux** or **C:\ProgramData\docker\volumes on Windows**). Non-Docker processes should not modify this part of the filesystem. A given volume can be mounted into multiple containers simultaneously. When no running container is using a volume, the volume is still available to Docker and is not removed automatically. They have a separate life cycle to containers so they can be created independently and then mounted inside one or more containers. Volumes are the best way to persist data in Docker.
@@ -454,64 +467,40 @@ In **Windows**, volume directories need to be empty. In the Dockerfile, files ca
 Bind mounts have limited functionality compared to volumes. When a bind mount is used, a file or directory on the host is mounted into a container. The file or directory is referenced by its full or relative path on the host. By contrast, when a volume is used, a new directory is created within Docker's storage directory on the host, and Docker manages that directory's contents. You can't use Docker CLI commands to directly manage bind mounts.
 
 To mount the host *c:\host_dir* folder to the container path *c:\container_dir*
->`\>` docker run –it --rm --name [mount1] -v c:\host_dir:c:\container_dir mcr.microsoft.com/windows/servercore:1903 powershell
-
->`PS C:\>` Set-Location -Path .\container_dir;
-
->`PS C:\cdir>` New-Item -Path .\LogFile.txt -ItemType File;
-
->`PS C:\cdir>` Add-Content -Path .\LogFile.txt -Value 'Juan Carlos Trimiño';
-
+>`\>` docker run –it --rm --name [mount1] -v c:\host_dir:c:\container_dir mcr.microsoft.com/windows/servercore:1903 powershell<br>
+>`PS C:\>` Set-Location -Path .\container_dir;<br>
+>`PS C:\cdir>` New-Item -Path .\LogFile.txt -ItemType File;<br>
+>`PS C:\cdir>` Add-Content -Path .\LogFile.txt -Value 'Juan Carlos Trimiño';<br>
 >`PS C:\cdir>` <kbd>Ctrl</kbd>+<kbd>Shift</kbd>pq
 
 To see the file in the host
 >`C:\>` dir c:\host_dir
 
 To mount the host c:\host_dir folder to another container (mount2) path c:\container_dir
->`\>` docker run -it --rm --name mount2 --mount type=bind,source=c:\host_dir,target=c:\container_dir mcr.microsoft.com/windows/servercore:1903 powershell
-
->`PS C:\>` Get-ChildItem -Path .\container_dir\ -File;
-
->`PS C:\>` Get-Content -Path .\container_dir\LogFile.txt;
-
+>`\>` docker run -it --rm --name mount2 --mount type=bind,source=c:\host_dir,target=c:\container_dir mcr.microsoft.com/windows/servercore:1903 powershell<br>
+>`PS C:\>` Get-ChildItem -Path .\container_dir\ -File;<br>
+>`PS C:\>` Get-Content -Path .\container_dir\LogFile.txt;<br>
 >`PS C:\>` <kbd>Ctrl</kbd>+<kbd>Shift</kbd>pq
 
-**[HEALTHCHECK](https://docs.docker.com/engine/reference/builder/#healthcheck)**<br>
-The options that can appear before **CMD** are:  
---interval=30s (default)  
-&nbsp;&nbsp;The health check will first run 'interval' seconds after the container is started, and then again 'interval' seconds after each previous check completes.  
---timeout=30s (default)  
-&nbsp;&nbsp;If a single run of the check takes longer than 'timeout' seconds, then the check is considered to have failed.  
---start-period=0s (default)  
-&nbsp;&nbsp;'start period' provides initialization time for containers that need time to bootstrap. Probe failure during that period will not be counted towards the maximum number of retries. However, if a health check succeeds during the start period, the container is considered started and all consecutive failures will be counted towards the maximum number of retries.  
---retries=3 (default)  
-&nbsp;&nbsp;It takes 'retries' consecutive failures of the health check for the container to be considered unhealthy.
+**[USER](https://docs.docker.com/engine/reference/builder/#user)**<br>
 
-There can only be one **HEALTHCHECK** instruction in a Dockerfile. If you list more than one, then only the last **HEALTHCHECK** will take effect.
+**Security**<br>
+`Linux`<br>
+It's important to set USER in all the Dockerfiles or change the user within an ENTRYPOINT or CMD instruction.
+Failure to do so will result in `processes running as `**`root`**` within the container`. As UIDs are the same within a container and on the host, should attackers manage to break the container, they will have root access to the host machine.
 
-The command's exit status indicates the health status of the container. The possible values are:  
-**0**: success - the container is healthy and ready for use  
-**1**: unhealthy - the container is not working correctly  
-**2**: reserved - do not use this exit code
+
+`Windows`<br>
+
+
 
 **[EXPOSE](https://docs.docker.com/engine/reference/builder/#expose)**<br>
 The instruction informs Docker that the container listens on the specified network port at runtime; the port listens on **TCP** (default) or **UDP**.
 
 The instruction does not actually publish the port. It functions as a type of documentation about which ports are intended to be published. To actually publish the port when running the container, use the **-p** (**--publish**) flag on **docker container run** to publish and map one or more ports, or the **-P** (**--publish-all**) flag to publish all exposed ports and map them to high-order ports. Containers in the same Docker network can always access one another's port; ports only need to be published to make them available outside Docker.
 
-**[WORKDIR](https://docs.docker.com/engine/reference/builder/#workdir)**<br>
-The instruction sets the working directory for any subsequent **RUN**, **CMD**, **ENTRYPOINT**, **COPY**, and **ADD** instructions. If the working directory doesn't exist, it will be created even if it's not used in any subsequent Dockerfile instruction.
-
-**[ADD](https://docs.docker.com/engine/reference/builder/#add)**<br>
-The instruction copies from the build context in the host files or directories, or remote URLs from `source` and adds them to the filesystem of the image at the path `destination`.
-
-**[COPY](https://docs.docker.com/engine/reference/builder/#copy)**<br>
-The instruction copies files or directories from `source` (build context in the host) to the filesystem of the container at the path `destination`; the `destination` is an absolute path, or a path relative to **WORKDIR**. Paths outside the build context cannot be specified. Furthermore, the instruction copies files or directories from a previous stage to the current stage in a multi-stage build.
-
-**[RUN](https://docs.docker.com/engine/reference/builder/#run)**<br>
-
 **[CMD](https://docs.docker.com/engine/reference/builder/#cmd)**<br>
-The instruction has three forms:  
+The instruction has three forms:
 1. The exec form, which is the prefer form: **CMD ["executable","param1","param2"]**
    * The exec form is parsed as a **JSON** array, which means that double-quotes (") must be used around words instead of single-quotes (').
    * Unlike the shell form, the exec form does not invoke a command shell. This means that normal shell processing does not happen. For example, **CMD ["echo", "$HOME"]** will not do variable substitution on **$HOME**. If shell processing is required, then either use the shell form or execute a shell directly; e.g., **CMD ["sh", "-c", "echo $HOME"]**. When using the exec form and executing a shell directly, as in the case of the shell form, it is the shell that is doing the environment variable expansion, not docker.
@@ -523,6 +512,24 @@ The instruction has three forms:
 There can only be one **CMD** instruction in a Dockerfile. If more than one **CMD** instruction is used, then only the last **CMD** will take effect.
 
 The **CMD** instruction is overridden by any arguments to *docker container run* after the image name.
+
+**[HEALTHCHECK](https://docs.docker.com/engine/reference/builder/#healthcheck)**<br>
+The options that can appear before **CMD** are:<br>
+--interval=30s (default)<br>
+&nbsp;&nbsp;The health check will first run 'interval' seconds after the container is started, and then again 'interval' seconds after each previous check completes.<br>
+--timeout=30s (default)<br>
+&nbsp;&nbsp;If a single run of the check takes longer than 'timeout' seconds, then the check is considered to have failed.<br>
+--start-period=0s (default)<br>
+&nbsp;&nbsp;'start period' provides initialization time for containers that need time to bootstrap. Probe failure during that period will not be counted towards the maximum number of retries. However, if a health check succeeds during the start period, the container is considered started and all consecutive failures will be counted towards the maximum number of retries.<br>
+--retries=3 (default)<br>
+&nbsp;&nbsp;It takes 'retries' consecutive failures of the health check for the container to be considered unhealthy.
+
+There can only be one **HEALTHCHECK** instruction in a Dockerfile. If you list more than one, then only the last **HEALTHCHECK** will take effect.
+
+The command's exit status indicates the health status of the container. The possible values are:<br>
+**0**: success - the container is healthy and ready for use<br>
+**1**: unhealthy - the container is not working correctly<br>
+**2**: reserved - do not use this exit code
 
 **[ENTRYPOINT](https://docs.docker.com/engine/reference/builder/#entrypoint)**<br>
 The instruction has two forms:
@@ -666,8 +673,8 @@ To get the range, use the `grep -E` above.
 
 
 
-chsh -s [shell] [username]
-chsh -s /sbin/nologin [username]
 
 
+docker images --format 'table {{.ID}}\t{{.Repository}}\t{{.Tag}}'
 
+In Linux by default, containers run as root.  A container running as root has full control of the host machine; UIDs are the same within a container and the host.

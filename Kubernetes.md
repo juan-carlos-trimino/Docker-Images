@@ -173,7 +173,7 @@ Setup a single-node K8s cluster on a local machine.
 <br>
 
 ***
-# [Kubernetes (K8s)](https://kubernetes.io/docs/)
+# [Kubernetes (K8s)](https://kubernetes.io/docs/) - Greek for "helmsman" or "pilot"
 K8s is an orchestration service that simplifies the deployment, management, and scaling of containerized applications.<br>
 A container orchestration is *an abstraction over the network*.
 
@@ -214,7 +214,7 @@ K8s runs workloads (containers) on worker nodes; a worker node consists of three
 <br>
 
 ***
-# kubectl
+# [kubectl](https://kubernetes.io/docs/reference/kubectl/overview/)
 #### Notes
 1. The double dash (--) in the command signals the end of command options for *kubectl*; all that follow the double dash is the command that should be executed inside the pod. If the command has no arguments that start with a dash, the double dash isn’t necessary.
 2. To use a different text editor with *kubectl*, set the KUBE_EDITOR environment variable.<br>
@@ -247,7 +247,7 @@ K8s runs workloads (containers) on worker nodes; a worker node consists of three
 
 <br>
 
-## Nodes
+## [Nodes](https://kubernetes.io/docs/concepts/architecture/nodes/)
 **Get all nodes in the cluster.**
 >`\>` kubectl get nodes
 
@@ -266,7 +266,7 @@ K8s runs workloads (containers) on worker nodes; a worker node consists of three
 
 <br>
 
-## Deployment
+## [Deployment](https://kubernetes.io/docs/concepts/workloads/controllers/deployment/)
 ### Listing
 **List deployments in the given namespace.**
 >`\>` kubectl get deployment -n [namespace-name]
@@ -304,12 +304,14 @@ If an issue occurs while creating the Deployment, a set of errors or warnings wi
 1. Pods represent the basic deployable unit in K8s.
 2. K8s assigns an IP address to a pod after the pod has been scheduled to a node and before it is started.
 3. As soon as a pod is scheduled to a node, the Kubelet on that node will run its containers, and it will keep them running as long as the pod exists. If a container's main process crashes, the Kubelet will restart the container.
-4. Since containers are not standalone K8s objects, they can't be listed individually.
-5. It's common for a pod to contain only a single container, but when a pod contains multiple containers, all of them are run on a single worker node.
-6. Because most of the container's filesystem comes from the container image, the filesystem of each container, by default, is fully isolated from other containers. But it is possible to have containers share file directories using *Volume*.
-7. Container logs are automatically rotated daily and every time the log file reaches 10MB in size. Note that container logs can only be retrieved from running pods. Once a pod is deleted, its logs are also deleted.
-8. When a pod is deleted, K8s terminates all of the containers that are part of the pod. K8s sends a SIGTERM signal to the main process of the container and waits a certain number of seconds, 30 is the default, for the main process to shut down gracefully. If it doesn't shut down in the given time, K8s sends a SIGKILL to the Operating System (OS), and the OS kills it. To ensure processes are always shut down gracefully, they need to handle the SIGTERM signal properly.
-9. To see the reason the previous container terminated, check the Exit Code. The exit code is the sum of two numbers: 128 + x, where x is the signal number sent to the process that caused it to terminate. For example, an exit code of 137 equals 128 + 9 (SIGKILL); likewise, an exit code of 143 equals 128 + 15 (SIGTERM).
+4. Pods are ephemeral -- they can come and go at any time for all sort of reasons such as scaling up and down, failing container health checks, node migrations, etc. As such, a pod’s network address may change over the life of an application thereby requiring another primitive for discovery and load balancing; this primitive is the `Service`.
+5. Since containers are not standalone K8s objects, they can't be listed individually.
+6. It's common for a pod to contain only a single container, but when a pod contains multiple containers, all of them are run on a single worker node.
+7. If a pod contains multiple containers, the scheduler needs to find a worker node that has enough resources to satisfy all container demands combined.
+8. Because most of the container's filesystem comes from the container image, the filesystem of each container, by default, is fully isolated from other containers. But it is possible to have containers share file directories using *Volume*.
+9. Container logs are automatically rotated daily and every time the log file reaches 10MB in size. Note that container logs can only be retrieved from running pods. Once a pod is deleted, its logs are also deleted.
+10. When a pod is deleted, K8s terminates all of the containers that are part of the pod. K8s sends a SIGTERM signal to the main process of the container and waits a certain number of seconds, 30 is the default, for the main process to shut down gracefully. If it doesn't shut down in the given time, K8s sends a SIGKILL to the Operating System (OS), and the OS kills it. To ensure processes are always shut down gracefully, they need to handle the SIGTERM signal properly.
+11. To see the reason the previous container terminated, check the Exit Code. The exit code is the sum of two numbers: 128 + x, where x is the signal number sent to the process that caused it to terminate. For example, an exit code of 137 equals 128 + 9 (SIGKILL); likewise, an exit code of 143 equals 128 + 15 (SIGTERM).
 
 ### Listing
 **List the pods in the given namespace.**
