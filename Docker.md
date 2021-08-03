@@ -485,13 +485,45 @@ To mount the host c:\host_dir folder to another container (mount2) path c:\conta
 **[USER](https://docs.docker.com/engine/reference/builder/#user)**<br>
 
 **Security**<br>
-`Linux`<br>
+**`Linux`**<br>
 It's important to set USER in all the Dockerfiles or change the user within an ENTRYPOINT or CMD instruction.
+
 Failure to do so will result in `processes running as `**`root`**` within the container`. As UIDs are the same within a container and on the host, should attackers manage to break the container, they will have root access to the host machine.
+When performing a task, a privileged process bypasses all the kernel-level permissions checks, while all the unprivileged processes are subject to permission checks.
+When performing a task, a privileged process bypasses all the kernel-level permissions checks, while all the unprivileged processes are subject to permission checks.
 
 
-`Windows`<br>
+**`Windows`**<br>
+A user account uniquely identifies a principal who is using the computer system. The account signals the system to enforce the appropriate authorization to allow or deny the user access to resources. Whenever a user account is created, it is assigned a unique SID to identify the user account. No two users have the same SID. *All Windows processes are owned by a user account*.
 
+In a `Windows Server Core` container, the default user account is the container administrator (`User Manager\ContainerAdministrator`), and it has **complete access to the whole filesystem and all the resources on the container**. The process specified in the ENTRYPOINT or CMD instruction on the Dockerfile runs under the container administrator account. Any process that is started from the `Windows Server Core` image will use the `ContainerAdministrator` user account. (The `whoami` tool displays the current username.)
+>`C:\>` docker run mcr.microsoft.com/windows/servercore:20H2 whoami<br>
+user manager\containeradministrator
+
+
+To find the SID of the container administrator account, run an interactive container that allows interaction with PowerShell.
+Since the account is part of the `Windows Serve Core` image, the container user account always has the same SID (S-1-5-93-2-1); every container has the same attributes, 
+
+Because the account is part of the Windows image, the container user always has the same SID (S-1-5-93-2-1) and the same attributes in every container. 
+
+But processes running in Windows Server containers are actually running on the host, but the host has no container administrator user account. In fact, mmmmmm
+
+>`C:\>` docker run -it --rm mcr.microsoft.com/windows/servercore:20H2 powershell<br>
+PS C:\\> $user = New-Object System.Security.Principal.NTAccount("containeradministrator"); \`<br>
+\>\> $sid = $user.Translate([System.Security.Principal.SecurityIdentifier]); \`<br>
+\>\> $sid.Value;<br>
+S-1-5-93-2-1
+
+
+
+>`C:\>` docker run -d --rm --name pinger mcr.microsoft.com/windows/servercore:20H2 ping -t localhost<br>
+>`C:\>` docker exec pinger powershell Get-Process ping -IncludeUserName<br>
+
+If the host is a Windows Server (the container is a Windows Server), the `ping` process is running directly on the host; the PID inside the container will match the PID on the host. On the host, using the PID from the command above under the Id column.
+>`PS C:\>` Get-Process -Id [process-id] -IncludeUserName
+
+Under the UserName column there will not be a user name. 
+The container user is not mapped to any user on the host. That is, the host process is running under an anonymous user; it has no permissions on the host only on the container.
 
 
 **[EXPOSE](https://docs.docker.com/engine/reference/builder/#expose)**<br>
@@ -678,3 +710,8 @@ To get the range, use the `grep -E` above.
 docker images --format 'table {{.ID}}\t{{.Repository}}\t{{.Tag}}'
 
 In Linux by default, containers run as root.  A container running as root has full control of the host machine; UIDs are the same within a container and the host.
+The superuser account is for administration of the system. The name of the superuser is root and the account has UID 0. The superuser has full access to the system.
+The $ character is replaced by a # character if the shell is running as the superuser, root.
+# Runtime protection: All applications in container images run as non-root users, minimizing the exposure surface to malicious or faulty applications.
+Create a Working Directory
+The working directory is the directory containing all files needed to build the image. Creating an empty working directory is good practice to avoid incorporating unnecessary files into the image. For security reasons, the root directory, /, should never be used as a working directory for image builds.
