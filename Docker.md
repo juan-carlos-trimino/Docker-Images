@@ -496,34 +496,52 @@ When performing a task, a privileged process bypasses all the kernel-level permi
 **`Windows`**<br>
 A user account uniquely identifies a principal who is using the computer system. The account signals the system to enforce the appropriate authorization to allow or deny the user access to resources. Whenever a user account is created, it is assigned a unique SID to identify the user account. No two users have the same SID. *All Windows processes are owned by a user account*.
 
-In a `Windows Server Core` container, the default user account is the container administrator (`User Manager\ContainerAdministrator`), and it has **complete access to the whole filesystem and all the resources on the container**. The process specified in the ENTRYPOINT or CMD instruction on the Dockerfile runs under the container administrator account. Any process that is started from the `Windows Server Core` image will use the `ContainerAdministrator` user account. (The `whoami` tool displays the current username.)
+*`Windows Server Core Images`*<br>
+In a **`Windows Server Core`** container, the default user account is the container administrator (`User Manager\ContainerAdministrator`), and it has **complete access to the whole filesystem and all the resources on the container**. The process specified in the ENTRYPOINT or CMD instruction on the Dockerfile runs under this account; the `whoami` tool displays the current username.
 >`C:\>` docker run mcr.microsoft.com/windows/servercore:20H2 whoami<br>
 user manager\containeradministrator
 
-
 To find the SID of the container administrator account, run an interactive container that allows interaction with PowerShell.
-Since the account is part of the `Windows Serve Core` image, the container user account always has the same SID (S-1-5-93-2-1); every container has the same attributes, 
-
-Because the account is part of the Windows image, the container user always has the same SID (S-1-5-93-2-1) and the same attributes in every container. 
-
-But processes running in Windows Server containers are actually running on the host, but the host has no container administrator user account. In fact, mmmmmm
-
 >`C:\>` docker run -it --rm mcr.microsoft.com/windows/servercore:20H2 powershell<br>
 PS C:\\> $user = New-Object System.Security.Principal.NTAccount("containeradministrator"); \`<br>
 \>\> $sid = $user.Translate([System.Security.Principal.SecurityIdentifier]); \`<br>
 \>\> $sid.Value;<br>
-S-1-5-93-2-1
+**S-1-5-93-2-1**
 
-
-
+Since the account is part of the `Windows Serve Core` image, the container user account always has the same SID (**S-1-5-93-2-1**); i.e., every container has the same attributes. The process running in the `Windows Server Core` container is actually running on the *Windows Server host*, but the host has **no ContainerAdministrator** user account. Obtain the *process ID* (*PID*) inside the container.
 >`C:\>` docker run -d --rm --name pinger mcr.microsoft.com/windows/servercore:20H2 ping -t localhost<br>
 >`C:\>` docker exec pinger powershell Get-Process ping -IncludeUserName<br>
+```
+Handles      WS(K)   CPU(s)     Id UserName               ProcessName
+-------      -----   ------     -- --------               -----------
+     88       3936     0.02   1620 User Manager\Contai... PING
+```
 
-If the host is a Windows Server (the container is a Windows Server), the `ping` process is running directly on the host; the PID inside the container will match the PID on the host. On the host, using the PID from the command above under the Id column.
->`PS C:\>` Get-Process -Id [process-id] -IncludeUserName
+This is a `Windows Server Core` container running on a Windows Server host, and since the process is running on the host, the PID inside the container will *match* the PID on the host. On the host, run the Get-Process cmdlet to display the details of the process running on the host. Because the container username **does not map** to any users on the host, the username under the column `UserName` is blank. That is, the host process is running under an **anonymous user** with no permissions on the host; it has only the configured permissions within the container. Hence, if an attacker breaks out of the container, it would be running a host process with no permissions on the host.
+>`PS C:\>` Get-Process -Id 1620 -IncludeUserName
+```
+Handles      WS(K)   CPU(s)     Id UserName               ProcessName
+-------      -----   ------     -- --------               -----------
+     88       3930     0.04   1620                        PING
+```
 
-Under the UserName column there will not be a user name. 
-The container user is not mapped to any user on the host. That is, the host process is running under an anonymous user; it has no permissions on the host only on the container.
+
+*`Windows Nano Server Images`*<br>
+The `Nano Server` images use the least-privilege user account; i.e., the default user account is the container user (`User Manager\ContainerUser`), and it has no administrator access inside the container. (The `Nano Server` base image is a stripped down version of Windows Server thereby having a much smaller attack surface and requiring fewer updates.)
+>`C:\>` docker run mcr.microsoft.com/windows/nanoserver:20H2 cmd /C echo %USERDOMAIN%\%USERNAME%<br>
+User Manager\ContainerUser
+
+
+If an application does not require administrator access, set the USER instruction in the Dockerfile to `ContainerUser` to ensure the container startup command runs with the least-privilege account. But if an application requires write access to a file, do not set the USER instruction in the Dockerfile to `ContainerAdministrator` to run as an administrator, but instead set the ACL permissions with a RUN instruction. **Always use the least-privilege user account (to run processes) and set ACLs as narrowly as possible.**
+
+$fileName = "C:\PShellTest\ITP.txt";
+$acl = Get-Acl -Path $fileName;
+$newOwner = [System.Security.Principal.NTAccount]('BUILTIN\Administrators');
+$acl.SetOwner($newOwner);
+Set-Acl -Path $fileName -AclObject $acl;
+Get-ChildItem -Path $fileName -Recurse | Set-Acl -AclObject $acl
+
+
 
 
 **[EXPOSE](https://docs.docker.com/engine/reference/builder/#expose)**<br>
