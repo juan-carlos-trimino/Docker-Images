@@ -25,7 +25,7 @@ LABEL maintainer="juancarlos@trimino.com"
 
 ARG OPENSSL_DIR="/openssl"
 ARG OPENSSL_VERSION="1.1.1k"
-ARG SSL_CERT_DIR=${OPENSSL_DIR}-certs
+ARG SSL_CERT_DIR=${OPENSSL_DIR}/${OPENSSL_DIR}-certs
 # ARG LD_LIBRARY_PATH=${OPENSSL_DIR}/lib:$LD_LIBRARY_PATH
 ENV PATH=${OPENSSL_DIR}/bin:$PATH
 # This environmental variable references the configuration file used by the openssl commands.
@@ -71,17 +71,21 @@ RUN set -x && \
     set +x
 
 RUN addgroup --gid 1001 openssl && \
-    # --no-create-home --home ${OPENSSL_DIR} \
-    adduser --uid 1001 --ingroup openssl --disabled-password --shell /sbin/nologin openssl
-    # chown -R openssl:openssl ${OPENSSL_DIR} && \
-    # chmod -R 755 ${OPENSSL_DIR}
+    # --home ${OPENSSL_DIR} \
+    adduser --uid 1001 --ingroup openssl --no-create-home --disabled-password --shell /sbin/nologin openssl && \
+    chown -R openssl:openssl ${OPENSSL_DIR} && \
+    chmod -R 755 ${OPENSSL_DIR}
+#    mkdir ${SSL_CERT_DIR} && \
+#    chown -R openssl:openssl ${SSL_CERT_DIR} && \
+#    chmod -R 755 ${SSL_CERT_DIR}
 
 USER openssl
 
 WORKDIR ${OPENSSL_DIR}
 
 # The directory where certificates and private keys are stored.
-VOLUME ${SSL_CERT_DIR}
+#VOLUME ${SSL_CERT_DIR}
+VOLUME ["/openssl/openssl-certs"]
 
 ENTRYPOINT ["openssl"]
 # A common idiom for keeping a container alive indefinitely.
