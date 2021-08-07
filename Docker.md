@@ -7,13 +7,16 @@
 
 ***
 # [Docker](https://docs.docker.com/)
-Docker provides *an abstraction over the physical machine*; it not only packages the application, but all its dependencies as well.
+Docker provides *an abstraction over the physical machine*; it not only packages the application and all its dependencies, but simplifies distribution as well.
 
 ## Notes
-1. Docker logging is powerful and pluggable, but it only reads log entries from the container's **`console output stream`**.
-2. Windows Versions<br>
+1. Docker is built from open source components and has two versions: Community Edition (CE) and Enterprise Edition (EE). Docker CE is free and has monthly releases; Docker EE is a paid subscription that comes with extended features and support, and it has quarterly releases.
+2. Docker follows a client-server architecture. The Docker client communicates with the Docker daemon/service running on the Docker host over a REST API to perform operations on Docker images and containers.
+3. The Docker daemon supports listening on three types of sockets: UNIX (default), TCP, and FD (file descriptor); only enabling TCP sockets allow the Docker client to communicate with the daemon remotely.
+4. Docker logging is powerful and pluggable, but it only reads log entries from the container's **`console output stream`**.
+5. Windows Versions<br>
    Because applications in [Windows Server](https://hub.docker.com/_/microsoft-windows-servercore) containers run processes directly on the host, the version of Windows on the server **`needs to match`** the version of Windows inside the container. But if the applications are running in Hyper-V containers, the version of Windows on the server does not need to match the version of Windows inside the container.
-3. [Nano Server](https://hub.docker.com/_/microsoft-windows-nanoserver) is a minimal operating system built for running apps in containers. It is not a full version of Windows, and it can't be run as the OS on a VM or a physical machine. Furthermore, not all Windows apps can run in a Nano Server container.
+6. [Nano Server](https://hub.docker.com/_/microsoft-windows-nanoserver) is a minimal operating system built for running apps in containers. It is not a full version of Windows, and it can't be run as the OS on a VM or a physical machine. Furthermore, not all Windows apps can run in a Nano Server container.
 
 ### Version and Info
 To verify the installation.<br>
@@ -82,8 +85,13 @@ The **start** command starts all stopped containers via the entry point of the c
 ***
 # Images
 ## Notes
-1. When identifying a container/image by its id, **`there is no need to specify the entire id`**; specify enough characters to uniquely identify it.
-2. *If a file is deleted in the same layer that it's created, it won't be included in the image.* Because of this, Dockerfiles often download a tarball or other archive file, unpack it, and immediately remove the archive file in one RUN instruction.
+1. A Docker image is a file that packs the application and all its dependencies for distribution and is built with multiple layers; the image version is commonly known as a *tag*.
+2. A Docker *registry* is where Docker images are stored for distribution; as a best practice, always tag the image before pushing it to a registry.
+3. A running instance of a Docker image is called a *container* and multiple Docker containers can be created from a single image.
+4. When identifying a container/image by its id, **`there is no need to specify the entire id`**; specify enough characters to uniquely identify it.
+5. When the `docker build` command is run to build a Docker image, Docker creates a layer for each instruction in the corresponding Dockerfile that modifies the filesystem of the base image.
+6. Each layer in a Docker image is *read-only* and has a unique identifier; layers stack on top of each other adding functionality incrementally. When a container is created from an image, Docker adds a *writable* layer on top of all of the read-only layers. This layer is known as the *container layer*. All writes from the container while it's running are written to this layer, but because containers are immutable, all data written to this layer are lost after the container is removed.
+7. *If a file is deleted in the same layer that it's created, it won't be included in the image.* Because of this, Dockerfiles often download a tarball or other archive file, unpack it, and immediately remove the archive file in one RUN instruction.
 
 ### Building images
 **name-of-container-image = {user-name-of-registry}/{app-name}**
@@ -221,6 +229,13 @@ The `-t` and `-i` options enable terminal redirection for interactive text-based
 >`\>` docker container ls --all
 
 >`\>` docker container ls -a
+
+### Pausing
+Pausing a container will not remove its writable layer, and the data already written remains unchanged. Docker removes the data written to the container layer only when the container is removed.
+>`\>` docker pause [container-name-or-id]
+
+Because the `docker pause` command doesn't make the process(es) running in the container restart when unpausing the container, any data written to the container's memory also remains unchanged. To return the container to its running state.
+>`\>` docker unpause [container-name-or-id]
 
 ### Stopping/Removing/Killing
 **Stop a running container**<br>
@@ -483,14 +498,24 @@ To mount the host c:\host_dir folder to another container (mount2) path c:\conta
 >`PS C:\>` <kbd>Ctrl</kbd>+<kbd>Shift</kbd>pq
 
 **[USER](https://docs.docker.com/engine/reference/builder/#user)**<br>
+The instruction sets the user to use in any subsequent **RUN**, **CMD**, or **ENTRYPOINT** instructions.
 
 **Security**<br>
+There are two approaches to run a container *without* the root/administrator user.
+- Use the USER instruction in the Dockerfile.
+- Use the flag --user (-u) in the `docker run` command, which overrides the USER instruction in the Dockerfile.
+
 **`Linux`**<br>
+In most Linux distributions, the user with an *ID 0* is called the *root* (super, administrator) user. In the Linux kernel there are two types of processes, privileged and unprivileged processes. A privileged process runs with the user ID 0 (root), and an unprivileged process runs with a nonzero user ID. When performing an operation, a privileged process bypasses all the kernel-level permissions checks, but an unprivileged process is subject to permission checks.
+
+247
+In Linux, all Docker containers, by default, run as the `root user`.
+Docker provides process isolation with six namespaces. In Linux, a namespace partitions kernel resources so that each running process has its own independent view of those resources. The mount namespace, which is one of the six namespaces, helps isolate one container's view of the filesystem from other containers and the host filesystem. 
+
+
 It's important to set USER in all the Dockerfiles or change the user within an ENTRYPOINT or CMD instruction.
 
 Failure to do so will result in `processes running as `**`root`**` within the container`. As UIDs are the same within a container and on the host, should attackers manage to break the container, they will have root access to the host machine.
-When performing a task, a privileged process bypasses all the kernel-level permissions checks, while all the unprivileged processes are subject to permission checks.
-When performing a task, a privileged process bypasses all the kernel-level permissions checks, while all the unprivileged processes are subject to permission checks.
 
 
 **`Windows`**<br>
@@ -516,7 +541,6 @@ Handles      WS(K)   CPU(s)     Id UserName               ProcessName
 -------      -----   ------     -- --------               -----------
      88       3936     0.02   1620 User Manager\Contai... PING
 ```
-
 This is a `Windows Server Core` container running on a Windows Server host, and since the process is running on the host, the PID inside the container will *match* the PID on the host. On the host, run the Get-Process cmdlet to display the details of the process running on the host. Because the container username **does not map** to any users on the host, the username under the column `UserName` is blank. That is, the host process is running under an **anonymous user** with no permissions on the host; it has only the configured permissions within the container. Hence, if an attacker breaks out of the container, it would be running a host process with no permissions on the host.
 >`PS C:\>` Get-Process -Id 1620 -IncludeUserName
 ```
@@ -525,24 +549,20 @@ Handles      WS(K)   CPU(s)     Id UserName               ProcessName
      88       3930     0.04   1620                        PING
 ```
 
-
 *`Windows Nano Server Images`*<br>
-The `Nano Server` images use the least-privilege user account; i.e., the default user account is the container user (`User Manager\ContainerUser`), and it has no administrator access inside the container. (The `Nano Server` base image is a stripped down version of Windows Server thereby having a much smaller attack surface and requiring fewer updates.)
+The `Nano Server` images use the *least-privilege* user account; i.e., the default user account is the container user (`User Manager\ContainerUser`), which has no administrator access inside the container. (The `Nano Server` base image is a stripped down version of Windows Server; it has a much smaller attack surface and requires fewer updates.)
 >`C:\>` docker run mcr.microsoft.com/windows/nanoserver:20H2 cmd /C echo %USERDOMAIN%\%USERNAME%<br>
 User Manager\ContainerUser
 
-
-If an application does not require administrator access, set the USER instruction in the Dockerfile to `ContainerUser` to ensure the container startup command runs with the least-privilege account. But if an application requires write access to a file, do not set the USER instruction in the Dockerfile to `ContainerAdministrator` to run as an administrator, but instead set the ACL permissions with a RUN instruction. **Always use the least-privilege user account (to run processes) and set ACLs as narrowly as possible.**
-
-$fileName = "C:\PShellTest\ITP.txt";
-$acl = Get-Acl -Path $fileName;
-$newOwner = [System.Security.Principal.NTAccount]('BUILTIN\Administrators');
-$acl.SetOwner($newOwner);
-Set-Acl -Path $fileName -AclObject $acl;
-Get-ChildItem -Path $fileName -Recurse | Set-Acl -AclObject $acl
-
-
-
+If an application does not require administrator access, set the USER instruction in the Dockerfile to `ContainerUser` to ensure the container process runs with the least-privilege account. But if the application requires write access to a file, set ACL permissions with a RUN instruction.
+```
+RUN $fileName = "C:\test\Service.log"; `
+    $acl = Get-Acl -Path $fileName; `
+    $acl.SetOwner([System.Security.Principal.NTAccount]('BUILTIN\[applicable-local-account]]')); `
+    Set-Acl -Path $fileName -AclObject $acl; `
+    Get-ChildItem -Path $fileName -Recurse | Set-Acl -AclObject $acl;
+```
+ **Always use the least-privilege user account and set ACLs as narrowly as possible.**
 
 **[EXPOSE](https://docs.docker.com/engine/reference/builder/#expose)**<br>
 The instruction informs Docker that the container listens on the specified network port at runtime; the port listens on **TCP** (default) or **UDP**.

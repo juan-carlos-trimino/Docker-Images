@@ -653,3 +653,83 @@ token  - This is a **JSON Web Token** (**JWT**), which is base64-encoded.
 #### Notes
 1. DaemonSet runs only a single pod replica on each node.
 2. Because DaemonSet bypasses the Scheduler, it can deploy pods to nodes that have been made un-schedulable, which prevents pods from being deployed to them.
+
+<br>
+
+***
+# Red Hat OpenShift Container Platform (RHOCP)
+## Verifying the Health of OpenShift Nodes
+To display a column with the status of each node. If a node is not `Ready`, it cannot communicate with the OpenShift control plane and is effectively dead to the cluster.
+>`$` oc get nodes
+
+To display the current CPU and memory usage of each node. These are actual usage numbers.
+>`$` oc adm top nodes
+
+To display the resources available and used from the scheduler point of view.
+>`$` oc describe node my-node-name
+
+## Reviewing the Cluster Version Resource
+The OpenShift installer creates the directory `auth` containing the `kubeconfig` and `kubeadmin-password` files. Run the `oc login` command to connect to the cluster with the user `kubeadmin` and the password located in the `kubeadmin-password` file.
+>`$` oc login -u kubeadmin -p [password] [URL:port]
+
+`ClusterVersion` is a custom resource that holds high-level information about the cluster; use this resource to declare the version of the cluster to run. Defining a new version for the cluster instructs the `cluster-version` operator to upgrade the cluster to that version.<br>
+To retrieve the cluster version.
+>`$` oc get clusterversion
+
+To obtain more detailed information about the cluster status.
+>`$` oc describe clusterversion
+
+## Reviewing Cluster Operators
+OpenShift Container Platform cluster operators are top level operators that manage the cluster. They are responsible for the main components, such as the API server, the web console, storage, or the SDN; their information is accessible through the `ClusterOperator` resource.<br>
+To retrieve the list of all cluster operators.
+>`$` oc get clusteroperators
+
+## Displaying the Logs of OpenShift Nodes
+Most of the infrastructure components of OpenShift are containers inside pods; their logs can be viewed the same way as regular containers. Some of these containers are created by the `Kubelet`, and thus invisible to most distributions of K8s, but OpenShift cluster operators create pod resources for them.
+
+An OpenShift node based on Red Hat Enterprise Linux CoreOS runs very few local services that would require direct access to a node to inspect their status. Most of the system services in Red Hat Enterprise Linux CoreOS run as containers. The **main exceptions** are the `CRI-O container engine` and the `Kubelet`, which are **systemd units**.<br>
+To view these logs.
+>`$` oc adm node-logs -u crio [node-name]<br>
+>`$` oc adm node-logs -u kubelet [node-name]
+
+To display all journal logs of a node.
+>`$` oc adm node-logs [node-name]
+
+
+51
+
+
+Troubleshooting The Container Engine
+From an oc debug node session, use the crictl command to get low-level information about
+all local containers running on the node. You cannot use the podman command for this task
+because it does not have visibility on containers created by CRI-O. The following example lists all
+containers running on a node. The oc describe node command provides the same information
+but organized by pod instead of by container.
+[user@host ~]$ oc debug node/my-node-name
+...output omitted...
+sh-4.4# chroot /host
+sh-4.4# crictl ps
+...output omitted...
+
+
+
+## Troubleshooting Application Deployments
+Ignore the differences between K8s deployments and OpenShift deployment configurations when troubleshooting applications; the common failure scenarios and the ways to troubleshoot them are essentially the same.
+
+### Troubleshooting Running and Terminated Pods
+A container that is running, even for a very short time, generates logs. These logs are not discarded when the container terminates. The `oc logs` command displays the logs from any
+container inside a pod. If the pod contains a single container, it requires the name of the pod.
+>`$` oc logs [pod-name]
+
+If the pod contains multiple containers, it requires the -c option.
+>`$` oc logs [pod-name] -c [container-name]
+
+
+54
+
+
+
+
+
+
+
