@@ -508,9 +508,21 @@ There are two approaches to run a container *without* the root/administrator use
 **`Linux`**<br>
 In most Linux distributions, the user with an *ID 0* is called the *root* (super, administrator) user. In the Linux kernel there are two types of processes, privileged and unprivileged processes. A privileged process runs with the user ID 0 (root), and an unprivileged process runs with a nonzero user ID. When performing an operation, a privileged process bypasses all the kernel-level permissions checks, but an unprivileged process is subject to permission checks.
 
-247
-In Linux, all Docker containers, by default, run as the `root user`.
-Docker provides process isolation with six namespaces. In Linux, a namespace partitions kernel resources so that each running process has its own independent view of those resources. The mount namespace, which is one of the six namespaces, helps isolate one container's view of the filesystem from other containers and the host filesystem. 
+
+In Linux, all Docker containers, by default, run as the **`root user`**; consequently, can an attacker having root access to a container do any damage to another container or host filesystem? 
+
+
+Because Linux's namespaces partition kernel resources to ensure that each running process has its own independent view of those resources, the mount namespace (one of six namespaces) isolates a container filesystem from other containers filesystems as well as the host filesystem. That is, changes made as the root user within a container remains inside the container filesystem; however, when a volume (`VOLUME` instruction in Docker) is used to mount a location in the container filesystem to the host filesystem, the root user has full access to the mounted location; if running as non-root, it will not. Furthermore, if a user has access to a container running as root user, it can use its root privileges to install applications within the container to search for any vulnerability to exploit.
+
+
+Containers use Linux namespaces to isolate themselves from the host on which they run. In
+particular, the User namespace is used to make containers rootless. This namespace maps
+user and group IDs so that a process inside the namespace might appear to be running under a
+different ID.
+Rootless containers use the User namespace to make application code appear to be running as
+root. However, from the host's perspective, permissions are limited to those of a regular user.
+If an attacker manages to escape the user namespace onto the host, then it will have only the
+capabilities of a regular, unprivileged user.
 
 
 It's important to set USER in all the Dockerfiles or change the user within an ENTRYPOINT or CMD instruction.
@@ -753,3 +765,66 @@ The $ character is replaced by a # character if the shell is running as the supe
 # Runtime protection: All applications in container images run as non-root users, minimizing the exposure surface to malicious or faulty applications.
 Create a Working Directory
 The working directory is the directory containing all files needed to build the image. Creating an empty working directory is good practice to avoid incorporating unnecessary files into the image. For security reasons, the root directory, /, should never be used as a working directory for image builds.
+
+
+
+
+
+***
+# Podman
+***
+# Image
+Login to the Red Hat Container Catalog with a Red Hat account (a valid account is required).
+>`$` podman login registry.redhat.io
+
+To search a registry or a list of registries for a matching image. The command can specify which registry to search by prefixing the registry in the search term (e.g.; `registry.fedoraproject.org/fedora`), default is the registries in the `registries.search` table in the config file `/etc/containers/registries.conf`. The default number of results is 25.<br>
+Container images are named based on the following syntax:<br>
+registry_name/user_name/image_name:tag
+>`$` cat /etc/containers/registries.conf<br>
+[registries.search]<br>
+registries = ['docker.io', 'quay.io']
+
+>`$` podman search rhel<br>
+>`$` podman search registry.redhat.io/rehl<br>
+>`$` podman search --format "table {{.Index}} {{.Name}}" registry.redhat.io/rhel
+
+To download an image.
+>`$` podman pull rhel
+
+After retrieval, images are stored locally.
+>`$` podman images
+
+<br>
+
+***
+# Containers
+## Notes
+1. Most Podman subcommands accept the `-l` flag (`l` for latest) as a replacement for the container id. This flag applies the command to the latest used container in any Podman command.
+2. By default, `Podman` and `Red Hat OpenShift` run `rootless` containers. Docker announced that rootless mode will be generally available in version 20.10.
+
+The container performs one task and exits.
+>`$` podman run ubi8/ubi:8.3 echo 'Hello world!'
+
+Use the `-p (--publish)` option to map port 8080 on the container to a `random` port on the host. Then, use the `podman port` command to retrieve which ports the container exposes (8080) and where they are mapped on the host (42469). Finally, use this port to create the target `URL` and fetch the root page from the Apache HTTP server.
+>`$` podman run -d -p 8080 registry.redhat.io/rhel8/httpd-24<br>
+>`$` podman port -l<br>
+8080/tcp -> 0.0.0.0:42469<br>
+>`$` curl http://localhost:42469
+
+To connect to a container interactively (`-it`).
+>`$` podman run -it ubi8/ubi:8.3 /bin/bash
+
+When running a container, use the `-e (--env)` option to add new environment variables or replace the values of existing image variables.
+>`$` podman run -e GREET=Hello --env NAME=RedHat ubi8/ubi:8.3 printenv GREET NAME
+
+To verify that the container started without errors.
+>`$` podman ps --format 'table {{.ID}} {{.Image}} {{.Names}}'
+
+
+
+
+
+
+
+
+
