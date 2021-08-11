@@ -658,6 +658,23 @@ token  - This is a **JSON Web Token** (**JWT**), which is base64-encoded.
 
 ***
 # Red Hat OpenShift Container Platform (RHOCP)
+## Reviewing the Cluster Version Resource
+The OpenShift installer creates the directory `auth` containing the `kubeconfig` and `kubeadmin-password` files. Run the `oc login` command to connect to the cluster with the user `kubeadmin` and the password located in the `kubeadmin-password` file.
+>`$` oc login -u [username] -p [password] [URL:port]<br>
+>`$` oc login --username [username] --password [password] [URL:port]
+
+>`$` oc login --token=[token] --server=[URL:port]
+
+Log out of the active session.
+>`$` oc logout
+
+`ClusterVersion` is a custom resource that holds high-level information about the cluster; use this resource to declare the version of the cluster to run. Defining a new version for the cluster instructs the `cluster-version` operator to upgrade the cluster to that version.<br>
+To retrieve the cluster version.
+>`$` oc get clusterversion
+
+To obtain more detailed information about the cluster status.
+>`$` oc describe clusterversion
+
 ## Verifying the Health of OpenShift Nodes
 To display a column with the status of each node. If a node is not `Ready`, it cannot communicate with the OpenShift control plane and is effectively dead to the cluster.
 >`$` oc get nodes
@@ -666,18 +683,7 @@ To display the current CPU and memory usage of each node. These are actual usage
 >`$` oc adm top nodes
 
 To display the resources available and used from the scheduler point of view.
->`$` oc describe node my-node-name
-
-## Reviewing the Cluster Version Resource
-The OpenShift installer creates the directory `auth` containing the `kubeconfig` and `kubeadmin-password` files. Run the `oc login` command to connect to the cluster with the user `kubeadmin` and the password located in the `kubeadmin-password` file.
->`$` oc login -u kubeadmin -p [password] [URL:port]
-
-`ClusterVersion` is a custom resource that holds high-level information about the cluster; use this resource to declare the version of the cluster to run. Defining a new version for the cluster instructs the `cluster-version` operator to upgrade the cluster to that version.<br>
-To retrieve the cluster version.
->`$` oc get clusterversion
-
-To obtain more detailed information about the cluster status.
->`$` oc describe clusterversion
+>`$` oc describe node [node-name-or-IP-address]
 
 ## Reviewing Cluster Operators
 OpenShift Container Platform cluster operators are top level operators that manage the cluster. They are responsible for the main components, such as the API server, the web console, storage, or the SDN; their information is accessible through the `ClusterOperator` resource.<br>
@@ -687,13 +693,13 @@ To retrieve the list of all cluster operators.
 ## Displaying the Logs of OpenShift Nodes
 Most of the infrastructure components of OpenShift are containers inside pods; their logs can be viewed the same way as regular containers. Some of these containers are created by the `Kubelet`, and thus invisible to most distributions of K8s, but OpenShift cluster operators create pod resources for them.
 
-An OpenShift node based on Red Hat Enterprise Linux CoreOS runs very few local services that would require direct access to a node to inspect their status. Most of the system services in Red Hat Enterprise Linux CoreOS run as containers. The **main exceptions** are the `CRI-O container engine` and the `Kubelet`, which are **systemd units**.<br>
+An OpenShift node based on `Red Hat Enterprise Linux CoreOS` runs very few local services that would require direct access to a node to inspect their status. Most of the system services in Red Hat Enterprise Linux CoreOS run as containers. The **main exceptions** are the `CRI-O container engine` and the `Kubelet`, which are **systemd units**.<br>
 To view these logs.
->`$` oc adm node-logs -u crio [node-name]<br>
->`$` oc adm node-logs -u kubelet [node-name]
+>`$` oc adm node-logs -u crio [node-name-or-IP-address]<br>
+>`$` oc adm node-logs -u kubelet [node-name-or-IP-address]
 
 To display all journal logs of a node.
->`$` oc adm node-logs [node-name]
+>`$` oc adm node-logs [node-name-or-IP-address]
 
 
 51
