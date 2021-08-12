@@ -21,10 +21,8 @@ Docker provides *an abstraction over the physical machine*; it not only packages
 ### Version and Info
 To verify the installation.<br>
 (It displays the versions for the Docker `client` (CLI) and the Docker `server` (the service that manages containers).
->`\>` docker version
-
->`\>` docker -v
-
+>`\>` docker version<br>
+>`\>` docker -v<br>
 >`\>` docker info
 
 <br>
@@ -92,6 +90,8 @@ The **start** command starts all stopped containers via the entry point of the c
 5. When the `docker build` command is run to build a Docker image, Docker creates a layer for each instruction in the corresponding Dockerfile that modifies the filesystem of the base image.
 6. Each layer in a Docker image is *read-only* and has a unique identifier; layers stack on top of each other adding functionality incrementally. When a container is created from an image, Docker adds a *writable* layer on top of all of the read-only layers. This layer is known as the *container layer*. All writes from the container while it's running are written to this layer, but because containers are immutable, all data written to this layer are lost after the container is removed.
 7. *If a file is deleted in the same layer that it's created, it won't be included in the image.* Because of this, Dockerfiles often download a tarball or other archive file, unpack it, and immediately remove the archive file in one RUN instruction.
+8. When building an image, the directory containing the Dockerfile is used as the context for the build. Creating an `empty directory` is good practice to avoid incorporating unnecessary files into the image. For **security** reasons, the `root directory` (**`/`** in Linux; **`C:\`** in Windows) should never be used as a directory for image builds.
+
 
 ### Building images
 **name-of-container-image = {user-name-of-registry}/{app-name}**
@@ -122,7 +122,8 @@ The **start** command starts all stopped containers via the entry point of the c
 >`\>` docker image ls --all<br>
 >`\>` docker image ls -a<br>
 >`\>` docker image ls --filter reference=[name-of-container-image][:version-or-variation]<br>
->`\>` docker image ls --filter reference=[name-of-container-image]
+>`\>` docker image ls --filter reference=[name-of-container-image]<br>
+>`\>` docker images --format 'table {{.ID}}\t{{.Repository}}\t{{.Tag}}'
 
 **List untagged images (dangling - TAG=<none>)**
 >`\>` docker images -f "dangling=true"
@@ -752,24 +753,6 @@ To get the range, use the `grep -E` above.
 >`\>` passwd -l [username]<br>
 >`\>` passwd -u [username]
 
-
-
-
-
-
-docker images --format 'table {{.ID}}\t{{.Repository}}\t{{.Tag}}'
-
-In Linux by default, containers run as root.  A container running as root has full control of the host machine; UIDs are the same within a container and the host.
-The superuser account is for administration of the system. The name of the superuser is root and the account has UID 0. The superuser has full access to the system.
-The $ character is replaced by a # character if the shell is running as the superuser, root.
-# Runtime protection: All applications in container images run as non-root users, minimizing the exposure surface to malicious or faulty applications.
-Create a Working Directory
-The working directory is the directory containing all files needed to build the image. Creating an empty working directory is good practice to avoid incorporating unnecessary files into the image. For security reasons, the root directory, /, should never be used as a working directory for image builds.
-
-
-
-
-
 ***
 # Podman
 ***
@@ -792,34 +775,133 @@ To download an image.
 >`$` podman pull rhel
 
 After retrieval, images are stored locally.
->`$` podman images
+>`$` podman images<br>
+>`$` podman images --format 'table {{.ID}}\t{{.Repository}}\t{{.Tag}}'
 
 <br>
 
 ***
 # Containers
 ## Notes
-1. Most Podman subcommands accept the `-l` flag (`l` for latest) as a replacement for the container id. This flag applies the command to the latest used container in any Podman command.
+1. Most `Podman` subcommands accept the `-l` flag (`l` for latest) as a replacement for the container id. This flag applies the command to the latest used container in any Podman command.
 2. By default, `Podman` and `Red Hat OpenShift` run `rootless` containers. Docker announced that rootless mode will be generally available in version 20.10.
+3. The `podman run` command creates a new container from an image **and** starts the new container. If the container image is not available locally, it attempts to download the image using the configured image repository.
+4. `Podman` identifies containers by a unique container ID or container name.
+   - The container ID (hexadecimal number) is unique and generated automatically.
+   - The container name can be manually specified (must be unique); otherwise, it is generated automatically.
 
-The container performs one task and exits.
+Display the **container ID and name** for all actively running containers.
+>`$` podman ps
+
+`Podman` does not discard stopped containers immediately; it preserves their local file systems and other states for facilitating postmortem analysis. Option `-a` lists all containers, including stopped ones.
+>`$` podman ps -a
+
+To send Linux signals to the main process in the container. If no signal is specified, it sends the SIGKILL signal, terminating the main process and the container.
+>`$` podman kill [container-name-or-id]
+
+To specify the signal with the `-s` option. Any Linux signal can be sent to the main process. `Podman` accepts either the signal name or number.
+>`$` podman kill -s SIGKILL [container-name-or-id]
+
+To **stop all containers**.<br>
+Before deleting all containers, all running containers must be in a stopped status.
+>`$` podman stop -a
+
+To **restart a stopped container**; the `podman restart` command creates a new container with the same container ID, reusing the stopped container state and file system.
+>`$` podman restart [container-name-or-id]
+
+To **delete a container** and discards its state and file system.<br>
+The `-f` option of the `rm` subcommand instructs `Podman` to remove the container even if it is not stopped. This option terminates the container forcefully and then removes it. Using the `-f` option is equivalent to the `podman kill` and `podman rm` commands together.
+>`$` podman rm [container-name-or-id]<br>
+>`$` podman rm -f [container-name-or-id]
+
+To **delete all containers** at the same time.<br>
+Many `podman` subcommands accept the `-a` option. This option indicates using the subcommand on all available containers or images.
+>`$` podman rm -a
+
+The container performs one task (foreground) and exits.
 >`$` podman run ubi8/ubi:8.3 echo 'Hello world!'
 
-Use the `-p (--publish)` option to map port 8080 on the container to a `random` port on the host. Then, use the `podman port` command to retrieve which ports the container exposes (8080) and where they are mapped on the host (42469). Finally, use this port to create the target `URL` and fetch the root page from the Apache HTTP server.
->`$` podman run -d -p 8080 registry.redhat.io/rhel8/httpd-24<br>
->`$` podman port -l<br>
-8080/tcp -> 0.0.0.0:42469<br>
->`$` curl http://localhost:42469
+To define the **container name** explicitly, use the `--name` option when running a container; the name must be unique.
+>`$` podman run --name [container-name] registry.redhat.io/rhel8/httpd-24
 
-To connect to a container interactively (`-it`).
+To run the container in **detach** mode (background), use the `-d (--detach)` option. `Podman` returns the container ID on the screen allowing to continue to run commands in the same terminal while the container runs in the background.
+>`$` podman run --rm -d registry.redhat.io/rhel8/httpd-24
+
+To override the process (PID 0) specified in the **ENTRYPOINT** or **CMD** instruction of the image, include the desired command after the container image. The desired command must be executable inside the container image.
+>`$` podman run registry.redhat.io/rhel8/httpd-24 ls /tmp
+
+To connect to a container **interactively** (`-it`).
 >`$` podman run -it ubi8/ubi:8.3 /bin/bash
 
-When running a container, use the `-e (--env)` option to add new environment variables or replace the values of existing image variables.
+When running a container, use the `-e (--env)` option to add new **environment variables** or replace the values of existing image variables.
 >`$` podman run -e GREET=Hello --env NAME=RedHat ubi8/ubi:8.3 printenv GREET NAME
 
 To verify that the container started without errors.
 >`$` podman ps --format 'table {{.ID}} {{.Image}} {{.Names}}'
 
+When a container starts, it executes the **ENTRYPOINT** or **CMD** instruction of the image. The `podman exec` command starts **an additional process** inside an already running container.
+>`$` podman exec [container-name-or-id] ls /etc
+
+To start a Bash shell inside a running container.
+>`$` podman exec -it [container-name-or-id] /bin/bash
+
+<br>
+
+***
+# Volumes
+## Notes
+1. Container storage is **ephemeral**, meaning its contents are not preserved after the container is removed.
+2. The `podman rm` command deletes the container storage.
+3. Podman can mount `host directories` inside a running container. The container sees the host directories as part of the container storage. But the contents of the host directories are not deleted after the container is removed; the host directories and their contents can be mounted to new containers whenever needed.
+
+
+A container with a single process runs as a host operating system process, under a host operating system user and group ID, so the host directory must be configured with ownership and permissions allowing access to the container. With some Linux distros (e.g., Red Hat Enterprise Linux), the host directory also needs to be configured with the appropriate `SELinux context`, which is `container_file_t`. `Podman` uses the `container_file_t SELinux context` to restrict which files on the host system the container is allowed to access. This avoids information leakage between the host system and the application running inside a container.
+
+To set up the host directory, create the directory.
+>`$` mkdir -pv /home/dira/dirb
+
+The user running processes in the container must be capable of writing files to the directory. The permission should be defined with the numeric user ID (UID) from the container. The `podman unshare` command provides a session to execute commands within the same user namespace as the process running inside the container.
+>`$` podman unshare chown -R [userID]:[groupID] /home/dira/dirb
+
+Apply the `container_file_t context` to the directory (and all subdirectories) to allow containers access to all of its contents.
+>`$` sudo semanage fcontext -a -t container_file_t '/home/dira/dirb(/.*)?'
+
+Apply the `SELinux container policy` that was set up in the first step to the newly created directory.
+>`$` sudo restorecon -Rv /home/dira/dirb
+
+**The host directory must be configured *before* starting the container that uses the directory.**
+
+After creating and configuring the host directory, next **mount** the directory to a container.<br>
+To bind mount a host directory to a container, use the `-v` option to the `podman run` command, specifying the host directory path and the container directory path (host-directory-path:container-directory-path).<br>
+If the directory already exists inside the container image, the host directory mount **overlays**, but does not remove, the content from the container image. If the mount is removed, the original content is accessible again.
+>`$` podman run -v /home/dira/dirb:/var/lib/dirc ubi8/ubi:8.3
+
+<br>
+
+***
+# Networks
+## Notes
+1. The `-p (--publish)` option has the following format: **[IP-address:][host-port:]container-port**
+
+To create an externally accessible container.<br>
+Requests to port 8080 on the host are forwarded to port 80 within the container.
+>`$` podman run -rm -d -p 8080:80 registry.redhat.io/rhel8/httpd-24
+
+To limit external access to the container to requests from `localhost` to host port 8080; requests are forwarded to port 80 in the container.
+>`$` podman run -rm -d -p 127.0.0.1:8080:80 registry.redhat.io/rhel8/httpd-24
+
+If a port is not specified for the `host port`, `Podman` assigns a `random` available host port.<br>
+To see the port assigned by `Podman`, use the `podman port` command.
+>`$` podman run -rm -d -p 127.0.0.1::80 --name httpd24 registry.redhat.io/rhel8/httpd-24<br>
+>`$` podman port httpd24<br>
+80/tcp -> 127.0.0.1:42469
+
+If only a container port is specified, then a `random` available host port is mapped to the container. Requests to this assigned host port from `any IP address` are forwarded to the container port.<br>
+Requests to host port 42469 are forwarded to port 80 in the container.
+>`$` podman run -rm -d -p 8080 registry.redhat.io/rhel8/httpd-24<br>
+>`$` podman port -l<br>
+8080/tcp -> 0.0.0.0:42469<br>
+>`$` curl http://localhost:42469
 
 
 
@@ -828,3 +910,28 @@ To verify that the container started without errors.
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+The $ character is replaced by a # character if the shell is running as the superuser, root.
