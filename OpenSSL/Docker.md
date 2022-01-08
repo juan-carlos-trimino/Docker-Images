@@ -9,41 +9,14 @@ Create self-signed certificate on Windows using OpenSSL inside docker.
 Linux
 -----
 >`\>` docker build -t veni-vidi-vici/openssl-1.1.1k:alpine-3.13 -f ./OpenSSL/Dockerfile.linux ./OpenSSL<br>
->`\>` docker run -it --rm -v /jct/Repos/Volumes/OpenSSL:/openssl-certs veni-vidi-vici/openssl-1.1.1k:alpine-3.13<br>
+>`\>` docker run -it --rm -v /jct/Repos/Volumes/OpenSSL:/openssl-certs veni-vidi-vici/openssl-1.1.1k:alpine-3.13
+
+>`\>` podman build -t veni-vidi-vici/openssl-1.1.1k:alpine-3.13 -f ./OpenSSL/Dockerfile.linux ./OpenSSL
 
 To use the `sh` shell.<br>
 >`\>` docker run -it --rm --entrypoint /bin/sh -v /jct/Repos/Volumes/OpenSSL:/openssl-certs veni-vidi-vici/openssl-1.1.1k:alpine-3.13<br>
 Then from the command prompt, type.<br>
 `\>` openssl
-
-<br>
-
-Useful Docker Commands
-----------------------
-List local images
->`PS>` docker image ls
-
-Remove given image (force removal)
->`PS>` docker image rm -f [container-name-or-id]
-
-Remove given container (it must be stopped first)
->`PS>` docker rm [container-name-or-id]
-
-Kill a running container
->`PS>` docker container kill [container-name-or-id]
-
-List running containers
->`PS>` docker container ls
->`PS>` docker ps
-
-List all containers
->`PS>` docker container ls -a
-
-Remove all containers (active and non-active)
->`PS>` docker container ls -aq | foreach { docker rm -f $_ }
-
-Remove images with TAG=<none>
->`PS>` docker rmi $(docker images -f "dangling=true" -q)
 
 <br>
 
