@@ -1,13 +1,13 @@
 apiVersion: v1
 kind: ServiceAccount
 metadata:
-  name: traefik-ingress-serviceaccount
+  name: traefik-ingress
   namespace: kube-system
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
-  name: traefik-ingress-clusterrole
+  name: traefik-ingress
 rules:
   - apiGroups: [""]
     verbs: ["get", "list", "watch"]
@@ -19,21 +19,21 @@ rules:
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
 metadata:
-  name: traefik-ingress-clusterrolebinding
+  name: traefik-ingress
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
-  name: traefik-ingress-clusterrole
+  name: traefik-ingress
 subjects:
   - kind: ServiceAccount
-    name: traefik-ingress-serviceaccount
+    name: traefik-ingress
     namespace: kube-system
 ---
 # Controller.
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: traefik-ingress-deployment
+  name: traefik-ingress
   namespace: kube-system
 spec:
   replicas: 1
@@ -47,16 +47,16 @@ spec:
   # Pod template.
   template:
     metadata:
-      name: traefik-ingress-pod
+      name: traefik-ingress
       # Must macth "Service" and "Deployment" labels.
       labels:
         deployment-label: traefik-ingress-controller
         service-label: traefik-ingress-controller
     spec:
-      serviceAccountName: traefik-ingress-serviceaccount
+      serviceAccountName: traefik-ingress
       terminationGracePeriodSeconds: 60
       containers:
-        - name: traefik-ingress-container
+        - name: traefik-ingress
           imagePullPolicy: IfNotPresent
           #image: traefik:2.4.8
           image: traefik:1.7
@@ -74,15 +74,15 @@ spec:
             - --api
             - --kubernetes
             - --logLevel=INFO
-            - --defaultentrypoints=http,https
-            - --entrypoints=Name:https Address::443 TLS
-            - --entrypoints=Name:http Address::80
+          #  - --defaultentrypoints=http,https
+          #  - --entrypoints=Name:https Address::443 TLS
+          #  - --entrypoints=Name:http Address::80
       restartPolicy: Always
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: traefik-ingress-service
+  name: traefik-ingress
   namespace: kube-system
 spec:
   type: NodePort
@@ -107,7 +107,7 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: traefik-dashboard-service
+  name: traefik-dashboard
   namespace: kube-system
   annotations:
     kubernetes.io/ingress.class: traefik
@@ -135,5 +135,5 @@ spec:
         paths:
         - path: /
           backend:
-            serviceName: traefik-dashboard-service
+            serviceName: traefik-dashboard
             servicePort: dashboard

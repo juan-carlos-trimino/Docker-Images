@@ -6,31 +6,29 @@ LABEL copyright="Copyright (C) 2020 Juan Carlos Trimino. All rights reserved."
 LABEL version="1.0.0"
 LABEL maintainer="juancarlos@trimino.com"
 
-
 # Default variables.
-ENV COUNTY="USA"
-ENV STATE="Texas"
-ENV LOCATION="Houston"
-ENV ORGANISATION="????????"
-ENV ROOT_CN="Root"
-ENV ISSUER_CN="Example Ltd"
-ENV PUBLIC_CN="*.example.com"
-ENV ROOT_NAME="root"
-ENV ISSUER_NAME="example"
-ENV PUBLIC_NAME="public"
-ENV RSA_KEY_NUMBITS="2048"
-ENV DAYS="365"
-ENV KEYSTORE_NAME="keystore"
-ENV KEYSTORE_PASS="changeit"
-ENV CERT_DIR="/etc/ssl/certs"
+# ENV COUNTY="USA"
+# ENV STATE="Texas"
+# ENV LOCATION="Houston"
+# ENV ORGANISATION="????????"
+# ENV ROOT_CN="Root"
+# ENV ISSUER_CN="Example Ltd"
+# ENV PUBLIC_CN="*.example.com"
+# ENV ROOT_NAME="root"
+# ENV ISSUER_NAME="example"
+# ENV PUBLIC_NAME="public"
+# ENV RSA_KEY_NUMBITS="2048"
+# ENV DAYS="365"
+# ENV KEYSTORE_NAME="keystore"
+# ENV KEYSTORE_PASS="changeit"
+# ENV CERT_DIR="/etc/ssl/certs"
 
-
-
-ENV OPENSSL_DIR="/openssl"
-ENV OPENSSL_VERSION="1.1.1k"
+ARG OPENSSL_DIR="/openssl"
+ARG OPENSSL_VERSION="1.1.1k"
+ARG SSL_CERT_DIR=${OPENSSL_DIR}/${OPENSSL_DIR}-certs
+# ARG LD_LIBRARY_PATH=${OPENSSL_DIR}/lib:$LD_LIBRARY_PATH
 ENV PATH=${OPENSSL_DIR}/bin:$PATH
-ENV SSL_CERT_DIR=${OPENSSL_DIR}-certs
-ENV LD_LIBRARY_PATH=${OPENSSL_DIR}/lib:$LD_LIBRARY_PATH
+# This environmental variable references the configuration file used by the openssl commands.
 ENV OPENSSL_CONF=${OPENSSL_DIR}/openssl.cnf
 
 # set -> Set or unset values of shell options and positional parameters.
@@ -72,8 +70,22 @@ RUN set -x && \
     # Stop tracing. \
     set +x
 
+RUN addgroup --gid 1001 openssl && \
+    # --home ${OPENSSL_DIR} \
+    adduser --uid 1001 --ingroup openssl --no-create-home --disabled-password --shell /sbin/nologin openssl && \
+    chown -R openssl:openssl ${OPENSSL_DIR} && \
+    chmod -R 755 ${OPENSSL_DIR}
+#    mkdir ${SSL_CERT_DIR} && \
+#    chown -R openssl:openssl ${SSL_CERT_DIR} && \
+#    chmod -R 755 ${SSL_CERT_DIR}
+
+USER openssl
+
+WORKDIR ${OPENSSL_DIR}
+
 # The directory where certificates and private keys are stored.
-VOLUME ${SSL_CERT_DIR}
+#VOLUME ${SSL_CERT_DIR}
+VOLUME ["/openssl/openssl-certs"]
 
 ENTRYPOINT ["openssl"]
 # A common idiom for keeping a container alive indefinitely.
