@@ -426,15 +426,19 @@ A Dockerfile is a mechanism to automate the building of container images. Buildi
 3. Build the image.
 
 ## The Build Context
-1. The **docker build** command requires a Dockerfile and a build context, which may be empty. The build context is the set of local files and directories that can be referenced from ADD or COPY instructions in the Dockerfile and is normally specified as a path to a directory.
-2. Only the instructions **FROM**, **RUN**, **COPY**, and **ADD** create layers in the final image. Other instructions configure things, add metadata, or tell Docker to do something at run time, such as expose a port or run a command.
+1. The `docker build` command requires a Dockerfile and a build context, which may be empty. The build context is the set of local files and directories that can be referenced from ADD or COPY instructions in the Dockerfile and is normally specified as a path to a directory.
+2. When the `docker build` command is run to build a Docker image, Docker creates a layer for each instruction in the corresponding Dockerfile that modifies the filesystem of the base image. Other instructions configure things, add metadata, or tell Docker to do something at run time, such as expose a port or run a command.
+3. Lines that begin with a hash or pound symbol (#) are comments.
+4. Instructions are *not* case-sensitive, but by convention, instructions are written in uppercase to improve visibility.
 
 **Lines that begin with a `hash`, or `pound`, symbol (`#`) are comments.**<br>
 **Instructions `are not case-sensitive`, but the convention is to make instructions all uppercase to improve visibility.**
 
-**\# [escape](https://docs.docker.com/engine/reference/builder/#escape)=\`**<br>
+**\# [escape](https://docs.docker.com/engine/reference/builder/#escape)**<br>
 Parser directives do not add layers to the build and will not be shown as a build step. Once a comment, empty line, or builder instruction has been processed, Docker no longer looks for parser directives. Hence, all parser directives must be at the very top of a Dockerfile.<br>
-Use the ``backtick (`)`` option for the escape character to split commands over multiple lines rather than the default `backslash (\)` option.
+
+For Windows PowerShell users, use the ``backtick (`)`` option for the escape character to split commands over multiple lines rather than the default `backslash (\)` option.<br>
+\# escape=\`
 
 **[ARG](https://docs.docker.com/engine/reference/builder/#arg) BASE_OS_LAYER**<br>
 **ARG BASE_OS_LAYER_VERSION**<br>
@@ -511,7 +515,7 @@ In most Linux distributions, the user with an *ID 0* is called the *root* (super
 
 
 In Linux, all Docker containers, by default, run as the **`root user`**; consequently, can an attacker having root access to a container do any damage to another container or host filesystem? 
-
+jct
 
 Because Linux's namespaces partition kernel resources to ensure that each running process has its own independent view of those resources, the mount namespace (one of six namespaces) isolates a container filesystem from other containers filesystems as well as the host filesystem. That is, changes made as the root user within a container remains inside the container filesystem; however, when a volume (`VOLUME` instruction in Docker) is used to mount a location in the container filesystem to the host filesystem, the root user has full access to the mounted location; if running as non-root, it will not. Furthermore, if a user has access to a container running as root user, it can use its root privileges to install applications within the container to search for any vulnerability to exploit.
 
@@ -620,6 +624,7 @@ The instruction has two forms:
    * The exec form is parsed as a **JSON** array, which means that double-quotes (") must be used around words instead of single-quotes (').
    * Unlike the shell form, the exec form does not invoke a command shell. This means that normal shell processing does not happen. For example, **ENTRYPOINT ["echo", "$HOME"]** will not do variable substitution on **$HOME**. If shell processing is required, then either use the shell form or execute a shell directly; e.g., **ENTRYPOINT ["sh", "-c", "echo $HOME"]**. When using the exec form and executing a shell directly, as in the case of the shell form, it is the shell that is doing the environment variable expansion, not docker.
 2. The shell form: **ENTRYPOINT command param1 param2**
+   - In this case, there will be a process for the shell (in Linux, the main process (PID 1)) and another process for the app.
 
 Only the last **ENTRYPOINT** instruction in the Dockerfile will have an effect.
 
@@ -757,10 +762,30 @@ To get the range, use the `grep -E` above.
 # Podman
 ***
 # Image
-Login to the Red Hat Container Catalog with a Red Hat account (a valid account is required).
->`$` podman login registry.redhat.io
+## Notes
+1. The `Red Hat Container Catalog` is the public image registry managed by `Red Hat`. All images in the Container Catalog are vetted by the Red Hat internal security team; they are trustworthy and secured against security flaws.
+2. `Quay.io` is another public image repository sponsored by Red Hat. `Quay.io` has several features, such as server-side image building, fine-grained access controls, and automatic scanning of images for known vulnerabilities.
+3. While `Red Hat Container Catalog` images are trusted and verified, `Quay.io` offers images regularly updated by creators. `Quay.io` users can create their namespaces, with fine-grained access control, and publish the images they create to that namespace. Container Catalog users rarely or never push new images, but consume trusted images generated by the Red Hat team.
+4. To configure registries for the `podman` command, update the `/etc/containers/registries.conf` file; edit the registries entry in the [registries.search] section, adding one or more entries to the values list. Use an FQDN and port number to identify a registry. A registry with no port number uses port 5000 by default. If the registry uses a different port, it must be specified; indicate the port number by appending a colon (:) and the port number after the FQDN.
+[registries.search]<br>
+registries = ['docker.io', 'quay.io']
+5. Secure connections to a registry require a trusted certificate. To support insecure connections, add the registry name to the registries entry in the [registries.insecure] section of the `/etc/containers/registries.conf` file.
+[registries.insecure]<br>
+registries = ['registry-FQDN:5000']
+6. If the image name does not include a registry name, `Podman` searches for a matching container image using the registries listed in the `/etc/containers/registries.conf` file. `Podman` searches for images in registries in the same order they appear in the configuration file.
+7. Container images downloaded from a registry are stored locally on the host where the `podman` command was executed; furthermore, `Podman` stores container images build locally in the same local storage. By default, `Podman` stores container images in the `/var/lib/containers/storage/overlay-images` directory.
+8. Any `Podman` subcommand that requires a container image name accepts a tag parameter to differentiate between multiple tags. If an image name does not contain a tag, then the tag value defaults to `latest`.
 
-To search a registry or a list of registries for a matching image. The command can specify which registry to search by prefixing the registry in the search term (e.g.; `registry.fedoraproject.org/fedora`), default is the registries in the `registries.search` table in the config file `/etc/containers/registries.conf`. The default number of results is 25.<br>
+**Login** to the Red Hat Container Catalog with a Red Hat account (a valid account is required).
+>`$` podman login registry.redhat.io<br>
+Username: username<br>
+Password:<br>
+Login Succeeded!
+
+>`$` podman login -u username -p password registry.redhat.io<br>
+Login Succeeded!
+
+To **search a registry** or a list of registries for a matching image. The command can specify which registry to search by prefixing the registry in the search term (e.g.; `registry.fedoraproject.org/fedora`), default is the registries in the `registries.search` table in the config file `/etc/containers/registries.conf`. The default number of results is 25.<br>
 Container images are named based on the following syntax:<br>
 registry_name/user_name/image_name:tag
 >`$` cat /etc/containers/registries.conf<br>
@@ -771,12 +796,45 @@ registries = ['docker.io', 'quay.io']
 >`$` podman search registry.redhat.io/rehl<br>
 >`$` podman search --format "table {{.Index}} {{.Name}}" registry.redhat.io/rhel
 
-To download an image.
+To **pull an image**.
 >`$` podman pull rhel
 
-After retrieval, images are stored locally.
+To pull an NGINX container from the quay.io registry, use the `podman pull [OPTIONS] [REGISTRY[:PORT]/]NAME[:TAG]` command.
+>`$` podman pull quay.io/bitnami/nginx
+
+After retrieval, images are stored locally.<br>
+To **list all container images** stored locally.
 >`$` podman images<br>
 >`$` podman images --format 'table {{.ID}}\t{{.Repository}}\t{{.Tag}}'
+
+To **save an image to a tar file**.<br>
+An existing image from the `Podman` local storage can be saved to a `.tar` file using the `podman save` command. The generated file is not a regular `tar archive`; it contains image metadata and preserves the original image layers. This allows `Podman` to recreate the original image exactly as it was.<br>
+If the `-o` option is omitted, the generated tar file will be sent to the standard output as binary data.<br>
+To save disk space, compress the file with `Gzip` using the `--compress` parameter. The `load` subcommand uses the `gunzip` command before importing the file to the local storage.<br>
+The format of the command: podman save [-o FILE_NAME] IMAGE_NAME[:TAG]
+>`$` podman save -o [filename].tar [image-name-required][:[tag-not-required]]
+
+If the .tar file given as an argument is not a container image with metadata, the `podman load` command fails.<br>
+To restore the container image, use the `podman load` command.
+>`$` podman load -i [filename].tar
+
+`Podman` cannot delete images while containers are using those images; containers that are using those images must be stopped and removed before deleting the images. But by using the `-f (--force)` option with the `rmi` subcommand, `Podman` stops and removes all containers forcefully before removing the images.
+To **delete an image** from local storage.
+>`$` podman rmi [container-name-or-id]<br>
+>`$` podman rmi -f [container-name-or-id]
+
+To delete two or more images from local storage.
+>`$` podman rmi [container-name-or-id] [container-name-or-id] ...<br>
+>`$` podman rmi -f [container-name-or-id] [container-name-or-id] ...
+
+To **delete all images** from local storage.<br>
+Images that are in use are not deleted; however, images that are *not* in use are deleted.
+>`$` podman rmi -a
+
+To **build an image from a Dockerfile**.<br>
+[dir] is the path to the build context directory, which must include the Dockerfile. If the build context directory is the current directory, use a dot (.); the current directory is designated by a dot.<br>
+If TAG is not specified, the image is automatically tagged as `latest`.
+>`$` podman build -t [image-name-required[:tag-not-required]] [dir]
 
 <br>
 
@@ -794,13 +852,18 @@ Display the **container ID and name** for all actively running containers.
 >`$` podman ps
 
 `Podman` does not discard stopped containers immediately; it preserves their local file systems and other states for facilitating postmortem analysis. Option `-a` lists all containers, including stopped ones.
->`$` podman ps -a
+>`$` podman ps -a<br>
+>`$` podman ps -a --format "table {{.ID}} {{.Names}} {{.Status}}"
 
 To send Linux signals to the main process in the container. If no signal is specified, it sends the SIGKILL signal, terminating the main process and the container.
 >`$` podman kill [container-name-or-id]
 
 To specify the signal with the `-s` option. Any Linux signal can be sent to the main process. `Podman` accepts either the signal name or number.
 >`$` podman kill -s SIGKILL [container-name-or-id]
+
+To **stop a container**.<br>
+Before deleting a container, the running container must be in a stopped status.
+>`$` podman stop [container-name-or-id]
 
 To **stop all containers**.<br>
 Before deleting all containers, all running containers must be in a stopped status.
@@ -855,7 +918,7 @@ To start a Bash shell inside a running container.
 3. Podman can mount `host directories` inside a running container. The container sees the host directories as part of the container storage. But the contents of the host directories are not deleted after the container is removed; the host directories and their contents can be mounted to new containers whenever needed.
 
 
-A container with a single process runs as a host operating system process, under a host operating system user and group ID, so the host directory must be configured with ownership and permissions allowing access to the container. With some Linux distros (e.g., Red Hat Enterprise Linux), the host directory also needs to be configured with the appropriate `SELinux context`, which is `container_file_t`. `Podman` uses the `container_file_t SELinux context` to restrict which files on the host system the container is allowed to access. This avoids information leakage between the host system and the application running inside a container.
+A container with a single process runs as a host operating system process, under a host operating system user and group ID, so the host directory must be configured with ownership and permissions allowing access to the container. With some Linux distros (e.g., Red Hat Enterprise Linux (RHEL)), the host directory also needs to be configured with the appropriate `SELinux context`, which is `container_file_t`. `Podman` uses the `container_file_t SELinux context` to restrict which files on the host system the container is allowed to access. This avoids information leakage between the host system and the application running inside a container.
 
 To set up the host directory, create the directory.
 >`$` mkdir -pv /home/dira/dirb
@@ -876,6 +939,14 @@ To bind mount a host directory to a container, use the `-v` option to the `podma
 If the directory already exists inside the container image, the host directory mount **overlays**, but does not remove, the content from the container image. If the mount is removed, the original content is accessible again.
 >`$` podman run -v /home/dira/dirb:/var/lib/dirc ubi8/ubi:8.3
 
+
+
+To retrieve the **list of mounted files and directories** for a running container. jct
+>`$` podman inspect -f "{{range .Mounts}}{{println .Destination}}{{end}}" [container-name-or-id]
+
+
+
+
 <br>
 
 ***
@@ -885,20 +956,20 @@ If the directory already exists inside the container image, the host directory m
 
 To create an externally accessible container.<br>
 Requests to port 8080 on the host are forwarded to port 80 within the container.
->`$` podman run -rm -d -p 8080:80 registry.redhat.io/rhel8/httpd-24
+>`$` podman run --rm -d -p 8080:80 registry.redhat.io/rhel8/httpd-24
 
 To limit external access to the container to requests from `localhost` to host port 8080; requests are forwarded to port 80 in the container.
->`$` podman run -rm -d -p 127.0.0.1:8080:80 registry.redhat.io/rhel8/httpd-24
+>`$` podman run --rm -d -p 127.0.0.1:8080:80 registry.redhat.io/rhel8/httpd-24
 
 If a port is not specified for the `host port`, `Podman` assigns a `random` available host port.<br>
 To see the port assigned by `Podman`, use the `podman port` command.
->`$` podman run -rm -d -p 127.0.0.1::80 --name httpd24 registry.redhat.io/rhel8/httpd-24<br>
+>`$` podman run --rm -d -p 127.0.0.1::80 --name httpd24 registry.redhat.io/rhel8/httpd-24<br>
 >`$` podman port httpd24<br>
 80/tcp -> 127.0.0.1:42469
 
 If only a container port is specified, then a `random` available host port is mapped to the container. Requests to this assigned host port from `any IP address` are forwarded to the container port.<br>
 Requests to host port 42469 are forwarded to port 80 in the container.
->`$` podman run -rm -d -p 8080 registry.redhat.io/rhel8/httpd-24<br>
+>`$` podman run --rm -d -p 8080 registry.redhat.io/rhel8/httpd-24<br>
 >`$` podman port -l<br>
 8080/tcp -> 0.0.0.0:42469<br>
 >`$` curl http://localhost:42469
@@ -933,5 +1004,3 @@ Requests to host port 42469 are forwarded to port 80 in the container.
 
 
 
-
-The $ character is replaced by a # character if the shell is running as the superuser, root.
